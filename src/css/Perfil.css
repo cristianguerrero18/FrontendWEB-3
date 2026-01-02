@@ -1,0 +1,585 @@
+/* Perfil.css */
+
+/* ========================================
+   Variables CSS para Perfil
+   ======================================== */
+   :root {
+    --perfil-primario: #4a90e2;
+    --perfil-secundario: #1e40af;
+    --perfil-acento: #f39c12;
+    --perfil-peligro: #e74c3c;
+    --perfil-exito: #27ae60;
+    --perfil-info: #3498db;
+  
+    --perfil-fondo: #f8f9fa;
+    --perfil-fondo-secundario: #ffffff;
+    --perfil-texto: #2c3e50;
+    --perfil-texto-secundario: #7f8c8d;
+    --perfil-borde: #e1e8ed;
+  
+    --perfil-sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --perfil-sombra-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --perfil-sombra-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+    --perfil-radio: 12px;
+    --perfil-radio-sm: 8px;
+    --perfil-radio-lg: 16px;
+  
+    --perfil-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* ========================================
+     Contenedor Principal
+     ======================================== */
+  .contenedor-perfil {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: var(--perfil-fondo);
+    min-height: 100vh;
+  }
+  
+  /* ========================================
+     Estados de Carga e Iniciales
+     ======================================== */
+  .estado-carga-perfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+  }
+  
+  .spinner-perfil {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--perfil-fondo);
+    border-top-color: var(--perfil-primario);
+    border-radius: 50%;
+    animation: girar 1s linear infinite;
+    margin-bottom: 1.5rem;
+  }
+  
+  .estado-carga-perfil p {
+    color: var(--perfil-texto);
+    margin: 1rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .estado-inicial-perfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+  }
+  
+  .estado-inicial-perfil h2 {
+    color: var(--perfil-texto);
+    margin: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .estado-inicial-perfil p {
+    color: var(--perfil-texto-secundario);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  @keyframes girar {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* ========================================
+     Mensajes
+     ======================================== */
+  .mensaje-perfil {
+    padding: 1rem 1.5rem;
+    border-radius: var(--perfil-radio);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: var(--perfil-sombra-md);
+    animation: deslizar-entrada 0.4s ease-out;
+    font-weight: 500;
+  }
+  
+  .mensaje-perfil.exito {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border-left: 4px solid var(--perfil-exito);
+  }
+  
+  .mensaje-perfil.error {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-left: 4px solid var(--perfil-peligro);
+  }
+  
+  .mensaje-perfil p {
+    margin: 0;
+    flex: 1;
+  }
+  
+  @keyframes deslizar-entrada {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* ========================================
+     Cabecera del Perfil
+     ======================================== */
+  .cabecera-perfil {
+    background: var(--perfil-fondo-secundario);
+    border-radius: var(--perfil-radio-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--perfil-sombra-md);
+  }
+  
+  .titulo-perfil-con-boton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .titulo-perfil-con-boton h1 {
+    color: var(--perfil-texto);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    background: linear-gradient(135deg, var(--perfil-primario), var(--perfil-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .subtitulo-perfil {
+    color: var(--perfil-texto-secundario);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+  
+  /* ========================================
+     Botones
+     ======================================== */
+  .boton-editar-perfil {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--perfil-primario), #357abd);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--perfil-radio);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--perfil-transicion);
+    box-shadow: var(--perfil-sombra-sm);
+  }
+  
+  .boton-editar-perfil:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--perfil-sombra-md);
+  }
+  
+  .boton-editar-perfil:active {
+    transform: translateY(0);
+  }
+  
+  .botones-accion-perfil {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .boton-cancelar-perfil {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--perfil-fondo-secundario);
+    border: 2px solid var(--perfil-borde);
+    color: var(--perfil-texto);
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--perfil-radio);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--perfil-transicion);
+  }
+  
+  .boton-cancelar-perfil:hover {
+    background: var(--perfil-fondo);
+    transform: translateY(-2px);
+  }
+  
+  .boton-guardar-perfil {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--perfil-exito), #229954);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--perfil-radio);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--perfil-transicion);
+    box-shadow: var(--perfil-sombra-sm);
+  }
+  
+  .boton-guardar-perfil:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--perfil-sombra-md);
+  }
+  
+  /* ========================================
+     Contenido Principal
+     ======================================== */
+  .contenido-perfil-principal {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 1024px) {
+    .contenido-perfil-principal {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* ========================================
+     Tarjetas
+     ======================================== */
+  .tarjeta-perfil {
+    background: var(--perfil-fondo-secundario);
+    border-radius: var(--perfil-radio-lg);
+    padding: 1.5rem;
+    box-shadow: var(--perfil-sombra-md);
+    height: fit-content;
+  }
+  
+  .cabecera-tarjeta-perfil {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--perfil-borde);
+  }
+  
+  .avatar-perfil {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--perfil-primario), var(--perfil-secundario));
+    border-radius: var(--perfil-radio);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+  }
+  
+  .info-usuario-perfil h2 {
+    margin: 0 0 0.5rem 0;
+    color: var(--perfil-texto);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  
+  .badge-id-perfil {
+    display: inline-block;
+    background: var(--perfil-fondo);
+    color: var(--perfil-texto-secundario);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--perfil-radio-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  /* ========================================
+     Campos del Formulario
+     ======================================== */
+  .campos-perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  .campo-perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .etiqueta-campo-perfil {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--perfil-texto);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .campo-editable-perfil {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .input-perfil {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--perfil-borde);
+    border-radius: var(--perfil-radio);
+    font-size: 0.95rem;
+    color: var(--perfil-texto);
+    background: var(--perfil-fondo-secundario);
+    transition: var(--perfil-transicion);
+  }
+  
+  .input-perfil:focus {
+    outline: none;
+    border-color: var(--perfil-primario);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  }
+  
+  .input-perfil::placeholder {
+    color: var(--perfil-texto-secundario);
+  }
+  
+  .valor-campo-perfil {
+    padding: 0.75rem 1rem;
+    background: var(--perfil-fondo);
+    border: 2px solid transparent;
+    border-radius: var(--perfil-radio);
+    color: var(--perfil-texto);
+    font-size: 0.95rem;
+  }
+  
+  .contenedor-contrasena-perfil {
+    position: relative;
+  }
+  
+  .contrasena-perfil {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .contrasena-oculta {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.125rem;
+  }
+  
+  .boton-mostrar-contrasena-perfil {
+    background: transparent;
+    border: none;
+    color: var(--perfil-texto-secundario);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--perfil-radio-sm);
+    transition: var(--perfil-transicion);
+  }
+  
+  .boton-mostrar-contrasena-perfil:hover {
+    color: var(--perfil-primario);
+    background: var(--perfil-fondo);
+  }
+  
+  .ayuda-contrasena-perfil {
+    color: var(--perfil-texto-secundario);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+  
+  /* ========================================
+     Panel de Sistema
+     ======================================== */
+  .titulo-tarjeta-perfil {
+    color: var(--perfil-texto);
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--perfil-borde);
+  }
+  
+  .campos-sistema-perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  .campo-sistema-perfil {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .icono-campo-sistema {
+    width: 40px;
+    height: 40px;
+    background: var(--perfil-fondo);
+    border-radius: var(--perfil-radio);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--perfil-primario);
+    flex-shrink: 0;
+  }
+  
+  .icono-id {
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+  
+  .contenido-campo-sistema {
+    flex: 1;
+  }
+  
+  .etiqueta-campo-sistema {
+    color: var(--perfil-texto-secundario);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .valor-campo-sistema {
+    color: var(--perfil-texto);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .badge-rol-perfil {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--perfil-radio-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 2px solid;
+  }
+  
+  /* ========================================
+     Nota de Edición
+     ======================================== */
+  .nota-edicion-perfil {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.08) 0%, rgba(255, 255, 255, 0.2) 100%);
+    border-radius: var(--perfil-radio);
+    border-left: 3px solid var(--perfil-acento);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .nota-edicion-perfil svg {
+    color: var(--perfil-acento);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+  
+  .nota-edicion-perfil p {
+    margin: 0;
+    color: var(--perfil-texto);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  /* ========================================
+     Responsive Design
+     ======================================== */
+  @media (max-width: 768px) {
+    .contenedor-perfil {
+      padding: 1rem;
+    }
+  
+    .cabecera-perfil {
+      padding: 1.25rem;
+    }
+  
+    .titulo-perfil-con-boton {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .titulo-perfil-con-boton h1 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+  
+    .botones-accion-perfil {
+      flex-direction: column;
+    }
+  
+    .boton-editar-perfil,
+    .boton-cancelar-perfil,
+    .boton-guardar-perfil {
+      width: 100%;
+      justify-content: center;
+    }
+  
+    .cabecera-tarjeta-perfil {
+      flex-direction: column;
+      text-align: center;
+    }
+  
+    .campo-editable-perfil {
+      flex-direction: column;
+    }
+  
+    .tarjeta-perfil {
+      padding: 1.25rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .avatar-perfil {
+      width: 50px;
+      height: 50px;
+    }
+  
+    .info-usuario-perfil h2 {
+      font-size: 1.125rem;
+    }
+  
+    .input-perfil,
+    .valor-campo-perfil {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  /* ========================================
+     Accesibilidad
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid var(--perfil-primario);
+    outline-offset: 2px;
+  }

@@ -1,0 +1,435 @@
+/* ========================================
+   Variables CSS para Dashboard
+   ======================================== */
+   :root {
+    --dashboard-primario: #4a90e2;
+    --dashboard-secundario: #1e40af;
+    --dashboard-acento: #f39c12;
+    --dashboard-peligro: #e74c3c;
+    --dashboard-exito: #27ae60;
+    --dashboard-info: #3498db;
+    --dashboard-purpura: #9b59b6;
+  
+    --dashboard-fondo: #f8f9fa;
+    --dashboard-fondo-secundario: #ffffff;
+    --dashboard-texto: #2c3e50;
+    --dashboard-texto-secundario: #7f8c8d;
+    --dashboard-borde: #e1e8ed;
+  
+    --dashboard-sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --dashboard-sombra-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --dashboard-sombra-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+    --dashboard-radio: 12px;
+    --dashboard-radio-sm: 8px;
+    --dashboard-radio-lg: 16px;
+  
+    --dashboard-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* ========================================
+     Contenedor Principal
+     ======================================== */
+  .contenedor-dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: var(--dashboard-fondo);
+    min-height: 100vh;
+  }
+  
+  /* ========================================
+     Estados de Carga
+     ======================================== */
+  .estado-carga-dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+  }
+  
+  .spinner-grande-dashboard {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--dashboard-fondo);
+    border-top-color: var(--dashboard-primario);
+    border-radius: 50%;
+    animation: girar 1s linear infinite;
+    margin-bottom: 1.5rem;
+  }
+  
+  .estado-carga-dashboard p {
+    color: var(--dashboard-texto-secundario);
+    font-size: 1rem;
+  }
+  
+  @keyframes girar {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* ========================================
+     Cabecera del Dashboard
+     ======================================== */
+  .cabecera-dashboard {
+    background: var(--dashboard-fondo-secundario);
+    border-radius: var(--dashboard-radio-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--dashboard-sombra-md);
+  }
+  
+  .titulo-dashboard-con-boton {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .titulo-dashboard-con-boton h1 {
+    color: var(--dashboard-texto);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, var(--dashboard-primario), var(--dashboard-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .subtitulo-dashboard {
+    color: var(--dashboard-texto-secundario);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .controles-dashboard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .info-actualizacion-dashboard {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--dashboard-texto-secundario);
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--dashboard-fondo);
+    border-radius: var(--dashboard-radio-sm);
+  }
+  
+  .boton-actualizar-dashboard {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--dashboard-fondo);
+    border: 2px solid var(--dashboard-borde);
+    color: var(--dashboard-texto);
+    padding: 0.625rem 1rem;
+    border-radius: var(--dashboard-radio);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--dashboard-transicion);
+  }
+  
+  .boton-actualizar-dashboard:hover:not(:disabled) {
+    background: var(--dashboard-primario);
+    color: white;
+    border-color: var(--dashboard-primario);
+    transform: translateY(-2px);
+  }
+  
+  .boton-actualizar-dashboard:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .girando {
+    animation: girar 1s linear infinite;
+  }
+  
+  /* ========================================
+     Total General
+     ======================================== */
+  .total-general-dashboard {
+    margin-bottom: 2rem;
+  }
+  
+  .tarjeta-total-general {
+    background: linear-gradient(135deg, var(--dashboard-primario), #357abd);
+    border-radius: var(--dashboard-radio-lg);
+    padding: 2rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--dashboard-sombra-lg);
+  }
+  
+  .icono-total-general {
+    background: rgba(255, 255, 255, 0.2);
+    width: 60px;
+    height: 60px;
+    border-radius: var(--dashboard-radio);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  
+  .contenido-total-general {
+    flex: 1;
+  }
+  
+  .valor-total-general {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  
+  .titulo-total-general {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0.75rem;
+  }
+  
+  .variacion-total-general {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  
+  /* ========================================
+     Grid de Estadísticas
+     ======================================== */
+  .grid-estadisticas-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .tarjeta-estadistica {
+    background: var(--dashboard-fondo-secundario);
+    border-radius: var(--dashboard-radio-lg);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: var(--dashboard-transicion);
+    box-shadow: var(--dashboard-sombra-md);
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .tarjeta-estadistica:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--dashboard-sombra-lg);
+    border-color: var(--dashboard-primario);
+  }
+  
+  .cabecera-tarjeta-estadistica {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  
+  .icono-tarjeta-estadistica {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--dashboard-radio);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .variacion-tarjeta-estadistica {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    background: var(--dashboard-fondo);
+    border-radius: var(--dashboard-radio-sm);
+  }
+  
+  .cuerpo-tarjeta-estadistica {
+    flex: 1;
+    margin-bottom: 1rem;
+  }
+  
+  .valor-tarjeta-estadistica {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dashboard-texto);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .titulo-tarjeta-estadistica {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dashboard-texto);
+    margin-bottom: 0.25rem;
+  }
+  
+  .descripcion-tarjeta-estadistica {
+    font-size: 0.85rem;
+    color: var(--dashboard-texto-secundario);
+    line-height: 1.4;
+  }
+  
+  .pie-tarjeta-estadistica {
+    border-top: 1px solid var(--dashboard-borde);
+    padding-top: 1rem;
+  }
+  
+  .indicador-acceso {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--dashboard-primario);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .flecha-acceso {
+    transition: var(--dashboard-transicion);
+  }
+  
+  .tarjeta-estadistica:hover .flecha-acceso {
+    transform: translateX(4px);
+  }
+  
+  /* ========================================
+     Información Adicional
+     ======================================== */
+  .informacion-adicional-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .tarjeta-informacion {
+    background: var(--dashboard-fondo-secundario);
+    border-radius: var(--dashboard-radio-lg);
+    padding: 1.5rem;
+    box-shadow: var(--dashboard-sombra-md);
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .icono-informacion {
+    color: var(--dashboard-primario);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+  }
+  
+  .contenido-informacion h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dashboard-texto);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .contenido-informacion p {
+    margin: 0;
+    color: var(--dashboard-texto-secundario);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  /* ========================================
+     Responsive Design
+     ======================================== */
+  @media (max-width: 768px) {
+    .contenedor-dashboard {
+      padding: 1rem;
+    }
+  
+    .titulo-dashboard-con-boton {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .controles-dashboard {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .info-actualizacion-dashboard {
+      justify-content: center;
+    }
+  
+    .boton-actualizar-dashboard {
+      justify-content: center;
+    }
+  
+    .tarjeta-total-general {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.5rem;
+    }
+  
+    .valor-total-general {
+      font-size: 2rem;
+    }
+  
+    .grid-estadisticas-dashboard {
+      grid-template-columns: 1fr;
+    }
+  
+    .informacion-adicional-dashboard {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .cabecera-dashboard {
+      padding: 1.25rem;
+    }
+  
+    .titulo-dashboard-con-boton h1 {
+      font-size: 1.5rem;
+    }
+  
+    .tarjeta-estadistica {
+      padding: 1.25rem;
+    }
+  
+    .valor-tarjeta-estadistica {
+      font-size: 1.75rem;
+    }
+  }
+  
+  /* ========================================
+     Accesibilidad
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  button:focus-visible {
+    outline: 3px solid var(--dashboard-primario);
+    outline-offset: 2px;
+  }
+  
+  .tarjeta-estadistica:focus-visible {
+    outline: 2px solid var(--dashboard-primario);
+    outline-offset: 2px;
+  }

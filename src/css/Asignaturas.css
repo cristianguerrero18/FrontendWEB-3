@@ -1,0 +1,905 @@
+/* ========================================
+   Variables CSS para Asignaturas
+   ======================================== */
+   :root {
+    --asignaturas-primario: #4a90e2;
+    --asignaturas-secundario: #1e40af;
+    --asignaturas-acento: #f39c12;
+    --asignaturas-peligro: #e74c3c;
+    --asignaturas-exito: #27ae60;
+    --asignaturas-advertencia: #f39c12;
+
+    --asignaturas-fondo: #f8f9fa;
+    --asignaturas-fondo-secundario: #ffffff;
+    --asignaturas-texto: #2c3e50;
+    --asignaturas-texto-secundario: #7f8c8d;
+    --asignaturas-borde: #e1e8ed;
+
+    --asignaturas-sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --asignaturas-sombra-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --asignaturas-sombra-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --asignaturas-sombra-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+
+    --asignaturas-radio: 12px;
+    --asignaturas-radio-sm: 8px;
+    --asignaturas-radio-lg: 16px;
+
+    --asignaturas-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --asignaturas-transicion-rapida: all 0.15s ease;
+  }
+
+  /* ========================================
+     Contenedor Principal
+     ======================================== */
+  .contenedor-asignaturas {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--asignaturas-fondo);
+    min-height: 100vh;
+  }
+
+  /* ========================================
+     Estados de Carga e Iniciales
+     ======================================== */
+  .estado-carga,
+  .estado-inicial {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+  }
+
+  .estado-carga p,
+  .estado-inicial h2 {
+    color: var(--asignaturas-texto);
+    margin: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .estado-inicial p {
+    color: var(--asignaturas-texto-secundario);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .boton-nueva-asignatura {
+    background: linear-gradient(135deg, var(--asignaturas-primario), #357abd);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--asignaturas-radio);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--asignaturas-transicion);
+    box-shadow: var(--asignaturas-sombra-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .boton-nueva-asignatura:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--asignaturas-sombra-hover);
+  }
+
+  .boton-nueva-asignatura:active {
+    transform: translateY(0);
+  }
+
+  /* ========================================
+     Mensajes de la API
+     ======================================== */
+  .mensaje-api {
+    padding: 1rem 1.5rem;
+    border-radius: var(--asignaturas-radio);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--asignaturas-sombra-md);
+    animation: deslizar-entrada 0.4s ease-out;
+    font-weight: 500;
+  }
+
+  .mensaje-api.exito {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border-left: 4px solid var(--asignaturas-exito);
+  }
+
+  .mensaje-api.error {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-left: 4px solid var(--asignaturas-peligro);
+  }
+
+  .boton-cerrar-mensaje {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: inherit;
+    padding: 0 0.5rem;
+    opacity: 0.7;
+    transition: var(--asignaturas-transicion-rapida);
+  }
+
+  .boton-cerrar-mensaje:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  @keyframes deslizar-entrada {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* ========================================
+     Cabecera de Asignaturas
+     ======================================== */
+  .cabecera-asignaturas {
+    background: var(--asignaturas-fondo-secundario);
+    border-radius: var(--asignaturas-radio-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--asignaturas-sombra-md);
+  }
+
+  .titulo-asignaturas-con-boton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .titulo-asignaturas-con-boton h3 {
+    color: var(--asignaturas-texto);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--asignaturas-primario), var(--asignaturas-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ========================================
+     Controles y Búsqueda
+     ======================================== */
+  .controles-asignaturas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .buscador-asignaturas {
+    flex: 1;
+  }
+
+  .input-busqueda-asignaturas {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--asignaturas-borde);
+    border-radius: var(--asignaturas-radio);
+    font-size: 1rem;
+    color: var(--asignaturas-texto);
+    background: var(--asignaturas-fondo-secundario);
+    transition: var(--asignaturas-transicion);
+    box-shadow: var(--asignaturas-sombra-sm);
+  }
+
+  .input-busqueda-asignaturas:focus {
+    outline: none;
+    border-color: var(--asignaturas-primario);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+  }
+
+  .input-busqueda-asignaturas::placeholder {
+    color: var(--asignaturas-texto-secundario);
+  }
+
+  .controles-paginacion-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .seleccion-elementos-asignaturas {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    color: var(--asignaturas-texto);
+  }
+
+  .select-elementos-asignaturas {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--asignaturas-borde);
+    border-radius: var(--asignaturas-radio-sm);
+    background: var(--asignaturas-fondo-secundario);
+    color: var(--asignaturas-texto);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--asignaturas-transicion);
+  }
+
+  .select-elementos-asignaturas:focus {
+    outline: none;
+    border-color: var(--asignaturas-primario);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  }
+
+  .info-cantidad-asignaturas {
+    color: var(--asignaturas-texto-secundario);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background: var(--asignaturas-fondo);
+    border-radius: var(--asignaturas-radio-sm);
+  }
+
+  /* ========================================
+     Tabla de Asignaturas
+     ======================================== */
+  .contenedor-tabla-asignaturas {
+    background: var(--asignaturas-fondo-secundario);
+    border-radius: var(--asignaturas-radio-lg);
+    box-shadow: var(--asignaturas-sombra-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .tabla-asignaturas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .tabla-asignaturas thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+
+  .tabla-asignaturas th {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--asignaturas-texto);
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--asignaturas-borde);
+  }
+
+  .tabla-asignaturas tbody tr {
+    border-bottom: 1px solid var(--asignaturas-borde);
+    transition: var(--asignaturas-transicion);
+  }
+
+  .tabla-asignaturas tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: scale(1.01);
+    box-shadow: var(--asignaturas-sombra-sm);
+  }
+
+  .tabla-asignaturas tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla-asignaturas td {
+    padding: 1.25rem 1rem;
+    color: var(--asignaturas-texto);
+    vertical-align: middle;
+  }
+
+  /* Columnas específicas */
+  .columna-id-asignatura {
+    width: 80px;
+  }
+
+  .columna-nombre-asignatura {
+    width: 40%;
+    min-width: 250px;
+  }
+
+  .columna-codigo-asignatura {
+    width: 20%;
+    min-width: 150px;
+  }
+
+  .columna-acciones-asignatura {
+    width: 180px;
+  }
+
+  /* ========================================
+     Celdas de la Tabla
+     ======================================== */
+  .badge-id-asignatura {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--asignaturas-radio-sm);
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: 2px solid;
+    min-width: 50px;
+  }
+
+  .nombre-asignatura-contenedor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .nombre-asignatura {
+    font-weight: 600;
+    color: var(--asignaturas-texto);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .tipo-asignatura {
+    font-size: 0.75rem;
+    color: var(--asignaturas-texto-secundario);
+    font-weight: 500;
+    padding: 0.125rem 0.5rem;
+    background: var(--asignaturas-fondo);
+    border-radius: var(--asignaturas-radio-sm);
+    width: fit-content;
+  }
+
+  .codigo-asignatura {
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--asignaturas-primario);
+    padding: 0.375rem 0.75rem;
+    background: var(--asignaturas-fondo);
+    border-radius: var(--asignaturas-radio-sm);
+    border: 1px solid var(--asignaturas-borde);
+    width: fit-content;
+  }
+
+  /* ========================================
+     Botones de Acciones
+     ======================================== */
+  .botones-acciones-asignatura {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .boton-editar-asignatura,
+  .boton-eliminar-asignatura {
+    padding: 0.625rem 1.125rem;
+    border: none;
+    border-radius: var(--asignaturas-radio-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--asignaturas-transicion);
+    box-shadow: var(--asignaturas-sombra-sm);
+  }
+
+  .boton-editar-asignatura {
+    background: linear-gradient(135deg, var(--asignaturas-primario), #357abd);
+    color: white;
+  }
+
+  .boton-editar-asignatura:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--asignaturas-sombra-hover);
+  }
+
+  .boton-eliminar-asignatura {
+    background: linear-gradient(135deg, var(--asignaturas-peligro), #c0392b);
+    color: white;
+  }
+
+  .boton-eliminar-asignatura:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+  }
+
+  .boton-editar-asignatura:active,
+  .boton-eliminar-asignatura:active {
+    transform: translateY(0);
+  }
+
+  /* ========================================
+     Modal
+     ======================================== */
+  .modal-fondo-asignaturas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: aparecer-fondo 0.3s ease-out;
+  }
+
+  @keyframes aparecer-fondo {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-contenido-asignaturas {
+    background: var(--asignaturas-fondo-secundario);
+    border-radius: var(--asignaturas-radio-lg);
+    box-shadow: var(--asignaturas-sombra-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: deslizar-modal 0.3s ease-out;
+  }
+
+  @keyframes deslizar-modal {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-contenido-asignaturas.modal-confirmacion {
+    max-width: 500px;
+  }
+
+  .modal-cabecera-asignaturas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--asignaturas-borde);
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  }
+
+  .modal-cabecera-asignaturas h2 {
+    margin: 0;
+    color: var(--asignaturas-texto);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .modal-cerrar-asignaturas {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--asignaturas-texto-secundario);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--asignaturas-transicion-rapida);
+  }
+
+  .modal-cerrar-asignaturas:hover {
+    background: var(--asignaturas-fondo);
+    color: var(--asignaturas-texto);
+    transform: rotate(90deg);
+  }
+
+  .modal-cuerpo-asignaturas {
+    padding: 2rem;
+  }
+
+  .modal-confirmacion .modal-cuerpo-asignaturas p {
+    margin: 0.75rem 0;
+    color: var(--asignaturas-texto);
+    line-height: 1.6;
+  }
+
+  .asignatura-a-eliminar {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--asignaturas-primario);
+    padding: 0.75rem;
+    background: var(--asignaturas-fondo);
+    border-radius: var(--asignaturas-radio-sm);
+    margin: 1rem 0;
+  }
+
+  /* ========================================
+     Formulario
+     ======================================== */
+  .campo-formulario-asignaturas {
+    margin-bottom: 1.5rem;
+  }
+
+  .campo-formulario-asignaturas label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--asignaturas-texto);
+    font-size: 0.95rem;
+  }
+
+  .input-formulario-asignaturas,
+  .textarea-formulario-asignaturas {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border: 2px solid var(--asignaturas-borde);
+    border-radius: var(--asignaturas-radio);
+    font-size: 1rem;
+    color: var(--asignaturas-texto);
+    background: var(--asignaturas-fondo-secundario);
+    transition: var(--asignaturas-transicion);
+    font-family: inherit;
+  }
+
+  .input-formulario-asignaturas.disabled {
+    background: var(--asignaturas-fondo);
+    color: var(--asignaturas-texto-secundario);
+    cursor: not-allowed;
+  }
+
+  .input-formulario-asignaturas:focus,
+  .textarea-formulario-asignaturas:focus {
+    outline: none;
+    border-color: var(--asignaturas-primario);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+  }
+
+  .textarea-formulario-asignaturas {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  .modal-pie-asignaturas {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--asignaturas-borde);
+    background: var(--asignaturas-fondo);
+  }
+
+  .boton-cancelar-asignaturas,
+  .boton-guardar-asignaturas,
+  .boton-eliminar-confirmar {
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: var(--asignaturas-radio);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--asignaturas-transicion);
+    box-shadow: var(--asignaturas-sombra-sm);
+  }
+
+  .boton-cancelar-asignaturas {
+    background: var(--asignaturas-fondo-secundario);
+    color: var(--asignaturas-texto);
+    border: 2px solid var(--asignaturas-borde);
+  }
+
+  .boton-cancelar-asignaturas:hover {
+    background: var(--asignaturas-fondo);
+    transform: translateY(-2px);
+  }
+
+  .boton-guardar-asignaturas {
+    background: linear-gradient(135deg, var(--asignaturas-exito), #229954);
+    color: white;
+  }
+
+  .boton-guardar-asignaturas:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
+  }
+
+  .boton-eliminar-confirmar {
+    background: linear-gradient(135deg, var(--asignaturas-peligro), #c0392b);
+    color: white;
+  }
+
+  .boton-eliminar-confirmar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+  }
+
+  .boton-cancelar-asignaturas:disabled,
+  .boton-guardar-asignaturas:disabled,
+  .boton-eliminar-confirmar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ========================================
+     Paginador
+     ======================================== */
+  .paginador-asignaturas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--asignaturas-fondo-secundario);
+    border-radius: var(--asignaturas-radio-lg);
+    box-shadow: var(--asignaturas-sombra-md);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .info-paginacion-asignaturas {
+    color: var(--asignaturas-texto-secundario);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .controles-navegacion-asignaturas {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .boton-paginador-asignaturas {
+    padding: 0.625rem 1.25rem;
+    border: 2px solid var(--asignaturas-borde);
+    background: var(--asignaturas-fondo-secundario);
+    color: var(--asignaturas-texto);
+    border-radius: var(--asignaturas-radio-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--asignaturas-transicion);
+    box-shadow: var(--asignaturas-sombra-sm);
+  }
+
+  .boton-paginador-asignaturas:hover:not(:disabled) {
+    background: var(--asignaturas-primario);
+    color: white;
+    border-color: var(--asignaturas-primario);
+    transform: translateY(-2px);
+    box-shadow: var(--asignaturas-sombra-hover);
+  }
+
+  .boton-paginador-asignaturas:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--asignaturas-fondo);
+  }
+
+  .numeros-pagina-asignaturas {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+  }
+
+  .numero-pagina-asignaturas {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--asignaturas-borde);
+    background: var(--asignaturas-fondo-secundario);
+    color: var(--asignaturas-texto);
+    border-radius: var(--asignaturas-radio-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--asignaturas-transicion);
+    box-shadow: var(--asignaturas-sombra-sm);
+  }
+
+  .numero-pagina-asignaturas:hover {
+    background: var(--asignaturas-primario);
+    color: white;
+    border-color: var(--asignaturas-primario);
+    transform: translateY(-2px);
+  }
+
+  .numero-pagina-asignaturas.activa {
+    background: linear-gradient(135deg, var(--asignaturas-primario), #357abd);
+    color: white;
+    border-color: var(--asignaturas-primario);
+    box-shadow: var(--asignaturas-sombra-md);
+  }
+
+  .puntos-suspensivos-asignaturas {
+    padding: 0 0.5rem;
+    color: var(--asignaturas-texto-secundario);
+    font-weight: 700;
+  }
+
+  .totales-asignaturas {
+    display: flex;
+    align-items: center;
+  }
+
+  .total-paginas-asignaturas {
+    color: var(--asignaturas-texto-secundario);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  /* ========================================
+     Responsive Design
+     ======================================== */
+  @media (max-width: 1024px) {
+    .tabla-asignaturas {
+      font-size: 0.875rem;
+    }
+
+    .tabla-asignaturas th,
+    .tabla-asignaturas td {
+      padding: 1rem 0.75rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .contenedor-asignaturas {
+      padding: 1rem;
+    }
+
+    .cabecera-asignaturas {
+      padding: 1.5rem;
+    }
+
+    .titulo-asignaturas-con-boton {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .titulo-asignaturas-con-boton h3 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .boton-nueva-asignatura {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .controles-paginacion-superior {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .contenedor-tabla-asignaturas {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabla-asignaturas {
+      min-width: 700px;
+    }
+
+    .modal-contenido-asignaturas {
+      max-width: 95%;
+    }
+
+    .modal-cabecera-asignaturas,
+    .modal-cuerpo-asignaturas,
+    .modal-pie-asignaturas {
+      padding: 1.25rem;
+    }
+
+    .paginador-asignaturas {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .controles-navegacion-asignaturas {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .numeros-pagina-asignaturas {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .boton-editar-asignatura,
+    .boton-eliminar-asignatura {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    .numero-pagina-asignaturas {
+      width: 36px;
+      height: 36px;
+      font-size: 0.875rem;
+    }
+
+    .boton-paginador-asignaturas {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .modal-pie-asignaturas {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .boton-cancelar-asignaturas,
+    .boton-guardar-asignaturas,
+    .boton-eliminar-confirmar {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  /* ========================================
+     Accesibilidad
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--asignaturas-primario);
+    outline-offset: 2px;
+  }
+
+  /* ========================================
+     Scrollbar Personalizada
+     ======================================== */
+  .contenedor-tabla-asignaturas::-webkit-scrollbar,
+  .modal-contenido-asignaturas::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .contenedor-tabla-asignaturas::-webkit-scrollbar-track,
+  .modal-contenido-asignaturas::-webkit-scrollbar-track {
+    background: var(--asignaturas-fondo);
+    border-radius: 4px;
+  }
+
+  .contenedor-tabla-asignaturas::-webkit-scrollbar-thumb,
+  .modal-contenido-asignaturas::-webkit-scrollbar-thumb {
+    background: var(--asignaturas-texto-secundario);
+    border-radius: 4px;
+  }
+
+  .contenedor-tabla-asignaturas::-webkit-scrollbar-thumb:hover,
+  .modal-contenido-asignaturas::-webkit-scrollbar-thumb:hover {
+    background: var(--asignaturas-texto);
+  }

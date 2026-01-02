@@ -1,0 +1,928 @@
+/* ========================================
+   Variables CSS para Roles
+   ======================================== */
+   :root {
+    --roles-primario: #4a90e2;
+    --roles-secundario: #1e3a8a;
+    --roles-acento: #f39c12;
+    --roles-peligro: #e74c3c;
+    --roles-exito: #27ae60;
+    --roles-advertencia: #f39c12;
+
+    --roles-fondo: #f8f9fa;
+    --roles-fondo-secundario: #ffffff;
+    --roles-texto: #2c3e50;
+    --roles-texto-secundario: #7f8c8d;
+    --roles-borde: #e1e8ed;
+
+    --roles-sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --roles-sombra-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --roles-sombra-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --roles-sombra-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+
+    --roles-radio: 12px;
+    --roles-radio-sm: 8px;
+    --roles-radio-lg: 16px;
+
+    --roles-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --roles-transicion-rapida: all 0.15s ease;
+  }
+
+  /* ========================================
+     Contenedor Principal
+     ======================================== */
+  .contenedor-roles {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--roles-fondo);
+    min-height: 100vh;
+  }
+
+  /* ========================================
+     Estados de Carga e Iniciales
+     ======================================== */
+  .estado-carga,
+  .estado-inicial {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+  }
+
+  .estado-carga p,
+  .estado-inicial h2 {
+    color: var(--roles-texto);
+    margin: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .estado-inicial p {
+    color: var(--roles-texto-secundario);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .boton-nuevo-rol {
+    background: linear-gradient(135deg, var(--roles-primario), #357abd);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--roles-radio);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--roles-transicion);
+    box-shadow: var(--roles-sombra-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .boton-nuevo-rol:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--roles-sombra-hover);
+  }
+
+  .boton-nuevo-rol:active {
+    transform: translateY(0);
+  }
+
+  /* ========================================
+     Mensajes de la API
+     ======================================== */
+  .mensaje-api {
+    padding: 1rem 1.5rem;
+    border-radius: var(--roles-radio);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--roles-sombra-md);
+    animation: deslizar-entrada 0.4s ease-out;
+    font-weight: 500;
+  }
+
+  .mensaje-api.exito {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border-left: 4px solid var(--roles-exito);
+  }
+
+  .mensaje-api.error {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-left: 4px solid var(--roles-peligro);
+  }
+
+  .boton-cerrar-mensaje {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: inherit;
+    padding: 0 0.5rem;
+    opacity: 0.7;
+    transition: var(--roles-transicion-rapida);
+  }
+
+  .boton-cerrar-mensaje:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  @keyframes deslizar-entrada {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* ========================================
+     Cabecera de Roles
+     ======================================== */
+  .cabecera-roles {
+    background: var(--roles-fondo-secundario);
+    border-radius: var(--roles-radio-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--roles-sombra-md);
+  }
+
+  .titulo-roles-con-boton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .titulo-roles-con-boton h2 {
+    color: var(--roles-texto);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--roles-primario), var(--roles-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ========================================
+     Controles y Búsqueda
+     ======================================== */
+  .controles-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .buscador-roles {
+    flex: 1;
+  }
+
+  .input-busqueda-roles {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--roles-borde);
+    border-radius: var(--roles-radio);
+    font-size: 1rem;
+    color: var(--roles-texto);
+    background: var(--roles-fondo-secundario);
+    transition: var(--roles-transicion);
+    box-shadow: var(--roles-sombra-sm);
+  }
+
+  .input-busqueda-roles:focus {
+    outline: none;
+    border-color: var(--roles-primario);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+  }
+
+  .input-busqueda-roles::placeholder {
+    color: var(--roles-texto-secundario);
+  }
+
+  .controles-paginacion-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .seleccion-elementos-roles {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    color: var(--roles-texto);
+  }
+
+  .select-elementos-roles {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--roles-borde);
+    border-radius: var(--roles-radio-sm);
+    background: var(--roles-fondo-secundario);
+    color: var(--roles-texto);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--roles-transicion);
+  }
+
+  .select-elementos-roles:focus {
+    outline: none;
+    border-color: var(--roles-primario);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  }
+
+  .info-cantidad-roles {
+    color: var(--roles-texto-secundario);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background: var(--roles-fondo);
+    border-radius: var(--roles-radio-sm);
+  }
+
+  /* ========================================
+     Tabla de Roles
+     ======================================== */
+  .contenedor-tabla-roles {
+    background: var(--roles-fondo-secundario);
+    border-radius: var(--roles-radio-lg);
+    box-shadow: var(--roles-sombra-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .tabla-roles {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .tabla-roles thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+
+  .tabla-roles th {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--roles-texto);
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--roles-borde);
+  }
+
+  .tabla-roles tbody tr {
+    border-bottom: 1px solid var(--roles-borde);
+    transition: var(--roles-transicion);
+  }
+
+  .tabla-roles tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: scale(1.01);
+    box-shadow: var(--roles-sombra-sm);
+  }
+
+  .tabla-roles tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla-roles td {
+    padding: 1.25rem 1rem;
+    color: var(--roles-texto);
+    vertical-align: middle;
+  }
+
+  /* Columnas específicas */
+  .columna-id-rol {
+    width: 80px;
+  }
+
+  .columna-nombre-rol {
+    width: 30%;
+    min-width: 200px;
+  }
+
+  .columna-descripcion-rol {
+    width: 40%;
+  }
+
+  .columna-acciones-rol {
+    width: 180px;
+  }
+
+  /* ========================================
+     Celdas de la Tabla
+     ======================================== */
+  .badge-id-rol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--roles-radio-sm);
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: 2px solid;
+    min-width: 50px;
+  }
+
+  .nombre-rol-contenedor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .nombre-rol {
+    font-weight: 600;
+    color: var(--roles-texto);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .nivel-acceso-rol {
+    font-size: 0.75rem;
+    color: var(--roles-texto-secundario);
+    font-weight: 500;
+    padding: 0.125rem 0.5rem;
+    background: var(--roles-fondo);
+    border-radius: var(--roles-radio-sm);
+    width: fit-content;
+  }
+
+  .descripcion-rol {
+    color: var(--roles-texto-secundario);
+    line-height: 1.6;
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  /* ========================================
+     Botones de Acciones
+     ======================================== */
+  .botones-acciones-rol {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .boton-editar-rol,
+  .boton-eliminar-rol {
+    padding: 0.625rem 1.125rem;
+    border: none;
+    border-radius: var(--roles-radio-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--roles-transicion);
+    box-shadow: var(--roles-sombra-sm);
+  }
+
+  .boton-editar-rol {
+    background: linear-gradient(135deg, var(--roles-primario), #357abd);
+    color: white;
+  }
+
+  .boton-editar-rol:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--roles-sombra-hover);
+  }
+
+  .boton-editar-rol:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .boton-eliminar-rol {
+    background: linear-gradient(135deg, var(--roles-peligro), #c0392b);
+    color: white;
+  }
+
+  .boton-eliminar-rol:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+  }
+
+  .boton-eliminar-rol:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .boton-editar-rol:active:not(:disabled),
+  .boton-eliminar-rol:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  /* ========================================
+     Modal
+     ======================================== */
+  .modal-fondo-roles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: aparecer-fondo 0.3s ease-out;
+  }
+
+  @keyframes aparecer-fondo {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-contenido-roles {
+    background: var(--roles-fondo-secundario);
+    border-radius: var(--roles-radio-lg);
+    box-shadow: var(--roles-sombra-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: deslizar-modal 0.3s ease-out;
+  }
+
+  @keyframes deslizar-modal {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-contenido-roles.modal-confirmacion {
+    max-width: 500px;
+  }
+
+  .modal-cabecera-roles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--roles-borde);
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  }
+
+  .modal-cabecera-roles h2 {
+    margin: 0;
+    color: var(--roles-texto);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .modal-cerrar-roles {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--roles-texto-secundario);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--roles-transicion-rapida);
+  }
+
+  .modal-cerrar-roles:hover {
+    background: var(--roles-fondo);
+    color: var(--roles-texto);
+    transform: rotate(90deg);
+  }
+
+  .modal-cuerpo-roles {
+    padding: 2rem;
+  }
+
+  .modal-confirmacion .modal-cuerpo-roles p {
+    margin: 0.75rem 0;
+    color: var(--roles-texto);
+    line-height: 1.6;
+  }
+
+  .rol-a-eliminar {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--roles-primario);
+    padding: 0.75rem;
+    background: var(--roles-fondo);
+    border-radius: var(--roles-radio-sm);
+    margin: 1rem 0;
+  }
+
+  .alerta-admin {
+    color: var(--roles-peligro);
+    font-weight: 600;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+    border-radius: var(--roles-radio-sm);
+    border-left: 4px solid var(--roles-peligro);
+    margin-top: 1rem;
+  }
+
+  /* ========================================
+     Formulario
+     ======================================== */
+  .campo-formulario-roles {
+    margin-bottom: 1.5rem;
+  }
+
+  .campo-formulario-roles label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--roles-texto);
+    font-size: 0.95rem;
+  }
+
+  .input-formulario-roles,
+  .textarea-formulario-roles {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border: 2px solid var(--roles-borde);
+    border-radius: var(--roles-radio);
+    font-size: 1rem;
+    color: var(--roles-texto);
+    background: var(--roles-fondo-secundario);
+    transition: var(--roles-transicion);
+    font-family: inherit;
+  }
+
+  .input-formulario-roles.disabled {
+    background: var(--roles-fondo);
+    color: var(--roles-texto-secundario);
+    cursor: not-allowed;
+  }
+
+  .input-formulario-roles:focus,
+  .textarea-formulario-roles:focus {
+    outline: none;
+    border-color: var(--roles-primario);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+  }
+
+  .textarea-formulario-roles {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  .modal-pie-roles {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--roles-borde);
+    background: var(--roles-fondo);
+  }
+
+  .boton-cancelar-roles,
+  .boton-guardar-roles,
+  .boton-eliminar-confirmar {
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: var(--roles-radio);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--roles-transicion);
+    box-shadow: var(--roles-sombra-sm);
+  }
+
+  .boton-cancelar-roles {
+    background: var(--roles-fondo-secundario);
+    color: var(--roles-texto);
+    border: 2px solid var(--roles-borde);
+  }
+
+  .boton-cancelar-roles:hover {
+    background: var(--roles-fondo);
+    transform: translateY(-2px);
+  }
+
+  .boton-guardar-roles {
+    background: linear-gradient(135deg, var(--roles-exito), #229954);
+    color: white;
+  }
+
+  .boton-guardar-roles:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
+  }
+
+  .boton-eliminar-confirmar {
+    background: linear-gradient(135deg, var(--roles-peligro), #c0392b);
+    color: white;
+  }
+
+  .boton-eliminar-confirmar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+  }
+
+  .boton-eliminar-confirmar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .boton-cancelar-roles:disabled,
+  .boton-guardar-roles:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ========================================
+     Paginador
+     ======================================== */
+  .paginador-roles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--roles-fondo-secundario);
+    border-radius: var(--roles-radio-lg);
+    box-shadow: var(--roles-sombra-md);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .info-paginacion-roles {
+    color: var(--roles-texto-secundario);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .controles-navegacion-roles {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .boton-paginador-roles {
+    padding: 0.625rem 1.25rem;
+    border: 2px solid var(--roles-borde);
+    background: var(--roles-fondo-secundario);
+    color: var(--roles-texto);
+    border-radius: var(--roles-radio-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--roles-transicion);
+    box-shadow: var(--roles-sombra-sm);
+  }
+
+  .boton-paginador-roles:hover:not(:disabled) {
+    background: var(--roles-primario);
+    color: white;
+    border-color: var(--roles-primario);
+    transform: translateY(-2px);
+    box-shadow: var(--roles-sombra-hover);
+  }
+
+  .boton-paginador-roles:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--roles-fondo);
+  }
+
+  .numeros-pagina-roles {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+  }
+
+  .numero-pagina-roles {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--roles-borde);
+    background: var(--roles-fondo-secundario);
+    color: var(--roles-texto);
+    border-radius: var(--roles-radio-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--roles-transicion);
+    box-shadow: var(--roles-sombra-sm);
+  }
+
+  .numero-pagina-roles:hover {
+    background: var(--roles-primario);
+    color: white;
+    border-color: var(--roles-primario);
+    transform: translateY(-2px);
+  }
+
+  .numero-pagina-roles.activa {
+    background: linear-gradient(135deg, var(--roles-primario), #357abd);
+    color: white;
+    border-color: var(--roles-primario);
+    box-shadow: var(--roles-sombra-md);
+  }
+
+  .puntos-suspensivos-roles {
+    padding: 0 0.5rem;
+    color: var(--roles-texto-secundario);
+    font-weight: 700;
+  }
+
+  .totales-roles {
+    display: flex;
+    align-items: center;
+  }
+
+  .total-paginas-roles {
+    color: var(--roles-texto-secundario);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  /* ========================================
+     Responsive Design
+     ======================================== */
+  @media (max-width: 1024px) {
+    .tabla-roles {
+      font-size: 0.875rem;
+    }
+
+    .tabla-roles th,
+    .tabla-roles td {
+      padding: 1rem 0.75rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .contenedor-roles {
+      padding: 1rem;
+    }
+
+    .cabecera-roles {
+      padding: 1.5rem;
+    }
+
+    .titulo-roles-con-boton {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .titulo-roles-con-boton h2 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .boton-nuevo-rol {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .controles-paginacion-superior {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .contenedor-tabla-roles {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabla-roles {
+      min-width: 700px;
+    }
+
+    .modal-contenido-roles {
+      max-width: 95%;
+    }
+
+    .modal-cabecera-roles,
+    .modal-cuerpo-roles,
+    .modal-pie-roles {
+      padding: 1.25rem;
+    }
+
+    .paginador-roles {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .controles-navegacion-roles {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .numeros-pagina-roles {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .boton-editar-rol,
+    .boton-eliminar-rol {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    .numero-pagina-roles {
+      width: 36px;
+      height: 36px;
+      font-size: 0.875rem;
+    }
+
+    .boton-paginador-roles {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .modal-pie-roles {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .boton-cancelar-roles,
+    .boton-guardar-roles,
+    .boton-eliminar-confirmar {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  /* ========================================
+     Accesibilidad
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--roles-primario);
+    outline-offset: 2px;
+  }
+
+  /* ========================================
+     Scrollbar Personalizada
+     ======================================== */
+  .contenedor-tabla-roles::-webkit-scrollbar,
+  .modal-contenido-roles::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .contenedor-tabla-roles::-webkit-scrollbar-track,
+  .modal-contenido-roles::-webkit-scrollbar-track {
+    background: var(--roles-fondo);
+    border-radius: 4px;
+  }
+
+  .contenedor-tabla-roles::-webkit-scrollbar-thumb,
+  .modal-contenido-roles::-webkit-scrollbar-thumb {
+    background: var(--roles-texto-secundario);
+    border-radius: 4px;
+  }
+
+  .contenedor-tabla-roles::-webkit-scrollbar-thumb:hover,
+  .modal-contenido-roles::-webkit-scrollbar-thumb:hover {
+    background: var(--roles-texto);
+  }

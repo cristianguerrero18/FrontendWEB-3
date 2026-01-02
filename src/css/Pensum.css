@@ -1,0 +1,1025 @@
+/* ========================================
+   Variables CSS para Pensum
+   ======================================== */
+   :root {
+    --pensum-primario: #4a90e2;
+    --pensum-secundario: #1e40af;
+    --pensum-acento: #f39c12;
+    --pensum-peligro: #e74c3c;
+    --pensum-exito: #27ae60;
+    --pensum-advertencia: #f39c12;
+
+    --pensum-fondo: #f8f9fa;
+    --pensum-fondo-secundario: #ffffff;
+    --pensum-texto: #2c3e50;
+    --pensum-texto-secundario: #7f8c8d;
+    --pensum-borde: #e1e8ed;
+
+    --pensum-sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --pensum-sombra-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --pensum-sombra-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --pensum-sombra-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+
+    --pensum-radio: 12px;
+    --pensum-radio-sm: 8px;
+    --pensum-radio-lg: 16px;
+
+    --pensum-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --pensum-transicion-rapida: all 0.15s ease;
+  }
+
+  /* ========================================
+     Contenedor Principal
+     ======================================== */
+  .contenedor-pensum {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--pensum-fondo);
+    min-height: 100vh;
+  }
+
+  /* ========================================
+     Estados de Carga e Iniciales
+     ======================================== */
+  .estado-carga,
+  .estado-inicial {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    min-height: 400px;
+  }
+
+  .estado-carga p,
+  .estado-inicial h2 {
+    color: var(--pensum-texto);
+    margin: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .estado-inicial p {
+    color: var(--pensum-texto-secundario);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .boton-nuevo-pensum {
+    background: linear-gradient(135deg, var(--pensum-primario), #357abd);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--pensum-radio);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+    box-shadow: var(--pensum-sombra-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .boton-nuevo-pensum:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--pensum-sombra-hover);
+  }
+
+  .boton-nuevo-pensum:active {
+    transform: translateY(0);
+  }
+
+  /* ========================================
+     Mensajes de la API
+     ======================================== */
+  .mensaje-api {
+    padding: 1rem 1.5rem;
+    border-radius: var(--pensum-radio);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--pensum-sombra-md);
+    animation: deslizar-entrada 0.4s ease-out;
+    font-weight: 500;
+  }
+
+  .mensaje-api.exito {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border-left: 4px solid var(--pensum-exito);
+  }
+
+  .mensaje-api.error {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-left: 4px solid var(--pensum-peligro);
+  }
+
+  .boton-cerrar-mensaje {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: inherit;
+    padding: 0 0.5rem;
+    opacity: 0.7;
+    transition: var(--pensum-transicion-rapida);
+  }
+
+  .boton-cerrar-mensaje:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  @keyframes deslizar-entrada {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* ========================================
+     Cabecera de Pensum
+     ======================================== */
+  .cabecera-pensum {
+    background: var(--pensum-fondo-secundario);
+    border-radius: var(--pensum-radio-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--pensum-sombra-md);
+  }
+
+  .titulo-pensum-con-boton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .titulo-pensum-con-boton h2 {
+    color: var(--pensum-texto);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--pensum-primario), var(--pensum-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ========================================
+     Filtros y Controles
+     ======================================== */
+  .filtros-pensum {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .filtros-superiores {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+  }
+
+  .filtro-grupo label {
+    font-weight: 600;
+    color: var(--pensum-texto);
+    font-size: 0.9rem;
+  }
+
+  .select-filtro {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--pensum-borde);
+    border-radius: var(--pensum-radio);
+    background: var(--pensum-fondo-secundario);
+    color: var(--pensum-texto);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+  }
+
+  .select-filtro:focus {
+    outline: none;
+    border-color: var(--pensum-primario);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  }
+
+  .boton-limpiar-filtros {
+    background: var(--pensum-fondo);
+    color: var(--pensum-texto);
+    border: 2px solid var(--pensum-borde);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--pensum-radio);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+    align-self: flex-end;
+    margin-top: 1.5rem;
+  }
+
+  .boton-limpiar-filtros:hover {
+    background: var(--pensum-fondo-secundario);
+    transform: translateY(-2px);
+  }
+
+  /* ========================================
+     Controles y Búsqueda
+     ======================================== */
+  .controles-pensum {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .buscador-pensum {
+    flex: 1;
+  }
+
+  .input-busqueda-pensum {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--pensum-borde);
+    border-radius: var(--pensum-radio);
+    font-size: 1rem;
+    color: var(--pensum-texto);
+    background: var(--pensum-fondo-secundario);
+    transition: var(--pensum-transicion);
+    box-shadow: var(--pensum-sombra-sm);
+  }
+
+  .input-busqueda-pensum:focus {
+    outline: none;
+    border-color: var(--pensum-primario);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+  }
+
+  .input-busqueda-pensum::placeholder {
+    color: var(--pensum-texto-secundario);
+  }
+
+  .controles-paginacion-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .seleccion-elementos-pensum {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    color: var(--pensum-texto);
+  }
+
+  .select-elementos-pensum {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--pensum-borde);
+    border-radius: var(--pensum-radio-sm);
+    background: var(--pensum-fondo-secundario);
+    color: var(--pensum-texto);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+  }
+
+  .select-elementos-pensum:focus {
+    outline: none;
+    border-color: var(--pensum-primario);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  }
+
+  .info-cantidad-pensum {
+    color: var(--pensum-texto-secundario);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background: var(--pensum-fondo);
+    border-radius: var(--pensum-radio-sm);
+  }
+
+  /* ========================================
+     Tabla de Pensum
+     ======================================== */
+  .contenedor-tabla-pensum {
+    background: var(--pensum-fondo-secundario);
+    border-radius: var(--pensum-radio-lg);
+    box-shadow: var(--pensum-sombra-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .tabla-pensum {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .tabla-pensum thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+
+  .tabla-pensum th {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--pensum-texto);
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--pensum-borde);
+  }
+
+  .tabla-pensum tbody tr {
+    border-bottom: 1px solid var(--pensum-borde);
+    transition: var(--pensum-transicion);
+  }
+
+  .tabla-pensum tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: scale(1.01);
+    box-shadow: var(--pensum-sombra-sm);
+  }
+
+  .tabla-pensum tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla-pensum td {
+    padding: 1.25rem 1rem;
+    color: var(--pensum-texto);
+    vertical-align: middle;
+  }
+
+  /* Columnas específicas */
+  .columna-id-pensum {
+    width: 80px;
+  }
+
+  .columna-carrera-pensum {
+    width: 25%;
+    min-width: 200px;
+  }
+
+  .columna-semestre-pensum {
+    width: 15%;
+    min-width: 120px;
+  }
+
+  .columna-asignatura-pensum {
+    width: 30%;
+    min-width: 250px;
+  }
+
+  .columna-acciones-pensum {
+    width: 180px;
+  }
+
+  /* ========================================
+     Celdas de la Tabla
+     ======================================== */
+  .badge-id-pensum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.875rem;
+    background: var(--pensum-fondo);
+    color: var(--pensum-texto-secundario);
+    border-radius: var(--pensum-radio-sm);
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: 2px solid var(--pensum-borde);
+    min-width: 50px;
+  }
+
+  .info-con-badge {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nombre-carrera,
+  .nombre-asignatura {
+    font-weight: 600;
+    color: var(--pensum-texto);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .badge-id-secundario {
+    display: inline-flex;
+    padding: 0.25rem 0.625rem;
+    background: var(--pensum-fondo);
+    color: var(--pensum-texto-secundario);
+    border-radius: var(--pensum-radio-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    width: fit-content;
+  }
+
+  .badge-semestre {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: var(--pensum-radio);
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: 2px solid;
+    transition: var(--pensum-transicion-rapida);
+    width: fit-content;
+  }
+
+  .badge-semestre:hover {
+    transform: translateX(4px);
+  }
+
+  /* ========================================
+     Botones de Acciones
+     ======================================== */
+  .botones-acciones-pensum {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .boton-editar-pensum,
+  .boton-eliminar-pensum {
+    padding: 0.625rem 1.125rem;
+    border: none;
+    border-radius: var(--pensum-radio-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+    box-shadow: var(--pensum-sombra-sm);
+  }
+
+  .boton-editar-pensum {
+    background: linear-gradient(135deg, var(--pensum-primario), #357abd);
+    color: white;
+  }
+
+  .boton-editar-pensum:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--pensum-sombra-hover);
+  }
+
+  .boton-eliminar-pensum {
+    background: linear-gradient(135deg, var(--pensum-peligro), #c0392b);
+    color: white;
+  }
+
+  .boton-eliminar-pensum:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+  }
+
+  .boton-editar-pensum:active,
+  .boton-eliminar-pensum:active {
+    transform: translateY(0);
+  }
+
+  /* ========================================
+     Modal
+     ======================================== */
+  .modal-fondo-pensum {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: aparecer-fondo 0.3s ease-out;
+  }
+
+  @keyframes aparecer-fondo {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-contenido-pensum {
+    background: var(--pensum-fondo-secundario);
+    border-radius: var(--pensum-radio-lg);
+    box-shadow: var(--pensum-sombra-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: deslizar-modal 0.3s ease-out;
+  }
+
+  @keyframes deslizar-modal {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-contenido-pensum.modal-confirmacion {
+    max-width: 500px;
+  }
+
+  .modal-cabecera-pensum {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--pensum-borde);
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  }
+
+  .modal-cabecera-pensum h2 {
+    margin: 0;
+    color: var(--pensum-texto);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .modal-cerrar-pensum {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--pensum-texto-secundario);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--pensum-transicion-rapida);
+  }
+
+  .modal-cerrar-pensum:hover {
+    background: var(--pensum-fondo);
+    color: var(--pensum-texto);
+    transform: rotate(90deg);
+  }
+
+  .modal-cuerpo-pensum {
+    padding: 2rem;
+  }
+
+  .modal-confirmacion .modal-cuerpo-pensum p {
+    margin: 0.75rem 0;
+    color: var(--pensum-texto);
+    line-height: 1.6;
+  }
+
+  .info-a-eliminar {
+    background: var(--pensum-fondo);
+    border-radius: var(--pensum-radio-sm);
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .info-a-eliminar p {
+    margin: 0.5rem 0;
+  }
+
+  .alerta-eliminacion {
+    color: var(--pensum-peligro);
+    font-weight: 600;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+    border-radius: var(--pensum-radio-sm);
+    border-left: 4px solid var(--pensum-peligro);
+    margin-top: 1rem;
+  }
+
+  /* ========================================
+     Formulario
+     ======================================== */
+  .campo-formulario-pensum {
+    margin-bottom: 1.5rem;
+  }
+
+  .campo-formulario-pensum label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--pensum-texto);
+    font-size: 0.95rem;
+  }
+
+  .input-formulario-pensum,
+  .select-formulario-pensum,
+  .textarea-formulario-pensum {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border: 2px solid var(--pensum-borde);
+    border-radius: var(--pensum-radio);
+    font-size: 1rem;
+    color: var(--pensum-texto);
+    background: var(--pensum-fondo-secundario);
+    transition: var(--pensum-transicion);
+    font-family: inherit;
+  }
+
+  .input-formulario-pensum.disabled {
+    background: var(--pensum-fondo);
+    color: var(--pensum-texto-secundario);
+    cursor: not-allowed;
+  }
+
+  .input-formulario-pensum:focus,
+  .select-formulario-pensum:focus,
+  .textarea-formulario-pensum:focus {
+    outline: none;
+    border-color: var(--pensum-primario);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+  }
+
+  .textarea-formulario-pensum {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  .info-registro {
+    background: var(--pensum-fondo);
+    border-radius: var(--pensum-radio-sm);
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .info-registro p {
+    margin: 0.5rem 0;
+    color: var(--pensum-texto);
+  }
+
+  .modal-pie-pensum {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--pensum-borde);
+    background: var(--pensum-fondo);
+  }
+
+  .boton-cancelar-pensum,
+  .boton-guardar-pensum,
+  .boton-eliminar-confirmar {
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: var(--pensum-radio);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+    box-shadow: var(--pensum-sombra-sm);
+  }
+
+  .boton-cancelar-pensum {
+    background: var(--pensum-fondo-secundario);
+    color: var(--pensum-texto);
+    border: 2px solid var(--pensum-borde);
+  }
+
+  .boton-cancelar-pensum:hover {
+    background: var(--pensum-fondo);
+    transform: translateY(-2px);
+  }
+
+  .boton-guardar-pensum {
+    background: linear-gradient(135deg, var(--pensum-exito), #229954);
+    color: white;
+  }
+
+  .boton-guardar-pensum:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
+  }
+
+  .boton-eliminar-confirmar {
+    background: linear-gradient(135deg, var(--pensum-peligro), #c0392b);
+    color: white;
+  }
+
+  .boton-eliminar-confirmar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+  }
+
+  .boton-cancelar-pensum:disabled,
+  .boton-guardar-pensum:disabled,
+  .boton-eliminar-confirmar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ========================================
+     Paginador
+     ======================================== */
+  .paginador-pensum {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--pensum-fondo-secundario);
+    border-radius: var(--pensum-radio-lg);
+    box-shadow: var(--pensum-sombra-md);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .info-paginacion-pensum {
+    color: var(--pensum-texto-secundario);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .controles-navegacion-pensum {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .boton-paginador-pensum {
+    padding: 0.625rem 1.25rem;
+    border: 2px solid var(--pensum-borde);
+    background: var(--pensum-fondo-secundario);
+    color: var(--pensum-texto);
+    border-radius: var(--pensum-radio-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+    box-shadow: var(--pensum-sombra-sm);
+  }
+
+  .boton-paginador-pensum:hover:not(:disabled) {
+    background: var(--pensum-primario);
+    color: white;
+    border-color: var(--pensum-primario);
+    transform: translateY(-2px);
+    box-shadow: var(--pensum-sombra-hover);
+  }
+
+  .boton-paginador-pensum:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--pensum-fondo);
+  }
+
+  .numeros-pagina-pensum {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+  }
+
+  .numero-pagina-pensum {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--pensum-borde);
+    background: var(--pensum-fondo-secundario);
+    color: var(--pensum-texto);
+    border-radius: var(--pensum-radio-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--pensum-transicion);
+    box-shadow: var(--pensum-sombra-sm);
+  }
+
+  .numero-pagina-pensum:hover {
+    background: var(--pensum-primario);
+    color: white;
+    border-color: var(--pensum-primario);
+    transform: translateY(-2px);
+  }
+
+  .numero-pagina-pensum.activa {
+    background: linear-gradient(135deg, var(--pensum-primario), #357abd);
+    color: white;
+    border-color: var(--pensum-primario);
+    box-shadow: var(--pensum-sombra-md);
+  }
+
+  .puntos-suspensivos-pensum {
+    padding: 0 0.5rem;
+    color: var(--pensum-texto-secundario);
+    font-weight: 700;
+  }
+
+  .totales-pensum {
+    display: flex;
+    align-items: center;
+  }
+
+  .total-paginas-pensum {
+    color: var(--pensum-texto-secundario);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  /* ========================================
+     Responsive Design
+     ======================================== */
+  @media (max-width: 1024px) {
+    .tabla-pensum {
+      font-size: 0.875rem;
+    }
+
+    .tabla-pensum th,
+    .tabla-pensum td {
+      padding: 1rem 0.75rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .contenedor-pensum {
+      padding: 1rem;
+    }
+
+    .cabecera-pensum {
+      padding: 1.5rem;
+    }
+
+    .titulo-pensum-con-boton {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .titulo-pensum-con-boton h2 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .boton-nuevo-pensum {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .filtros-superiores {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filtro-grupo {
+      min-width: auto;
+    }
+
+    .boton-limpiar-filtros {
+      align-self: stretch;
+      margin-top: 0.5rem;
+    }
+
+    .controles-paginacion-superior {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .contenedor-tabla-pensum {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabla-pensum {
+      min-width: 800px;
+    }
+
+    .modal-contenido-pensum {
+      max-width: 95%;
+    }
+
+    .modal-cabecera-pensum,
+    .modal-cuerpo-pensum,
+    .modal-pie-pensum {
+      padding: 1.25rem;
+    }
+
+    .paginador-pensum {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .controles-navegacion-pensum {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .numeros-pagina-pensum {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .boton-editar-pensum,
+    .boton-eliminar-pensum {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    .numero-pagina-pensum {
+      width: 36px;
+      height: 36px;
+      font-size: 0.875rem;
+    }
+
+    .boton-paginador-pensum {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .modal-pie-pensum {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .boton-cancelar-pensum,
+    .boton-guardar-pensum,
+    .boton-eliminar-confirmar {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  /* ========================================
+     Accesibilidad
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--pensum-primario);
+    outline-offset: 2px;
+  }
+
+  /* ========================================
+     Scrollbar Personalizada
+     ======================================== */
+  .contenedor-tabla-pensum::-webkit-scrollbar,
+  .modal-contenido-pensum::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .contenedor-tabla-pensum::-webkit-scrollbar-track,
+  .modal-contenido-pensum::-webkit-scrollbar-track {
+    background: var(--pensum-fondo);
+    border-radius: 4px;
+  }
+
+  .contenedor-tabla-pensum::-webkit-scrollbar-thumb,
+  .modal-contenido-pensum::-webkit-scrollbar-thumb {
+    background: var(--pensum-texto-secundario);
+    border-radius: 4px;
+  }
+
+  .contenedor-tabla-pensum::-webkit-scrollbar-thumb:hover,
+  .modal-contenido-pensum::-webkit-scrollbar-thumb:hover {
+    background: var(--pensum-texto);
+  }
