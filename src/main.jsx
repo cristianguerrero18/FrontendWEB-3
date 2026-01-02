@@ -20,7 +20,7 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <UserProvider> {/* 👈 AQUÍ */}
         <Routes>
-          <Route path="/" element={<App />} />
+          <Route path="/" element={<Login />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Registro" element={<Registro />} />
           <Route path="/Verificacion" element={<Verificacion />} />
