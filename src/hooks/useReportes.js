@@ -111,7 +111,7 @@ export const useReportes = (idRecurso = null) => {
   }, [cargarReportes, idRecurso]);
 
   // Limpiar mensajes
-  const limpiarMensaje = useCallback(() => {
+  const limpiarMensajes = useCallback(() => {
     setMensaje("");
   }, []);
 
@@ -130,6 +130,6 @@ export const useReportes = (idRecurso = null) => {
     cargarUsuario,
     cargarReporteCompleto,
     eliminarReporte,
-    limpiarMensaje,
+    limpiarMensajes,
   };
 };

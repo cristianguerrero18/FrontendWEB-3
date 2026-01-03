@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000";
+const API_URL = "https://proyectoweb-3.onrender.com";
 
 // ======================
 // TIPO DE CARRERA

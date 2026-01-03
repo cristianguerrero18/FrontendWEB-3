@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000"; // cambia si tu backend usa otro puerto
+const API_URL = "https://proyectoweb-3.onrender.com"; // cambia si tu backend usa otro puerto
 
 // Registrar usuario
 export const registrarUsuario = async (datos) => {

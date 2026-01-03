@@ -27,7 +27,8 @@ import "../css/Recursos.css";
 import Perfil from "../components/Perfil.jsx";
 import Recursos from "../components/Semestres.jsx";
 import MisRecursos from "../components/MisRecursos.jsx";
-import Favoritos from "../components/Favoritos.jsx"; // Importamos el componente de favoritos
+import Favoritos from "../components/Favoritos.jsx";
+import PQRSStudent from "../components/PQRSStudent.jsx"; // Importamos el componente de PQRS
 import { usePerfil } from "../hooks/usePerfil.js";
 import { useUser } from "../context/UserContext.jsx";
 
@@ -52,7 +53,7 @@ const PanelEstudiante = () => {
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(false);
   const [datos, setDatos] = useState(null);
-  const [mostrarVistaFavoritos, setMostrarVistaFavoritos] = useState(false); // Estado para controlar la vista de favoritos
+  const [mostrarVistaFavoritos, setMostrarVistaFavoritos] = useState(false);
 
   const usuarioStorage = parseLocalStorage("usuario");
   const carreraStorage = parseLocalStorage("carrera");
@@ -64,15 +65,15 @@ const PanelEstudiante = () => {
     seccionActiva === "perfil" && usuarioStorage.id_usuario ? usuarioStorage.id_usuario : null
   );
 
-  // SECCIONES PARA ESTUDIANTE - Agregamos "favoritos"
+  // SECCIONES PARA ESTUDIANTE - Agregamos "pqrs" en el menú
   const secciones = [
     { id: "inicio", icono: LayoutDashboard, label: "Dashboard", descripcion: "Panel principal del estudiante" },
     { id: "perfil", icono: User, label: "Perfil", descripcion: "Información personal y académica" },
     { id: "recursos", icono: BookCheck, label: "Recursos", descripcion: "Recursos educativos disponibles" },
     { id: "favoritos", icono: Heart, label: "Mis Favoritos", descripcion: "Recursos que has marcado como favoritos" },
-    { id: "adminrecursos", icono: FolderArchive , label: "Mis Recursos", descripcion: "Administración de mis recursos subidos" },
-    { id: "notificaciones", icono: BellPlus, label: "Notificaciones", descripcion: "Notificaciones del sistema" },
+    { id: "adminrecursos", icono: FolderArchive, label: "Mis Recursos", descripcion: "Administración de mis recursos subidos" },
     { id: "pqrs", icono: MessageSquare, label: "PQRS", descripcion: "Peticiones, Quejas, Reclamos y Sugerencias" },
+    { id: "notificaciones", icono: BellPlus, label: "Notificaciones", descripcion: "Notificaciones del sistema" },
     { id: "tutoriales", icono: Video, label: "Video Tutoriales", descripcion: "Aprende a usar el sistema" }
   ];
   const seccionActivaInfo = secciones.find((s) => s.id === seccionActiva) || secciones[0];
@@ -106,7 +107,8 @@ const PanelEstudiante = () => {
     setMostrarVistaFavoritos(false); // Resetear vista de favoritos al cambiar de sección
     
     // Solo las secciones con componentes propios no necesitan datos de prueba
-    if (seccionId === "perfil" || seccionId === "recursos" || seccionId === "adminrecursos" || seccionId === "favoritos") {
+    if (seccionId === "perfil" || seccionId === "recursos" || seccionId === "adminrecursos" || 
+        seccionId === "favoritos" || seccionId === "pqrs") {
       setCargando(false);
     } else {
       setTimeout(() => {
@@ -137,7 +139,7 @@ const PanelEstudiante = () => {
 
   // Función para obtener estadísticas de los recursos del usuario
   const obtenerEstadisticasRecursos = () => {
-    if (!userData || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos")) return null;
+    if (!userData || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs")) return null;
 
     // Estas serían estadísticas reales que vendrían de tu API
     const estadisticas = {
@@ -145,7 +147,7 @@ const PanelEstudiante = () => {
       activos: userData.recursosActivos || 0,
       reportados: userData.recursosReportados || 0,
       categorias: userData.categoriasDistintas || 0,
-      favoritos: userData.totalFavoritos || 0 // Nueva estadística para favoritos
+      favoritos: userData.totalFavoritos || 0
     };
 
     return estadisticas;
@@ -186,6 +188,8 @@ const PanelEstudiante = () => {
         return <Recursos />;
       case "adminrecursos":
         return <MisRecursos />;
+      case "pqrs":
+        return <PQRSStudent />; // Aquí renderizamos el componente de PQRS
       default:
         if (datos && datos.seccion === seccionActiva) {
           return (
@@ -218,7 +222,7 @@ const PanelEstudiante = () => {
                  seccionActiva === "notificaciones" ? <BellPlus size={48} /> :
                  seccionActiva === "tutoriales" ? <Video size={48} /> :
                  seccionActiva === "adminrecursos" ? <Settings size={48} /> :
-                 seccionActiva === "favoritos" ? <Heart size={48} /> : // Icono de favoritos
+                 seccionActiva === "favoritos" ? <Heart size={48} /> :
                  seccionActiva === "inicio" ? <LayoutDashboard size={48} /> :
                  <User size={48} />}
               </div>
@@ -226,10 +230,12 @@ const PanelEstudiante = () => {
               <p>{seccionActivaInfo.descripcion}</p>
               {seccionActiva === "favoritos" ? (
                 <p className="texto-ayuda">Aquí podrás ver todos los recursos que has marcado como favoritos</p>
+              ) : seccionActiva === "pqrs" ? (
+                <p className="texto-ayuda">Aquí podrás gestionar tus peticiones, quejas, reclamos y sugerencias</p>
               ) : (
                 <p className="texto-ayuda">Esta funcionalidad estará disponible próximamente</p>
               )}
-              {seccionActiva !== "favoritos" && (
+              {seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && (
                 <button className="boton-cargar-datos" onClick={() => cargarDatosSeccion(seccionActiva)}>
                   Ver Vista de Desarrollo
                 </button>
@@ -240,9 +246,9 @@ const PanelEstudiante = () => {
     }
   };
 
-  // Renderizar estadísticas en la barra lateral si estamos en adminrecursos o favoritos
+  // Renderizar estadísticas en la barra lateral si estamos en adminrecursos, favoritos o pqrs
   const renderEstadisticasPanel = () => {
-    if (!panelAbierto || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos")) return null;
+    if (!panelAbierto || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs")) return null;
 
     const stats = obtenerEstadisticasRecursos();
     if (!stats || (stats.total === 0 && stats.favoritos === 0)) return null;
@@ -250,9 +256,13 @@ const PanelEstudiante = () => {
     return (
       <div className="panel-estadisticas-recursos">
         <div className="cabecera-estadisticas">
-          {seccionActiva === "favoritos" ? <Heart size={16} /> : <FileText size={16} />}
+          {seccionActiva === "favoritos" ? <Heart size={16} /> : 
+           seccionActiva === "pqrs" ? <MessageSquare size={16} /> :
+           <FileText size={16} />}
           <span>
-            {seccionActiva === "favoritos" ? "Estadísticas de Favoritos" : "Estadísticas de Recursos"}
+            {seccionActiva === "favoritos" ? "Estadísticas de Favoritos" : 
+             seccionActiva === "pqrs" ? "Estadísticas de PQRS" :
+             "Estadísticas de Recursos"}
           </span>
         </div>
         <div className="estadisticas-contenido">
@@ -261,6 +271,17 @@ const PanelEstudiante = () => {
               <div className="estadistica-item destacado">
                 <span className="estadistica-label">Total Favoritos:</span>
                 <span className="estadistica-valor">{stats.favoritos || 0}</span>
+              </div>
+            </>
+          ) : seccionActiva === "pqrs" ? (
+            <>
+              <div className="estadistica-item">
+                <span className="estadistica-label">PQRS Activos:</span>
+                <span className="estadistica-valor">{stats.activos || 0}</span>
+              </div>
+              <div className="estadistica-item">
+                <span className="estadistica-label">PQRS Resueltos:</span>
+                <span className="estadistica-valor">{stats.total || 0}</span>
               </div>
             </>
           ) : (
@@ -384,6 +405,12 @@ const PanelEstudiante = () => {
               <div className="badge-accion-admin">
                 <Settings size={16} />
                 <span>Administrador de Recursos</span>
+              </div>
+            )}
+            {seccionActiva === "pqrs" && (
+              <div className="badge-accion-admin">
+                <MessageSquare size={16} />
+                <span>Gestión de PQRS</span>
               </div>
             )}
             <button 

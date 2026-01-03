@@ -472,7 +472,7 @@ const Semestres = () => {
     setRecursoAReporter(null)
     setUsuarioYaReporto(false)
     setMotivoReporte("")
-    limpiarMensajesReporte()
+    limpiarMensajesReporte() 
   }
 
   // Función para enviar reporte
