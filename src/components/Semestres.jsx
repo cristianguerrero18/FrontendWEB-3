@@ -1090,8 +1090,8 @@ const Semestres = () => {
               <div className="grid-recursos">
                 {recursosMateria.map((recurso) => {
                   const esFavoritoRecurso = esFavorito(recurso.id_recurso)
-                  const estaProcesandoFavorito = operacionFavorito.cargando && operacionFavorito.idRecurso === recurso.id_recurso
-                  const estaProcesandoReporte = operacionReporte.cargando && operacionReporte.idRecurso === recurso.id_recurso
+                  const estaProcesandoFavorito = operacionFavorito?.cargando && operacionFavorito?.idRecurso === recurso.id_recurso
+const estaProcesandoReporte = operacionReporte?.cargando && operacionReporte?.idRecurso === recurso.id_recurso
                   const yaReportado = usuarioYaReporto && recursoAReporter?.id_recurso === recurso.id_recurso
 
                   return (
