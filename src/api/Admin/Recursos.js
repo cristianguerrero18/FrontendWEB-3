@@ -255,3 +255,22 @@ export const getRecursosPorUsuario = async (id_usuario) => {
     return [];
   }
 };
+
+export const getRecursoDetalle = async (id_recurso) => {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/recursos/detalle/${id_recurso}`,
+      {
+        method: "GET",
+        headers: authHeaders(),
+      }
+    );
+
+    if (!res.ok) throw new Error(res.status);
+    return res.json();
+  } catch (error) {
+    console.error("Error en getRecursoDetalle:", error.message);
+    return null;
+  }
+};
+

@@ -16,6 +16,8 @@ const Recursos = () => {
     categorias,
     usuarios,
     cargando,
+    cargandoDetalle,
+    recursoDetalle,
     mensaje,
     archivo,
     recargarRecursos,
@@ -23,6 +25,8 @@ const Recursos = () => {
     actualizarRecurso,
     eliminarRecurso,
     toggleEstadoRecurso,
+    cargarRecursoDetalle,
+    limpiarDetalle,
     manejarArchivo,
     limpiarArchivo,
     limpiarMensaje
@@ -31,8 +35,12 @@ const Recursos = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const [elementosPorPagina, setElementosPorPagina] = useState(10);
   const [busqueda, setBusqueda] = useState("");
+  const [filtroAsignatura, setFiltroAsignatura] = useState("");
+  const [busquedaAsignatura, setBusquedaAsignatura] = useState("");
+  const [mostrarOpcionesAsignatura, setMostrarOpcionesAsignatura] = useState(false);
 
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [recursoActual, setRecursoActual] = useState({
     id_recurso: 0,
@@ -73,11 +81,30 @@ const Recursos = () => {
     return categoriaSeleccionada?.nombre_categoria === "Links" || recursoActual.id_categoria === 4;
   };
 
-  const recursosFiltrados = recursos.filter(recurso =>
-    recurso.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-    recurso.tema.toLowerCase().includes(busqueda.toLowerCase()) ||
-    (recurso.URL && recurso.URL.toLowerCase().includes(busqueda.toLowerCase()))
+  // Filtrar asignaturas según la búsqueda
+  const asignaturasFiltradas = asignaturas.filter(asignatura =>
+    asignatura.nombre_asignatura.toLowerCase().includes(busquedaAsignatura.toLowerCase())
   );
+
+  // Obtener nombre de la asignatura seleccionada
+  const getNombreAsignaturaSeleccionada = () => {
+    if (!filtroAsignatura) return "Todas las asignaturas";
+    const asignatura = asignaturas.find(a => a.id_asignatura === parseInt(filtroAsignatura));
+    return asignatura ? asignatura.nombre_asignatura : "Todas las asignaturas";
+  };
+
+  // Filtrar recursos
+  const recursosFiltrados = recursos.filter(recurso => {
+    const coincideBusqueda = 
+      recurso.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+      recurso.tema.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (recurso.URL && recurso.URL.toLowerCase().includes(busqueda.toLowerCase()));
+    
+    const coincideAsignatura = filtroAsignatura === "" || 
+      recurso.id_asignatura === parseInt(filtroAsignatura);
+    
+    return coincideBusqueda && coincideAsignatura;
+  });
 
   const indiceUltimoElemento = paginaActual * elementosPorPagina;
   const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
@@ -141,6 +168,13 @@ const Recursos = () => {
     setUrlManual(recurso.URL || "");
     setModoEdicion(true);
     setMostrarModal(true);
+  };
+
+  const handleVerDetalle = async (recurso) => {
+    const resultado = await cargarRecursoDetalle(recurso.id_recurso);
+    if (!resultado.error) {
+      setMostrarModalDetalle(true);
+    }
   };
 
   const handleEliminarRecurso = (recurso) => {
@@ -311,7 +345,52 @@ const Recursos = () => {
     return getNombreUsuario(idUsuario);
   };
 
-  if (cargando) return (
+  const formatearFecha = (fechaString) => {
+    if (!fechaString) return "No disponible";
+    const fecha = new Date(fechaString);
+    return fecha.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const cerrarModalDetalle = () => {
+    setMostrarModalDetalle(false);
+    limpiarDetalle();
+  };
+
+  const limpiarFiltros = () => {
+    setBusqueda("");
+    setFiltroAsignatura("");
+    setBusquedaAsignatura("");
+    setPaginaActual(1);
+    setMostrarOpcionesAsignatura(false);
+  };
+
+  const seleccionarAsignatura = (idAsignatura) => {
+    setFiltroAsignatura(idAsignatura.toString());
+    setBusquedaAsignatura("");
+    setMostrarOpcionesAsignatura(false);
+    setPaginaActual(1);
+  };
+
+  const handleClickFueraDropdown = (e) => {
+    if (!e.target.closest('.combo-asignatura')) {
+      setMostrarOpcionesAsignatura(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickFueraDropdown);
+    return () => {
+      document.removeEventListener('click', handleClickFueraDropdown);
+    };
+  }, []);
+
+  if (cargando && !recursos.length) return (
     <div className="estado-carga">
       <div className="spinner-grande"></div>
       <p>Cargando recursos...</p>
@@ -349,9 +428,6 @@ const Recursos = () => {
         <div className="titulo-recursos-con-boton">
           <div>
             <h3>Gestión de Recursos</h3>
-            <p className="info-usuario-actual">
-              <strong>Usuario actual:</strong> {nombreUsuarioActual}
-            </p>
           </div>
           <button
             className="boton-nuevo-recurso"
@@ -362,17 +438,84 @@ const Recursos = () => {
         </div>
 
         <div className="controles-recursos">
-          <div className="buscador-recursos">
-            <input
-              type="text"
-              placeholder="Buscar por título, tema o URL..."
-              value={busqueda}
-              onChange={(e) => {
-                setBusqueda(e.target.value);
-                setPaginaActual(1);
-              }}
-              className="input-busqueda-recursos"
-            />
+          <div className="filtros-recursos">
+            <div className="buscador-recursos">
+              <input
+                type="text"
+                placeholder="Buscar por título, tema o URL..."
+                value={busqueda}
+                onChange={(e) => {
+                  setBusqueda(e.target.value);
+                  setPaginaActual(1);
+                }}
+                className="input-busqueda-recursos"
+              />
+            </div>
+
+            <div className="combo-asignatura">
+              <div 
+                className="combo-header"
+                onClick={() => setMostrarOpcionesAsignatura(!mostrarOpcionesAsignatura)}
+              >
+                <span className="combo-selected">
+                  {getNombreAsignaturaSeleccionada()}
+                </span>
+                <span className="combo-arrow">▼</span>
+              </div>
+              
+              {mostrarOpcionesAsignatura && (
+                <div className="combo-options">
+                  <div className="combo-search">
+                    <input
+                      type="text"
+                      placeholder="Buscar asignatura..."
+                      value={busquedaAsignatura}
+                      onChange={(e) => {
+                        setBusquedaAsignatura(e.target.value);
+                      }}
+                      className="combo-search-input"
+                      autoFocus
+                    />
+                  </div>
+                  
+                  <div className="combo-list">
+                    <div 
+                      className={`combo-option ${!filtroAsignatura ? 'selected' : ''}`}
+                      onClick={() => seleccionarAsignatura("")}
+                    >
+                      <span>Todas las asignaturas</span>
+                      {!filtroAsignatura && <span className="check">✓</span>}
+                    </div>
+                    
+                    {asignaturasFiltradas.map(asignatura => (
+                      <div 
+                        key={asignatura.id_asignatura}
+                        className={`combo-option ${filtroAsignatura === asignatura.id_asignatura.toString() ? 'selected' : ''}`}
+                        onClick={() => seleccionarAsignatura(asignatura.id_asignatura)}
+                      >
+                        <span>{asignatura.nombre_asignatura}</span>
+                        {filtroAsignatura === asignatura.id_asignatura.toString() && <span className="check">✓</span>}
+                      </div>
+                    ))}
+                    
+                    {asignaturasFiltradas.length === 0 && (
+                      <div className="combo-no-results">
+                        No se encontraron asignaturas
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {(busqueda || filtroAsignatura) && (
+              <button
+                className="boton-limpiar-filtros"
+                onClick={limpiarFiltros}
+              >
+                Limpiar filtros
+              </button>
+            )}
           </div>
 
           <div className="controles-paginacion-superior">
@@ -534,6 +677,13 @@ const Recursos = () => {
                   </td>
                   <td className="celda-acciones-recurso">
                     <div className="botones-acciones-recurso">
+                      <button
+                        className="boton-ver-detalle"
+                        onClick={() => handleVerDetalle(recurso)}
+                        title="Ver detalle del recurso"
+                      >
+                        👁️
+                      </button>
                       <button
                         className="boton-editar-recurso"
                         onClick={() => handleEditarRecurso(recurso)}
@@ -833,6 +983,226 @@ const Recursos = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalDetalle && recursoDetalle && (
+        <div className="modal-fondo-recursos">
+          <div className="modal-contenido-recursos modal-detalle-recursos">
+            <div className="modal-cabecera-recursos">
+              <h2>Detalle del Recurso</h2>
+              <button
+                className="modal-cerrar-recursos"
+                onClick={cerrarModalDetalle}
+              >
+                ×
+              </button>
+            </div>
+
+            {cargandoDetalle ? (
+              <div className="carga-detalle">
+                <div className="spinner"></div>
+                <p>Cargando detalles del recurso...</p>
+              </div>
+            ) : (
+              <div className="modal-cuerpo-recursos cuerpo-detalle">
+                <div className="cabecera-detalle">
+                  <h3 className="titulo-detalle">{recursoDetalle.titulo}</h3>
+                  <div className="badges-detalle">
+                    <span className={`badge-estado ${recursoDetalle.activo === 1 ? 'activo' : 'inactivo'}`}>
+                      {recursoDetalle.activo === 1 ? 'Activo ✓' : 'Inactivo ✗'}
+                    </span>
+                    <span className="badge-id">ID: {recursoDetalle.id_recurso}</span>
+                    {recursoDetalle.contador_reportes > 0 && (
+                      <span className="badge-reportes-detalle">
+                        ⚠️ {recursoDetalle.contador_reportes} reporte(s)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid-detalle">
+                  <div className="info-principal">
+                    <h4>Información Principal</h4>
+                    <div className="campo-detalle">
+                      <label>Tema:</label>
+                      <p className="valor-detalle">{recursoDetalle.tema}</p>
+                    </div>
+                    <div className="campo-detalle">
+                      <label>URL:</label>
+                      <div className="url-detalle">
+                        <span className="valor-url" title={recursoDetalle.URL}>
+                          {recursoDetalle.URL?.substring(0, 60)}...
+                        </span>
+                        <div className="botones-url">
+                          <button
+                            className="boton-copiar-detalle"
+                            onClick={() => copiarURL(recursoDetalle.URL)}
+                            title="Copiar URL"
+                          >
+                            📋 Copiar
+                          </button>
+                          <a
+                            href={recursoDetalle.URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="boton-abrir-detalle"
+                          >
+                            🔗 Abrir
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    {recursoDetalle.PUBLIC_ID && (
+                      <div className="campo-detalle">
+                        <label>Public ID (Cloudinary):</label>
+                        <p className="valor-detalle">{recursoDetalle.PUBLIC_ID}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="info-clasificacion">
+                    <h4>Clasificación</h4>
+                    <div className="campo-detalle">
+                      <label>Asignatura:</label>
+                      <p className="valor-detalle">{recursoDetalle.asignatura}</p>
+                    </div>
+                    <div className="campo-detalle">
+                      <label>Categoría:</label>
+                      <p className="valor-detalle">{recursoDetalle.categoria}</p>
+                    </div>
+                    <div className="campo-detalle">
+                      <label>Tipo de archivo:</label>
+                      <p className="valor-detalle">
+                        <span className="icono-tipo-detalle">
+                          {getIconoArchivo(getTipoArchivo(recursoDetalle.URL))}
+                        </span>
+                        {getTipoArchivo(recursoDetalle.URL)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="info-usuario">
+                    <h4>Información del Usuario</h4>
+                    <div className="campo-detalle">
+                      <label>Subido por:</label>
+                      <p className="valor-detalle">{recursoDetalle.usuario}</p>
+                    </div>
+                    <div className="campo-detalle">
+                      <label>ID Usuario:</label>
+                      <p className="valor-detalle">{recursoDetalle.id_usuario}</p>
+                    </div>
+                    {recursoDetalle.id_usuario === idUsuarioActual && (
+                      <div className="campo-detalle">
+                        <span className="usuario-actual-detalle">✓ Este recurso fue subido por ti</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="info-interaccion">
+                    <h4>Interacción</h4>
+                    <div className="estadisticas-interaccion">
+                      <div className="estadistica">
+                        <span className="icono-estadistica">👍</span>
+                        <div>
+                          <span className="valor-estadistica">{recursoDetalle.total_likes || 0}</span>
+                          <span className="label-estadistica">Likes</span>
+                        </div>
+                      </div>
+                      <div className="estadistica">
+                        <span className="icono-estadistica">👎</span>
+                        <div>
+                          <span className="valor-estadistica">{recursoDetalle.total_dislikes || 0}</span>
+                          <span className="label-estadistica">Dislikes</span>
+                        </div>
+                      </div>
+                      <div className="estadistica">
+                        <span className="icono-estadistica">💬</span>
+                        <div>
+                          <span className="valor-estadistica">{recursoDetalle.total_comentarios || 0}</span>
+                          <span className="label-estadistica">Comentarios</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {recursoDetalle.reportes && recursoDetalle.reportes.length > 0 && (
+                  <div className="seccion-reportes">
+                    <h4>Reportes ({recursoDetalle.reportes.length})</h4>
+                    <div className="lista-reportes">
+                      {recursoDetalle.reportes.map((reporte, index) => (
+                        <div key={index} className="reporte-item">
+                          <div className="cabecera-reporte">
+                            <span className="motivo-reporte">
+                              <strong>Motivo:</strong> {reporte.motivo}
+                            </span>
+                            <span className="fecha-reporte">
+                              {formatearFecha(reporte.fecha_reporte)}
+                            </span>
+                          </div>
+                          <div className="info-adicional-reporte">
+                            <span className="id-reporte">
+                              <strong>ID Reporte:</strong> {reporte.id_reporte}
+                            </span>
+                            {reporte.id_usuario !== null && (
+                              <span className="id-usuario-reportero">
+                                <strong>ID Usuario Reportero:</strong> {reporte.id_usuario}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {recursoDetalle.comentarios && recursoDetalle.comentarios.length > 0 && (
+                  <div className="seccion-comentarios">
+                    <h4>Comentarios ({recursoDetalle.comentarios.length})</h4>
+                    <div className="lista-comentarios">
+                      {recursoDetalle.comentarios.map((comentario, index) => (
+                        <div key={index} className="comentario-item">
+                          <div className="cabecera-comentario">
+                            <span className="usuario-comentario">{comentario.usuario}</span>
+                            <span className="fecha-comentario">{formatearFecha(comentario.fecha)}</span>
+                          </div>
+                          <p className="texto-comentario">{comentario.comentario}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(!recursoDetalle.comentarios || recursoDetalle.comentarios.length === 0) && 
+                 (!recursoDetalle.reportes || recursoDetalle.reportes.length === 0) && (
+                  <div className="sin-interacciones">
+                    <p>No hay comentarios ni reportes para este recurso.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="modal-pie-recursos">
+              <button
+                type="button"
+                className="boton-editar-recursos"
+                onClick={() => {
+                  cerrarModalDetalle();
+                  handleEditarRecurso(recursoDetalle);
+                }}
+              >
+                Editar Recurso
+              </button>
+              <button
+                type="button"
+                className="boton-cerrar-detalle"
+                onClick={cerrarModalDetalle}
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

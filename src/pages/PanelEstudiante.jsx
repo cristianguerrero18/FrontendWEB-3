@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -19,7 +19,9 @@ import {
   FileText,
   Heart,
   FolderArchive,
-  BookCheck
+  BookCheck,
+  Bell,
+  RotateCw
 } from "lucide-react";
 
 import "../css/Principal.css";
@@ -28,7 +30,10 @@ import Perfil from "../components/Perfil.jsx";
 import Recursos from "../components/Semestres.jsx";
 import MisRecursos from "../components/MisRecursos.jsx";
 import Favoritos from "../components/Favoritos.jsx";
-import PQRSStudent from "../components/PQRSStudent.jsx"; // Importamos el componente de PQRS
+import PQRSStudent from "../components/PQRSStudent.jsx";
+import Notificaciones from "../components/NotificacionesStudent.jsx";
+import NotificacionesSuperior from "../components/NotificacionesSuperior.jsx";
+import DashboardEstudiante from "../components/Dashboards.jsx"; // Nueva importación
 import { usePerfil } from "../hooks/usePerfil.js";
 import { useUser } from "../context/UserContext.jsx";
 
@@ -54,18 +59,26 @@ const PanelEstudiante = () => {
   const [cargando, setCargando] = useState(false);
   const [datos, setDatos] = useState(null);
   const [mostrarVistaFavoritos, setMostrarVistaFavoritos] = useState(false);
+  
+  // Nuevo estado para el efecto de recarga
+  const [recargandoSeccion, setRecargandoSeccion] = useState(false);
+  const [ultimaSeccionClickeada, setUltimaSeccionClickeada] = useState(null);
+  const [tiempoRecarga, setTiempoRecarga] = useState(0);
+  
+  // Ref para controlar si es la primera carga
+  const esPrimeraCarga = useRef(true);
+  const temporizadorRecargaRef = useRef(null);
 
   const usuarioStorage = parseLocalStorage("usuario");
   const carreraStorage = parseLocalStorage("carrera");
 
-  // Usar el contexto del usuario
   const { userData, loadUserData } = useUser();
 
   const { perfil, cargando: cargandoPerfil, mensaje, recargar, guardarPerfil } = usePerfil(
     seccionActiva === "perfil" && usuarioStorage.id_usuario ? usuarioStorage.id_usuario : null
   );
 
-  // SECCIONES PARA ESTUDIANTE - Agregamos "pqrs" en el menú
+  // SECCIONES PARA ESTUDIANTE - Actualizada con Dashboard
   const secciones = [
     { id: "inicio", icono: LayoutDashboard, label: "Dashboard", descripcion: "Panel principal del estudiante" },
     { id: "perfil", icono: User, label: "Perfil", descripcion: "Información personal y académica" },
@@ -94,33 +107,79 @@ const PanelEstudiante = () => {
     }
   }, [navigate]);
 
-  // Cargar datos del usuario cuando esté disponible el ID
+  // Cargar datos del usuario
   useEffect(() => {
     if (usuarioStorage?.id_usuario && !userData) {
       loadUserData(usuarioStorage.id_usuario);
     }
   }, [usuarioStorage?.id_usuario, userData, loadUserData]);
 
-  const cargarDatosSeccion = (seccionId) => {
-    setCargando(true);
-    setSeccionActiva(seccionId);
-    setMostrarVistaFavoritos(false); // Resetear vista de favoritos al cambiar de sección
-    
-    // Solo las secciones con componentes propios no necesitan datos de prueba
-    if (seccionId === "perfil" || seccionId === "recursos" || seccionId === "adminrecursos" || 
-        seccionId === "favoritos" || seccionId === "pqrs") {
-      setCargando(false);
-    } else {
-      setTimeout(() => {
-        setDatos({
-          seccion: seccionId,
-          timestamp: new Date().toISOString(),
-          totalRegistros: Math.floor(Math.random() * 50) + 1,
-          mensaje: `Vista del módulo ${seccionId} - En desarrollo`
-        });
-        setCargando(false);
-      }, 500);
+  // Efecto para manejar la recarga automática cuando se cambia de sección
+  useEffect(() => {
+    // No aplicar recarga en la primera carga
+    if (esPrimeraCarga.current) {
+      esPrimeraCarga.current = false;
+      return;
     }
+
+    // Solo recargar si la sección ha cambiado (no cuando se hace clic en la misma)
+    if (ultimaSeccionClickeada && ultimaSeccionClickeada === seccionActiva) {
+      iniciarRecargaSutil();
+    }
+  }, [seccionActiva, ultimaSeccionClickeada]);
+
+  // Limpiar temporizador al desmontar
+  useEffect(() => {
+    return () => {
+      if (temporizadorRecargaRef.current) {
+        clearTimeout(temporizadorRecargaRef.current);
+      }
+    };
+  }, []);
+
+  const iniciarRecargaSutil = () => {
+    // Limpiar temporizador anterior si existe
+    if (temporizadorRecargaRef.current) {
+      clearTimeout(temporizadorRecargaRef.current);
+    }
+
+    // Iniciar recarga
+    setRecargandoSeccion(true);
+    setTiempoRecarga(0);
+    
+    // Temporizador para el contador visual
+    const startTime = Date.now();
+    const updateTimer = () => {
+      const elapsed = Date.now() - startTime;
+      setTiempoRecarga(elapsed);
+      
+      if (elapsed < 800) {
+        temporizadorRecargaRef.current = setTimeout(updateTimer, 50);
+      }
+    };
+    
+    updateTimer();
+
+    // Finalizar recarga después de un tiempo corto
+    setTimeout(() => {
+      setRecargandoSeccion(false);
+      setTiempoRecarga(0);
+    }, 800); // 0.8 segundos - suficiente para notarse pero no molesto
+  };
+
+  const handleVerTodasNotificaciones = () => {
+    cargarDatosSeccion("notificaciones");
+  };
+
+  const cargarDatosSeccion = (seccionId) => {
+    // Guardar la sección clickeada para comparar después
+    setUltimaSeccionClickeada(seccionId);
+    
+    // Cambiar inmediatamente la sección activa
+    setSeccionActiva(seccionId);
+    setMostrarVistaFavoritos(false);
+    
+    // No iniciar la recarga aquí, se manejará en el useEffect
   };
 
   const obtenerEtiquetaActual = () => {
@@ -137,28 +196,47 @@ const PanelEstudiante = () => {
     navigate("/Login", { replace: true });
   };
 
-  // Función para obtener estadísticas de los recursos del usuario
   const obtenerEstadisticasRecursos = () => {
-    if (!userData || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs")) return null;
+    if (!userData || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && seccionActiva !== "notificaciones")) return null;
 
-    // Estas serían estadísticas reales que vendrían de tu API
     const estadisticas = {
       total: userData.totalRecursos || 0,
       activos: userData.recursosActivos || 0,
       reportados: userData.recursosReportados || 0,
       categorias: userData.categoriasDistintas || 0,
-      favoritos: userData.totalFavoritos || 0
+      favoritos: userData.totalFavoritos || 0,
+      notificaciones: userData.notificacionesNoLeidas || 0
     };
 
     return estadisticas;
   };
 
-  // Función para manejar el retorno desde favoritos
   const handleVolverDeFavoritos = () => {
     setMostrarVistaFavoritos(false);
   };
 
   const renderContenido = () => {
+    // Mostrar el efecto de recarga sutil si está activo
+    if (recargandoSeccion) {
+      return (
+        <div className="contenedor-recarga-sutil">
+          <div className="animacion-recarga">
+            <div className="icono-recarga-girando">
+              <RotateCw size={40} />
+            </div>
+            <div className="progreso-recarga">
+              <div 
+                className="barra-progreso-recarga" 
+                style={{ width: `${Math.min(100, (tiempoRecarga / 800) * 100)}%` }}
+              ></div>
+            </div>
+            <p className="texto-recarga">Actualizando contenido...</p>
+            <p className="texto-ayuda-recarga">Esto tomará solo un momento</p>
+          </div>
+        </div>
+      );
+    }
+
     if (cargando) {
       return (
         <div className="estado-carga">
@@ -168,12 +246,13 @@ const PanelEstudiante = () => {
       );
     }
 
-    // Si estamos en la sección de recursos y queremos mostrar la vista de favoritos
     if (seccionActiva === "favoritos") {
       return <Favoritos onVolver={handleVolverDeFavoritos} />;
     }
 
     switch (seccionActiva) {
+      case "inicio":
+        return <DashboardEstudiante />; // Dashboard agregado aquí
       case "perfil":
         return (
           <Perfil
@@ -189,7 +268,9 @@ const PanelEstudiante = () => {
       case "adminrecursos":
         return <MisRecursos />;
       case "pqrs":
-        return <PQRSStudent />; // Aquí renderizamos el componente de PQRS
+        return <PQRSStudent />;
+      case "notificaciones":
+        return <Notificaciones />;
       default:
         if (datos && datos.seccion === seccionActiva) {
           return (
@@ -232,10 +313,14 @@ const PanelEstudiante = () => {
                 <p className="texto-ayuda">Aquí podrás ver todos los recursos que has marcado como favoritos</p>
               ) : seccionActiva === "pqrs" ? (
                 <p className="texto-ayuda">Aquí podrás gestionar tus peticiones, quejas, reclamos y sugerencias</p>
+              ) : seccionActiva === "notificaciones" ? (
+                <p className="texto-ayuda">Aquí podrás ver y gestionar todas tus notificaciones del sistema</p>
+              ) : seccionActiva === "inicio" ? (
+                <p className="texto-ayuda">Bienvenido al panel principal del estudiante</p>
               ) : (
                 <p className="texto-ayuda">Esta funcionalidad estará disponible próximamente</p>
               )}
-              {seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && (
+              {seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && seccionActiva !== "notificaciones" && seccionActiva !== "inicio" && (
                 <button className="boton-cargar-datos" onClick={() => cargarDatosSeccion(seccionActiva)}>
                   Ver Vista de Desarrollo
                 </button>
@@ -246,22 +331,23 @@ const PanelEstudiante = () => {
     }
   };
 
-  // Renderizar estadísticas en la barra lateral si estamos en adminrecursos, favoritos o pqrs
   const renderEstadisticasPanel = () => {
-    if (!panelAbierto || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs")) return null;
+    if (!panelAbierto || (seccionActiva !== "adminrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && seccionActiva !== "notificaciones")) return null;
 
     const stats = obtenerEstadisticasRecursos();
-    if (!stats || (stats.total === 0 && stats.favoritos === 0)) return null;
+    if (!stats || (stats.total === 0 && stats.favoritos === 0 && stats.notificaciones === 0)) return null;
 
     return (
       <div className="panel-estadisticas-recursos">
         <div className="cabecera-estadisticas">
           {seccionActiva === "favoritos" ? <Heart size={16} /> : 
            seccionActiva === "pqrs" ? <MessageSquare size={16} /> :
+           seccionActiva === "notificaciones" ? <BellPlus size={16} /> :
            <FileText size={16} />}
           <span>
             {seccionActiva === "favoritos" ? "Estadísticas de Favoritos" : 
              seccionActiva === "pqrs" ? "Estadísticas de PQRS" :
+             seccionActiva === "notificaciones" ? "Estadísticas de Notificaciones" :
              "Estadísticas de Recursos"}
           </span>
         </div>
@@ -281,6 +367,17 @@ const PanelEstudiante = () => {
               </div>
               <div className="estadistica-item">
                 <span className="estadistica-label">PQRS Resueltos:</span>
+                <span className="estadistica-valor">{stats.total || 0}</span>
+              </div>
+            </>
+          ) : seccionActiva === "notificaciones" ? (
+            <>
+              <div className="estadistica-item destacado">
+                <span className="estadistica-label">No leídas:</span>
+                <span className="estadistica-valor">{stats.notificaciones || 0}</span>
+              </div>
+              <div className="estadistica-item">
+                <span className="estadistica-label">Total:</span>
                 <span className="estadistica-valor">{stats.total || 0}</span>
               </div>
             </>
@@ -355,20 +452,30 @@ const PanelEstudiante = () => {
             return (
               <button
                 key={s.id}
-                className={`item-navegacion ${estaActivo ? "activo" : ""}`}
+                className={`item-navegacion ${estaActivo ? "activo" : ""} ${recargandoSeccion && estaActivo ? 'recargando' : ''}`}
                 onClick={() => cargarDatosSeccion(s.id)}
                 title={s.descripcion}
+                disabled={recargandoSeccion}
               >
                 <Icono size={18} />
                 {panelAbierto && <span>{s.label}</span>}
                 {estaActivo && panelAbierto && (
                   <div className="indicador-activo"></div>
                 )}
+                {recargandoSeccion && estaActivo && panelAbierto && (
+                  <div className="indicador-recarga">
+                    <RotateCw size={12} />
+                  </div>
+                )}
               </button>
             );
           })}
           <div className="separador-navegacion" />
-          <button className="item-navegacion cerrar-sesion" onClick={handleCerrarSesion}>
+          <button 
+            className="item-navegacion cerrar-sesion" 
+            onClick={handleCerrarSesion}
+            disabled={recargandoSeccion}
+          >
             <LogOut size={18} />
             {panelAbierto && <span>Cerrar Sesión</span>}
           </button>
@@ -399,6 +506,12 @@ const PanelEstudiante = () => {
             <span>Sistema Académico</span>
             <span className="separador-ruta">/</span>
             <span className="ruta-actual-item">{obtenerEtiquetaActual()}</span>
+            {recargandoSeccion && (
+              <span className="badge-recarga-activa">
+                <RotateCw size={12} />
+                <span>Actualizando...</span>
+              </span>
+            )}
           </div>
           <div className="acciones-superior">
             {seccionActiva === "adminrecursos" && (
@@ -413,13 +526,23 @@ const PanelEstudiante = () => {
                 <span>Gestión de PQRS</span>
               </div>
             )}
+            {seccionActiva === "notificaciones" && (
+              <div className="badge-accion-admin">
+                <BellPlus size={16} />
+                <span>Mis Notificaciones</span>
+              </div>
+            )}
             <button 
               className="boton-ayuda" 
               onClick={() => cargarDatosSeccion("tutoriales")}
               title="Video Tutoriales"
+              disabled={recargandoSeccion}
             >
               <Video size={20} />
             </button>
+            <NotificacionesSuperior 
+              onVerTodas={handleVerTodasNotificaciones} 
+            />
           </div>
         </header>
 
@@ -427,11 +550,24 @@ const PanelEstudiante = () => {
           <div className="contenido-seccion">
             <div className="cabecera-seccion">
               <div>
-                <h1>{obtenerEtiquetaActual()}</h1>
+                <h1>
+                  {obtenerEtiquetaActual()}
+                  {recargandoSeccion && (
+                    <span className="badge-recarga-titulo">
+                      <RotateCw size={14} />
+                      <span>Actualizando</span>
+                    </span>
+                  )}
+                </h1>
                 <p className="texto-subtitulo">{obtenerDescripcionActual()}</p>
               </div>
-              <div className={`badge-estado-api ${cargando ? 'cargando' : 'conectado'}`}>
-                {cargando ? (
+              <div className={`badge-estado-api ${recargandoSeccion ? 'recargando' : cargando ? 'cargando' : 'conectado'}`}>
+                {recargandoSeccion ? (
+                  <>
+                    <div className="spinner-recarga"></div>
+                    <span>Actualizando contenido...</span>
+                  </>
+                ) : cargando ? (
                   <>
                     <div className="spinner-api"></div>
                     <span>Sincronizando...</span>

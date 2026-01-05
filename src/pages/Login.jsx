@@ -5,8 +5,11 @@ import { loginUsuario } from "../api/auth/Auth.js";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-// Importar imagen de fondo (ajusta la ruta según tu estructura)
-import backgroundImage from "../assets/fondo.png"; // Ajusta la extensión según tu imagen
+// Importar storage
+import { storeUserToken } from "./../utils/tokenStorage.js";
+
+// Importar imagen de fondo
+import backgroundImage from "../assets/fondo.png";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -29,7 +32,7 @@ function Login() {
         return;
       }
 
-      // 🔐 Guardar token y datos
+      // 🔐 Guardar en localStorage tradicional
       localStorage.setItem("token", res.token);
       localStorage.setItem("usuario", JSON.stringify(res.usuario));
       localStorage.setItem("carrera", JSON.stringify(res.carrera));
@@ -37,20 +40,22 @@ function Login() {
 
       // 🔎 Decodificar token
       const decoded = jwtDecode(res.token);
+      
+      // 🆕 ALMACENAR EN EL SISTEMA GLOBAL DE TOKENS (sin logs)
+      const userId = res.usuario.id_usuario || decoded.sub || email;
+      storeUserToken(userId, res.token, res.usuario, res.carrera);
 
-      // ✅ ADMIN
+      // ✅ Redirección según rol
       if (decoded.id_rol === 1) {
         navigate("/PanelAdministrador", { replace: true });
         return;
       }
 
-      // ✅ ESTUDIANTE
       if (decoded.id_rol === 2) {
         navigate("/PanelEstudiante", { replace: true });
         return;
       }
 
-      // ✅ DOCENTE - ERROR: Estaba repetido el id_rol 2, lo corregí a 3
       if (decoded.id_rol === 3) {
         navigate("/PanelDocente", { replace: true });
         return;
@@ -84,7 +89,7 @@ function Login() {
           transition={{ duration: 0.6 }}
           className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20"
         >
-          {/* HEADER - NUEVO GRADIENTE */}
+          {/* HEADER */}
           <div className="bg-gradient-to-r from-[#1e3a8a] to-[#4a90e2] py-6 px-6">
             <h2 className="text-center text-2xl md:text-3xl font-bold text-white mb-2">
               Iniciar Sesión
@@ -158,7 +163,7 @@ function Login() {
               </button>
             </div>
 
-            {/* BOTÓN - NUEVO GRADIENTE */}
+            {/* BOTÓN */}
             <motion.button
               whileTap={{ scale: 0.97 }}
               type="submit"

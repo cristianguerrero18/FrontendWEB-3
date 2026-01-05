@@ -1,0 +1,881 @@
+/* ========================================
+   DASHBOARD ESTUDIANTE - UTS
+   ======================================== */
+
+   .dashboard-estudiante {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  /* Hero Section */
+  .hero-dashboard {
+    background: linear-gradient(135deg, #1e3a8a 0%, #4a90e2 100%);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    color: white;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-dashboard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .hero-contenido {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .hero-icono {
+    background: rgba(255, 255, 255, 0.1);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .hero-titulo {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+  
+  .hero-subtitulo {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-badges {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .badge-estado {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 25px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .badge-version {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 25px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Grid de características */
+  .grid-caracteristicas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .caracteristica-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid #e1e8ed;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .caracteristica-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: #4a90e2;
+  }
+  
+  .caracteristica-icono {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: #1976d2;
+  }
+  
+  .caracteristica-card h3 {
+    color: #2c3e50;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .caracteristica-card p {
+    color: #7f8c8d;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  
+  /* Sección de misión */
+  .seccion-mision {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 3rem;
+    margin-bottom: 3rem;
+    border-left: 6px solid #4a90e2;
+  }
+  
+  .mision-contenido {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .mision-icono {
+    background: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #1e3a8a;
+    border: 2px solid #4a90e2;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+  }
+  
+  .mision-texto {
+    flex: 1;
+  }
+  
+  .mision-texto h2 {
+    color: #2c3e50;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  
+  .mision-texto p {
+    color: #4a5568;
+    line-height: 1.8;
+    font-size: 1.1rem;
+  }
+  
+  .mision-texto strong {
+    color: #1e3a8a;
+    font-weight: 700;
+  }
+  
+  /* Estadísticas y beneficios */
+  .estadisticas-beneficios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .beneficio-item {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+  }
+  
+  .beneficio-item:hover {
+    border-color: #4a90e2;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.1);
+  }
+  
+  .beneficio-icono {
+    background: #f7fafc;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a90e2;
+    flex-shrink: 0;
+  }
+  
+  .beneficio-contenido h4 {
+    color: #2d3748;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .beneficio-contenido p {
+    color: #718096;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  /* Sección legal */
+  .seccion-legal {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem;
+    margin-bottom: 3rem;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  .legal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .legal-icono {
+    background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c53030;
+  }
+  
+  .legal-header h2 {
+    color: #2d3748;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  
+  .legal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .legal-card {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #4a90e2;
+  }
+  
+  .legal-card h3 {
+    color: #2d3748;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .legal-card p {
+    color: #4a5568;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  .legal-footer {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .legal-footer p {
+    color: #4a5568;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  
+  .legal-footer strong {
+    color: #2d3748;
+    font-weight: 700;
+  }
+  
+  .enlace-politica {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+  }
+  
+  .enlace-politica:hover {
+    color: #1e3a8a;
+    text-decoration: underline;
+  }
+  
+  /* Call to Action */
+  .cta-dashboard {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    color: white;
+    text-align: center;
+  }
+  
+  .cta-contenido h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  
+  .cta-contenido p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .cta-estadisticas {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+  
+  .estadistica {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .numero {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #4a90e2;
+    margin-bottom: 0.25rem;
+  }
+  
+  .label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-titulo {
+      font-size: 2rem;
+    }
+    
+    .hero-subtitulo {
+      font-size: 1.1rem;
+    }
+    
+    .mision-contenido {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .mision-icono {
+      margin: 0 auto;
+    }
+    
+    .grid-caracteristicas,
+    .estadisticas-beneficios,
+    .legal-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .seccion-mision,
+    .seccion-legal {
+      padding: 2rem 1.5rem;
+    }
+    
+    .cta-estadisticas {
+      gap: 2rem;
+    }
+    
+    .numero {
+      font-size: 2rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .hero-dashboard {
+      padding: 2rem 1rem;
+    }
+    
+    .hero-titulo {
+      font-size: 1.75rem;
+    }
+    
+    .cta-estadisticas {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  }/* DashboardS.css - Estilos adicionales */
+
+/* Banner de desarrollo */
+.banner-desarrollo {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .banner-desarrollo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    animation: banner-pulse 3s infinite;
+  }
+  
+  @keyframes banner-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  
+  .banner-contenido {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .banner-contenido svg {
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+  }
+  
+  .banner-texto h3 {
+    color: #92400e;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+  
+  .banner-texto p {
+    color: #78350f;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .banner-indicador {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #92400e;
+    font-weight: 600;
+  }
+  
+  .punto-latente {
+    width: 8px;
+    height: 8px;
+    background-color: #f59e0b;
+    border-radius: 50%;
+    animation: latente 2s infinite;
+  }
+  
+  @keyframes latente {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  
+  /* Badge de desarrollo activo */
+  .badge-estado.activo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #f59e0b;
+    animation: badge-pulse 2s infinite;
+  }
+  
+  @keyframes badge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  .badge-beta {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #f59e0b;
+  }
+  
+  /* Indicadores en tarjetas de características */
+  .caracteristica-badge.desarrollo {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #f59e0b;
+  }
+  
+  .caracteristica-card {
+    position: relative;
+  }
+  
+  .caracteristica-estado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #e5e7eb;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+  
+  .caracteristica-estado svg {
+    color: #f59e0b;
+  }
+  
+  /* Badges en sección misión */
+  .mision-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .badge-proyecto {
+    background: #3b82f6;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .badge-investigacion {
+    background: #8b5cf6;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .mision-advertencia {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #fef3c7;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+  }
+  
+  .mision-advertencia svg {
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  
+  .mision-advertencia span {
+    color: #78350f;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  /* Tags en beneficios */
+  .beneficio-tag.desarrollo {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    border: 1px solid #f59e0b;
+  }
+  
+  /* Sección de errores */
+  .seccion-errores {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 2px solid #f59e0b;
+  }
+  
+  .error-contenido {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+  
+  .error-icono svg {
+    color: #d97706;
+    flex-shrink: 0;
+  }
+  
+  .error-texto h3 {
+    color: #92400e;
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .error-texto p {
+    color: #78350f;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+  
+  .error-lista {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+  
+  .error-lista li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #78350f;
+  }
+  
+  .error-lista li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #d97706;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  
+  .error-ayuda {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+    font-style: italic;
+  }
+  
+  /* Badges legales */
+  .legal-badge.desarrollo {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #f59e0b;
+    margin-left: 1rem;
+  }
+  
+  .legal-card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #f59e0b;
+  }
+  
+  .legal-card {
+    position: relative;
+  }
+  
+  .legal-advertencia {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: #fef3c7;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #f59e0b;
+  }
+  
+  .legal-advertencia svg {
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+  }
+  
+  .legal-advertencia p {
+    color: #78350f;
+    margin: 0;
+    line-height: 1.6;
+  }
+  
+  /* Estadísticas con tags */
+  .estadistica-tag.beta {
+    position: absolute;
+    top: -0.5rem;
+    right: 0;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid #f59e0b;
+  }
+  
+  .estadistica {
+    position: relative;
+  }
+  
+  .cta-advertencia {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(254, 243, 199, 0.5);
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+  }
+  
+  .cta-advertencia svg {
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  
+  .cta-advertencia span {
+    color: #78350f;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  /* Sección de reporte */
+  .seccion-reporte {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 2px solid #e2e8f0;
+  }
+  
+  .seccion-reporte h3 {
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .reporte-pasos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+  
+  .paso {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .paso-numero {
+    width: 36px;
+    height: 36px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  
+  .paso-contenido h4 {
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+  
+  .paso-contenido p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .banner-contenido {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .error-contenido {
+      flex-direction: column;
+    }
+    
+    .reporte-pasos {
+      grid-template-columns: 1fr;
+    }
+    
+    .legal-advertencia {
+      flex-direction: column;
+    }
+    
+    .mision-advertencia {
+      flex-direction: column;
+    }
+    
+    .cta-advertencia {
+      flex-direction: column;
+    }
+  }

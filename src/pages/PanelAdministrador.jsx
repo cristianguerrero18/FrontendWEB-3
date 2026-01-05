@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -36,7 +36,8 @@ import {
   FootprintsIcon,
   FolderOutput,
   LayoutDashboard,
-  Video
+  Video,
+  RotateCw // Agregamos el ícono de recarga
 } from "lucide-react";
 
 import "../css/Principal.css";
@@ -84,6 +85,16 @@ const PanelUniversitario = () => {
   const [cargando, setCargando] = useState(false);
   const [datos, setDatos] = useState(null);
   const [idRecursoFiltro, setIdRecursoFiltro] = useState(null);
+  
+  // Nuevo estado para el efecto de recarga
+  const [recargandoSeccion, setRecargandoSeccion] = useState(false);
+  const [ultimaSeccionClickeada, setUltimaSeccionClickeada] = useState(null);
+  const [ultimaSubseccionClickeada, setUltimaSubseccionClickeada] = useState(null);
+  const [tiempoRecarga, setTiempoRecarga] = useState(0);
+  
+  // Ref para controlar si es la primera carga
+  const esPrimeraCarga = useRef(true);
+  const temporizadorRecargaRef = useRef(null);
 
   const usuarioStorage = parseLocalStorage("usuario");
   const carreraStorage = parseLocalStorage("carrera");
@@ -147,6 +158,60 @@ const PanelUniversitario = () => {
     }
   }, [navigate]);
 
+  // Efecto para manejar la recarga automática cuando se cambia de sección
+  useEffect(() => {
+    // No aplicar recarga en la primera carga
+    if (esPrimeraCarga.current) {
+      esPrimeraCarga.current = false;
+      return;
+    }
+
+    // Solo recargar si la sección o subsección ha cambiado
+    if ((ultimaSeccionClickeada && ultimaSeccionClickeada === seccionActiva) ||
+        (ultimaSubseccionClickeada && ultimaSubseccionClickeada === subseccionActiva)) {
+      iniciarRecargaSutil();
+    }
+  }, [seccionActiva, subseccionActiva, ultimaSeccionClickeada, ultimaSubseccionClickeada]);
+
+  // Limpiar temporizador al desmontar
+  useEffect(() => {
+    return () => {
+      if (temporizadorRecargaRef.current) {
+        clearTimeout(temporizadorRecargaRef.current);
+      }
+    };
+  }, []);
+
+  const iniciarRecargaSutil = () => {
+    // Limpiar temporizador anterior si existe
+    if (temporizadorRecargaRef.current) {
+      clearTimeout(temporizadorRecargaRef.current);
+    }
+
+    // Iniciar recarga
+    setRecargandoSeccion(true);
+    setTiempoRecarga(0);
+    
+    // Temporizador para el contador visual
+    const startTime = Date.now();
+    const updateTimer = () => {
+      const elapsed = Date.now() - startTime;
+      setTiempoRecarga(elapsed);
+      
+      if (elapsed < 800) {
+        temporizadorRecargaRef.current = setTimeout(updateTimer, 50);
+      }
+    };
+    
+    updateTimer();
+
+    // Finalizar recarga después de un tiempo corto
+    setTimeout(() => {
+      setRecargandoSeccion(false);
+      setTiempoRecarga(0);
+    }, 800); // 0.8 segundos
+  };
+
   const handleVerTodasNotificaciones = () => {
     // Cierra cualquier submenu abierto
     setCarrerasDesplegado(false);
@@ -157,7 +222,13 @@ const PanelUniversitario = () => {
   }; 
 
   const cargarDatosSeccion = (seccionId, subseccionId = null) => {
-    setCargando(true);
+    // Guardar la sección clickeada para comparar después
+    setUltimaSeccionClickeada(seccionId);
+    if (subseccionId) {
+      setUltimaSubseccionClickeada(subseccionId);
+    }
+    
+    // Cambiar inmediatamente la sección activa
     setSeccionActiva(seccionId);
     if (subseccionId) {
       setSubseccionActiva(subseccionId);
@@ -187,10 +258,7 @@ const PanelUniversitario = () => {
           totalRegistros: Math.floor(Math.random() * 100) + 1,
           mensaje: `Datos cargados para ${subseccionId || seccionId}`
         });
-        setCargando(false);
       }, 600);
-    } else {
-      setCargando(false);
     }
   };
 
@@ -227,6 +295,7 @@ const PanelUniversitario = () => {
           break;
       }
     } else {
+      setUltimaSeccionClickeada(seccionId);
       setSeccionActiva(seccionId);
       cargarDatosSeccion(seccionId);
     }
@@ -289,6 +358,8 @@ const PanelUniversitario = () => {
 
   const navegarAReportesConFiltro = (idRecurso) => {
     setIdRecursoFiltro(idRecurso);
+    setUltimaSeccionClickeada("recursos");
+    setUltimaSubseccionClickeada("reportes-recursos");
     setSeccionActiva("recursos");
     setSubseccionActiva("reportes-recursos");
     setRecursosDesplegado(true);
@@ -301,6 +372,27 @@ const PanelUniversitario = () => {
   };
 
   const renderContenido = () => {
+    // Mostrar el efecto de recarga sutil si está activo
+    if (recargandoSeccion) {
+      return (
+        <div className="contenedor-recarga-sutil">
+          <div className="animacion-recarga">
+            <div className="icono-recarga-girando">
+              <RotateCw size={40} />
+            </div>
+            <div className="progreso-recarga">
+              <div 
+                className="barra-progreso-recarga" 
+                style={{ width: `${Math.min(100, (tiempoRecarga / 800) * 100)}%` }}
+              ></div>
+            </div>
+            <p className="texto-recarga">Actualizando contenido...</p>
+            <p className="texto-ayuda-recarga">Esto tomará solo un momento</p>
+          </div>
+        </div>
+      );
+    }
+
     const seccionesConCargaPropia = [
       "perfil", "roles", "asignaturas", "usuarios", "pensum", "recursos",
       "carreras-lista", "tipos-carrera", "recursos-lista", "categorias-recursos",
@@ -438,6 +530,7 @@ const PanelUniversitario = () => {
             className="boton-toggle"
             onClick={() => setPanelAbierto(!panelAbierto)}
             aria-label={panelAbierto ? "Contraer panel" : "Expandir panel"}
+            disabled={recargandoSeccion}
           >
             {panelAbierto ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
@@ -452,6 +545,7 @@ const PanelUniversitario = () => {
               placeholder="Buscar módulo..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
+              disabled={recargandoSeccion}
             />
           </div>
         )}
@@ -469,15 +563,21 @@ const PanelUniversitario = () => {
               return (
                 <div key={s.id} className="item-submenu-contenedor">
                   <button
-                    className={`item-navegacion ${estaActiva ? "activo" : ""} ${tieneSubmenuDesplegado ? "con-submenu-abierto" : ""}`}
+                    className={`item-navegacion ${estaActiva ? "activo" : ""} ${tieneSubmenuDesplegado ? "con-submenu-abierto" : ""} ${recargandoSeccion && estaActiva ? 'recargando' : ''}`}
                     onClick={() => manejarClickMenuConSubmenu(s.id)}
                     title={s.descripcion}
+                    disabled={recargandoSeccion}
                   >
                     <Icono size={18} />
                     {panelAbierto && <span>{s.label}</span>}
                     {panelAbierto && (
                       <div className="icono-desplegable">
                         {tieneSubmenuDesplegado ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                    )}
+                    {recargandoSeccion && estaActiva && (
+                      <div className="indicador-recarga">
+                        <RotateCw size={12} />
                       </div>
                     )}
                   </button>
@@ -490,12 +590,18 @@ const PanelUniversitario = () => {
                         return (
                           <button
                             key={sub.id}
-                            className={`item-submenu ${subEstaActiva ? "activo-sub" : ""}`}
+                            className={`item-submenu ${subEstaActiva ? "activo-sub" : ""} ${recargandoSeccion && subEstaActiva ? 'recargando-sub' : ''}`}
                             onClick={() => cargarDatosSeccion(s.id, sub.id)}
                             title={sub.descripcion}
+                            disabled={recargandoSeccion}
                           >
                             <SubIcono size={16} />
                             <span>{sub.label}</span>
+                            {recargandoSeccion && subEstaActiva && (
+                              <div className="indicador-recarga-sub">
+                                <RotateCw size={10} />
+                              </div>
+                            )}
                           </button>
                         );
                       })}
@@ -505,20 +611,31 @@ const PanelUniversitario = () => {
               );
             }
 
+            const estaActiva = seccionActiva === s.id;
             return (
               <button
                 key={s.id}
-                className={`item-navegacion ${seccionActiva === s.id ? "activo" : ""}`}
+                className={`item-navegacion ${estaActiva ? "activo" : ""} ${recargandoSeccion && estaActiva ? 'recargando' : ''}`}
                 onClick={() => cargarDatosSeccion(s.id)}
                 title={s.descripcion}
+                disabled={recargandoSeccion}
               >
                 <Icono size={18} />
                 {panelAbierto && <span>{s.label}</span>}
+                {recargandoSeccion && estaActiva && (
+                  <div className="indicador-recarga">
+                    <RotateCw size={12} />
+                  </div>
+                )}
               </button>
             );
           })}
           <div className="separador-navegacion" />
-          <button className="item-navegacion cerrar-sesion" onClick={handleCerrarSesion}>
+          <button 
+            className="item-navegacion cerrar-sesion" 
+            onClick={handleCerrarSesion}
+            disabled={recargandoSeccion}
+          >
             <LogOut size={18} />
             {panelAbierto && <span>Cerrar Sesión</span>}
           </button>
@@ -545,12 +662,19 @@ const PanelUniversitario = () => {
             <span>Sistema Académico</span>
             <span className="separador-ruta">/</span>
             <span className="ruta-actual-item">{obtenerEtiquetaActual()}</span>
+            {recargandoSeccion && (
+              <span className="badge-recarga-activa">
+                <RotateCw size={12} />
+                <span>Actualizando...</span>
+              </span>
+            )}
           </div>
           <div className="acciones-superior">
             <button 
               className="boton-ayuda" 
               onClick={() => cargarDatosSeccion("tutoriales")}
               title="Video Tutoriales"
+              disabled={recargandoSeccion}
             >
               <Video size={20} />
             </button>
@@ -568,9 +692,20 @@ const PanelUniversitario = () => {
               <div>
                 {/* SOLO DESCRIPCIÓN, SIN TÍTULO <h1> */}
                 <p className="texto-subtitulo">{obtenerDescripcionActual()}</p>
+                {recargandoSeccion && (
+                  <div className="badge-recarga-titulo">
+                    <RotateCw size={14} />
+                    <span>Actualizando contenido</span>
+                  </div>
+                )}
               </div>
-              <div className={`badge-estado-api ${cargando ? 'cargando' : 'conectado'}`}>
-                {cargando ? (
+              <div className={`badge-estado-api ${recargandoSeccion ? 'recargando' : cargando ? 'cargando' : 'conectado'}`}>
+                {recargandoSeccion ? (
+                  <>
+                    <div className="spinner-recarga"></div>
+                    <span>Actualizando contenido...</span>
+                  </>
+                ) : cargando ? (
                   <>
                     <div className="spinner-api"></div>
                     <span>Sincronizando...</span>

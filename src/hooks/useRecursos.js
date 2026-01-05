@@ -8,16 +8,19 @@ import {
   getAsignaturas,
   getCategorias,
   getUsuarios,
-  cambiarEstadoRecurso
+  cambiarEstadoRecurso,
+  getRecursoDetalle // Nueva función añadida
 } from "../api/Admin/Recursos.js";
 
 export const useRecursos = (idRecurso = null) => {
   const [recursos, setRecursos] = useState([]);
   const [recurso, setRecurso] = useState(null);
+  const [recursoDetalle, setRecursoDetalle] = useState(null); // Nuevo estado para el detalle
   const [asignaturas, setAsignaturas] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(false);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false); // Estado de carga para el detalle
   const [mensaje, setMensaje] = useState("");
   const [archivo, setArchivo] = useState(null);
 
@@ -76,6 +79,30 @@ export const useRecursos = (idRecurso = null) => {
     }
   };
 
+  // Nueva función para cargar el detalle del recurso
+  const cargarRecursoDetalle = async (id) => {
+    if (!id) return;
+    setCargandoDetalle(true);
+    setMensaje("");
+    try {
+      const resultado = await getRecursoDetalle(id);
+      if (resultado.error) {
+        setMensaje(resultado.mensaje || "Error al cargar el detalle del recurso");
+        setRecursoDetalle(null);
+        return { error: true, datos: resultado };
+      } else {
+        setRecursoDetalle(resultado);
+        return { error: false, datos: resultado };
+      }
+    } catch (error) {
+      setMensaje("Error al cargar el detalle del recurso");
+      console.error(error);
+      return { error: true, datos: { mensaje: "Error al cargar el detalle del recurso" } };
+    } finally {
+      setCargandoDetalle(false);
+    }
+  };
+
   const crearRecurso = async (nuevoRecurso, archivoAdjunto = null) => {
     setCargando(true);
     setMensaje("");
@@ -110,6 +137,10 @@ export const useRecursos = (idRecurso = null) => {
       } else {
         setMensaje("Recurso actualizado exitosamente");
         await cargarRecursos();
+        // Si estamos viendo el detalle, recargarlo también
+        if (recursoDetalle?.id_recurso === recursoActualizado.id_recurso) {
+          await cargarRecursoDetalle(recursoActualizado.id_recurso);
+        }
         return { error: false, datos: resultado };
       }
     } catch (error) {
@@ -132,6 +163,10 @@ export const useRecursos = (idRecurso = null) => {
       } else {
         setMensaje("Recurso eliminado exitosamente");
         await cargarRecursos();
+        // Limpiar el detalle si estaba viendo el recurso eliminado
+        if (recursoDetalle?.id_recurso === idRecurso) {
+          setRecursoDetalle(null);
+        }
         return { error: false, datos: resultado };
       }
     } catch (error) {
@@ -156,6 +191,10 @@ export const useRecursos = (idRecurso = null) => {
       } else {
         setMensaje(`Recurso ${nuevoEstado === 1 ? 'activado' : 'desactivado'} exitosamente`);
         await cargarRecursos();
+        // Actualizar el detalle si está cargado
+        if (recursoDetalle?.id_recurso === idRecurso) {
+          await cargarRecursoDetalle(idRecurso);
+        }
         return { error: false, datos: resultado };
       }
     } catch (error) {
@@ -181,6 +220,11 @@ export const useRecursos = (idRecurso = null) => {
     setMensaje("");
   };
 
+  // Función para limpiar el detalle del recurso
+  const limpiarDetalle = () => {
+    setRecursoDetalle(null);
+  };
+
   useEffect(() => {
     cargarDatosRelacionados();
     if (idRecurso) {
@@ -191,22 +235,33 @@ export const useRecursos = (idRecurso = null) => {
   }, [idRecurso]);
 
   return {
+    // Estados
     recursos,
     recurso,
+    recursoDetalle, // Nuevo estado exportado
     asignaturas,
     categorias,
     usuarios,
     cargando,
+    cargandoDetalle, // Nuevo estado de carga
     mensaje,
     archivo,
+    
+    // Funciones de carga
     recargarRecursos: cargarRecursos,
     recargarRecurso: cargarRecurso,
+    cargarRecursoDetalle, // Nueva función exportada
+    
+    // Funciones CRUD
     crearRecurso,
     actualizarRecurso,
     eliminarRecurso,
     toggleEstadoRecurso,
+    
+    // Funciones auxiliares
     manejarArchivo,
     limpiarArchivo,
-    limpiarMensaje
+    limpiarMensaje,
+    limpiarDetalle // Nueva función exportada
   };
 };

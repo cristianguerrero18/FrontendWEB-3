@@ -1,6 +1,6 @@
 // src/hooks/usePQRSStudent.js - VERSIÓN CON CONTEXTO
 import { useState, useEffect, useCallback } from "react";
-import { useUser } from "../context/UserContext"; // Importa el contexto
+import { useUser } from "../context/UserContext.jsx"; // Importa el contexto
 import { 
   createPQRS, 
   getPQRSPorUsuario 

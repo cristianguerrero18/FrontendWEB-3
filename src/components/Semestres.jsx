@@ -5,6 +5,8 @@ import { useAsignaturasEstudiante } from "../hooks/useAsignaturasEstudiante.js"
 import { useAgregarRecurso } from "../hooks/useAgregarRecurso.js"
 import { useFavoritos } from "../hooks/useFavoritos.js"
 import { useReportes } from "../hooks/useReportes.js"
+import { useRecursoLikes } from "../hooks/useRecursoLikes.js"
+import { useComentarios } from "../hooks/useComentarios.js" // <-- Nuevo hook agregado
 import { 
   BookOpen, 
   GraduationCap, 
@@ -29,10 +31,19 @@ import {
   AlertTriangle,
   Copyright,
   User,
-  Heart
+  Heart,
+  ThumbsUp,
+  ThumbsDown,
+  MessageCircle,
+  Send,
+  Edit2,
+  Trash2,
+  MoreVertical,
+  Smile,
+  Clock
 } from "lucide-react"
 import "../css/semestres.css"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 
 const Semestres = () => {
   const {
@@ -116,6 +127,14 @@ const Semestres = () => {
   const [recursoAReporter, setRecursoAReporter] = useState(null)
   const [usuarioYaReporto, setUsuarioYaReporto] = useState(false)
   const [motivoReporte, setMotivoReporte] = useState("")
+  const [descargando, setDescargando] = useState({})
+  const [notificacion, setNotificacion] = useState(null)
+
+  // Estado para mostrar/ocultar comentarios por recurso
+  const [mostrarComentarios, setMostrarComentarios] = useState({})
+
+  // Ref para controlar las descargas
+  const descargaRef = useRef(null)
 
   // Estados para el formulario de recurso
   const [formularioRecurso, setFormularioRecurso] = useState({
@@ -136,6 +155,22 @@ const Semestres = () => {
     usoPermitido: false,
     aceptaTerminos: false
   })
+
+  // Función para mostrar notificaciones
+  const mostrarNotificacion = (tipo, mensaje) => {
+    setNotificacion({ tipo, mensaje })
+    setTimeout(() => {
+      setNotificacion(null)
+    }, 3000)
+  }
+
+  // Toggle para mostrar/ocultar comentarios de un recurso
+  const toggleMostrarComentarios = (idRecurso) => {
+    setMostrarComentarios(prev => ({
+      ...prev,
+      [idRecurso]: !prev[idRecurso]
+    }))
+  }
 
   // Cargar categorías al montar el componente
   useEffect(() => {
@@ -401,10 +436,103 @@ const Semestres = () => {
     }
   }
 
-  // Descargar recurso
+  // Obtener extensión basada en categoría o tipo de archivo
+  const obtenerExtension = (recurso) => {
+    // Si es un enlace web
+    if (recurso.id_categoria === 4) {
+      return 'html'
+    }
+    
+    // Si la URL contiene un tipo de archivo conocido
+    const url = recurso.URL || ''
+    const match = url.match(/\.([a-z0-9]+)(?:[\?#]|$)/i)
+    if (match) {
+      return match[1].toLowerCase()
+    }
+    
+    // Si no, basarse en la categoría
+    switch(recurso.id_categoria) {
+      case 1: return 'jpg'
+      case 2: return 'pdf'
+      case 3: return 'bin'
+      default: return 'file'
+    }
+  }
+
+  // Función para generar un nombre de archivo seguro
+  const generarNombreArchivo = (recurso) => {
+    const tituloLimpio = recurso.titulo
+      .replace(/[^a-z0-9]/gi, '_')
+      .toLowerCase()
+      .substring(0, 50)
+    const extension = obtenerExtension(recurso)
+    return `${tituloLimpio}.${extension}`
+  }
+
+  // Función para forzar descarga en Cloudinary
+  const forzarDescargaCloudinary = (url) => {
+    // Si ya tiene el parámetro de descarga, no hacer nada
+    if (url.includes('/fl_attachment/')) {
+      return url
+    }
+    
+    // Agregar el parámetro de descarga forzada
+    return url.replace('/upload/', '/upload/fl_attachment/')
+  }
+
+  // Descargar recurso usando el atributo download
   const handleDescargarRecurso = (recurso) => {
-    if (recurso.URL) {
+    // Si es un enlace web, simplemente abrir en nueva pestaña
+    if (recurso.id_categoria === 4 || recurso.URL?.startsWith('http') && recurso.id_categoria !== 1 && recurso.id_categoria !== 2 && recurso.id_categoria !== 3) {
       window.open(recurso.URL, '_blank')
+      return
+    }
+
+    // Si no tiene URL, no se puede descargar
+    if (!recurso.URL) {
+      mostrarNotificacion('error', 'No se puede descargar este recurso')
+      return
+    }
+
+    // Marcar como descargando
+    setDescargando(prev => ({ ...prev, [recurso.id_recurso]: true }))
+
+    try {
+      const nombreArchivo = generarNombreArchivo(recurso)
+      let urlDescarga = recurso.URL
+
+      // Si es Cloudinary, forzar descarga
+      if (urlDescarga.includes('cloudinary.com')) {
+        urlDescarga = forzarDescargaCloudinary(urlDescarga)
+      }
+
+      // Crear un enlace temporal
+      const enlace = document.createElement('a')
+      enlace.href = urlDescarga
+      enlace.download = nombreArchivo
+      enlace.target = '_blank'
+      enlace.rel = 'noopener noreferrer'
+      
+      // Estilos para ocultar el enlace
+      enlace.style.display = 'none'
+      
+      // Agregar al DOM
+      document.body.appendChild(enlace)
+      
+      // Simular clic
+      enlace.click()
+      
+      // Limpiar después de un tiempo
+      setTimeout(() => {
+        document.body.removeChild(enlace)
+        setDescargando(prev => ({ ...prev, [recurso.id_recurso]: false }))
+        mostrarNotificacion('success', `Descargando: ${recurso.titulo}`)
+      }, 100)
+      
+    } catch (error) {
+      console.error('Error al descargar:', error)
+      setDescargando(prev => ({ ...prev, [recurso.id_recurso]: false }))
+      mostrarNotificacion('error', 'Error al descargar el archivo')
     }
   }
 
@@ -413,7 +541,12 @@ const Semestres = () => {
     if (recurso.id_categoria === 4) { // Link
       window.open(recurso.URL, '_blank')
     } else if (recurso.URL) {
-      window.open(recurso.URL, '_blank')
+      // Para archivos, intentar abrirlos en nueva pestaña
+      const ventana = window.open(recurso.URL, '_blank')
+      if (!ventana || ventana.closed || typeof ventana.closed === 'undefined') {
+        // Si falla al abrir (posible bloqueo de popup), ofrecer descarga
+        handleDescargarRecurso(recurso)
+      }
     }
   }
 
@@ -1054,6 +1187,13 @@ const Semestres = () => {
           </div>
         )}
 
+        {/* Notificación flotante */}
+        {notificacion && (
+          <div className={`notificacion ${notificacion.tipo}`}>
+            {notificacion.mensaje}
+          </div>
+        )}
+
         {/* Listado de recursos */}
         <div className="seccion-materias">
           {recursosMateria.length > 0 ? (
@@ -1091,79 +1231,28 @@ const Semestres = () => {
                 {recursosMateria.map((recurso) => {
                   const esFavoritoRecurso = esFavorito(recurso.id_recurso)
                   const estaProcesandoFavorito = operacionFavorito?.cargando && operacionFavorito?.idRecurso === recurso.id_recurso
-const estaProcesandoReporte = operacionReporte?.cargando && operacionReporte?.idRecurso === recurso.id_recurso
+                  const estaProcesandoReporte = operacionReporte?.cargando && operacionReporte?.idRecurso === recurso.id_recurso
                   const yaReportado = usuarioYaReporto && recursoAReporter?.id_recurso === recurso.id_recurso
+                  const estaDescargando = descargando[recurso.id_recurso] || false
 
                   return (
-                    <div key={recurso.id_recurso} className="tarjeta-recurso">
-                      <div className="cabecera-recurso">
-                        <div className="icono-recurso">
-                          {getIconoCategoria(recurso.id_categoria)}
-                        </div>
-                        <div className="info-recurso">
-                          <h3 className="titulo-recurso">{recurso.titulo}</h3>
-                          <div className="detalles-recurso">
-                            <span className="categoria-recurso">
-                              {getEtiquetaCategoria(recurso.id_categoria)}
-                            </span>
-                            <span className="tema-recurso">{recurso.tema}</span>
-                            {recurso.contador_reportes > 0 && (
-                              <span className="contador-reportes-badge">
-                                <AlertTriangle size={12} />
-                                {recurso.contador_reportes} reporte{recurso.contador_reportes !== 1 ? 's' : ''}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="acciones-superiores-recurso">
-                          <button 
-                            className={`boton-favorito ${esFavoritoRecurso ? 'activo' : ''}`}
-                            onClick={() => handleToggleFavorito(recurso)}
-                            disabled={estaProcesandoFavorito}
-                            title={esFavoritoRecurso ? "Quitar de favoritos" : "Agregar a favoritos"}
-                          >
-                            {estaProcesandoFavorito ? (
-                              <div className="spinner-favorito"></div>
-                            ) : esFavoritoRecurso ? (
-                              <Heart size={20} fill="currentColor" />
-                            ) : (
-                              <Heart size={20} />
-                            )}
-                          </button>
-                          
-                          <button 
-                            className={`boton-reportar ${yaReportado ? 'ya-reportado' : ''}`}
-                            onClick={() => handleAbrirModalReportar(recurso)}
-                            disabled={estaProcesandoReporte || yaReportado}
-                            title={yaReportado ? "Ya reportaste este recurso" : "Reportar recurso"}
-                          >
-                            {estaProcesandoReporte ? (
-                              <div className="spinner-pequeno"></div>
-                            ) : (
-                              <AlertTriangle size={18} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="acciones-recurso">
-                        <button 
-                          className="boton-ver-recurso"
-                          onClick={() => handleVerRecurso(recurso)}
-                          title="Ver recurso"
-                        >
-                          <Eye size={16} />
-                          <span>Ver</span>
-                        </button>
-                        <button 
-                          className="boton-descargar-recurso"
-                          onClick={() => handleDescargarRecurso(recurso)}
-                          title="Descargar recurso"
-                        >
-                          <Download size={16} />
-                          <span>Descargar</span>
-                        </button>
-                      </div>
-                    </div>
+                    <RecursoCompleto 
+                      key={recurso.id_recurso}
+                      recurso={recurso}
+                      esFavoritoRecurso={esFavoritoRecurso}
+                      estaProcesandoFavorito={estaProcesandoFavorito}
+                      estaProcesandoReporte={estaProcesandoReporte}
+                      yaReportado={yaReportado}
+                      estaDescargando={estaDescargando}
+                      mostrarComentarios={mostrarComentarios[recurso.id_recurso] || false}
+                      toggleMostrarComentarios={() => toggleMostrarComentarios(recurso.id_recurso)}
+                      getIconoCategoria={getIconoCategoria}
+                      getEtiquetaCategoria={getEtiquetaCategoria}
+                      handleToggleFavorito={handleToggleFavorito}
+                      handleAbrirModalReportar={handleAbrirModalReportar}
+                      handleVerRecurso={handleVerRecurso}
+                      handleDescargarRecurso={handleDescargarRecurso}
+                    />
                   )
                 })}
               </div>
@@ -1376,6 +1465,402 @@ const estaProcesandoReporte = operacionReporte?.cargando && operacionReporte?.id
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+// Componente separado para el recurso con likes y comentarios
+const RecursoCompleto = ({ 
+  recurso, 
+  esFavoritoRecurso, 
+  estaProcesandoFavorito, 
+  estaProcesandoReporte, 
+  yaReportado,
+  estaDescargando,
+  mostrarComentarios,
+  toggleMostrarComentarios,
+  getIconoCategoria,
+  getEtiquetaCategoria,
+  handleToggleFavorito,
+  handleAbrirModalReportar,
+  handleVerRecurso,
+  handleDescargarRecurso
+}) => {
+  // Usar el hook de likes para este recurso específico
+  const {
+    likesData,
+    miReaccion,
+    cargando: cargandoLikes,
+    darLike,
+    darDislike
+  } = useRecursoLikes(recurso.id_recurso)
+
+  // Usar el hook de comentarios para este recurso
+  const {
+    comentarios,
+    totalComentarios,
+    cargando: cargandoComentarios,
+    error: errorComentarios,
+    mensaje: mensajeComentarios,
+    nuevoComentario,
+    setNuevoComentario,
+    crearNuevoComentario,
+    editandoComentario,
+    textoEditando,
+    setTextoEditando,
+    iniciarEdicion,
+    cancelarEdicion,
+    guardarEdicion,
+    eliminarComentario,
+    formatearFecha,
+    obtenerAvatar,
+    obtenerNombre,
+    estaEditando
+  } = useComentarios(recurso.id_recurso)
+
+  // Manejar clic en "Me gusta"
+  const handleMeGusta = async () => {
+    await darLike(recurso.id_recurso)
+  }
+
+  // Manejar clic en "No me gusta"
+  const handleNoMeGusta = async () => {
+    await darDislike(recurso.id_recurso)
+  }
+
+  // Manejar envío de nuevo comentario
+  const handleEnviarComentario = async (e) => {
+    e.preventDefault()
+    if (nuevoComentario.trim()) {
+      await crearNuevoComentario()
+    }
+  }
+
+  // Verificar si el usuario puede editar/eliminar un comentario
+  const verificarPermisosComentario = (comentario) => {
+    // En un caso real, esto verificaría con el backend
+    // Por ahora, asumimos que el usuario solo puede editar/eliminar sus propios comentarios
+    const token = localStorage.getItem("token")
+    if (!token) return false
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return payload.id_usuario === comentario.id_usuario
+    } catch {
+      return false
+    }
+  }
+
+  return (
+    <div className="tarjeta-recurso">
+      <div className="cabecera-recurso">
+        <div className="icono-recurso">
+          {getIconoCategoria(recurso.id_categoria)}
+        </div>
+        <div className="info-recurso">
+          <h3 className="titulo-recurso">{recurso.titulo}</h3>
+          <div className="detalles-recurso">
+            <span className="categoria-recurso">
+              {getEtiquetaCategoria(recurso.id_categoria)}
+            </span>
+            <span className="tema-recurso">{recurso.tema}</span>
+            {recurso.contador_reportes > 0 && (
+              <span className="contador-reportes-badge">
+                <AlertTriangle size={12} />
+                {recurso.contador_reportes} reporte{recurso.contador_reportes !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="acciones-superiores-recurso">
+          <button 
+            className={`boton-favorito ${esFavoritoRecurso ? 'activo' : ''}`}
+            onClick={() => handleToggleFavorito(recurso)}
+            disabled={estaProcesandoFavorito}
+            title={esFavoritoRecurso ? "Quitar de favoritos" : "Agregar a favoritos"}
+          >
+            {estaProcesandoFavorito ? (
+              <div className="spinner-favorito"></div>
+            ) : esFavoritoRecurso ? (
+              <Heart size={20} fill="currentColor" />
+            ) : (
+              <Heart size={20} />
+            )}
+          </button>
+          
+          <button 
+            className={`boton-reportar ${yaReportado ? 'ya-reportado' : ''}`}
+            onClick={() => handleAbrirModalReportar(recurso)}
+            disabled={estaProcesandoReporte || yaReportado}
+            title={yaReportado ? "Ya reportaste este recurso" : "Reportar recurso"}
+          >
+            {estaProcesandoReporte ? (
+              <div className="spinner-pequeno"></div>
+            ) : (
+              <AlertTriangle size={18} />
+            )}
+          </button>
+
+          {/* Botón para mostrar/ocultar comentarios */}
+          <button 
+            className={`boton-comentarios ${mostrarComentarios ? 'activo' : ''}`}
+            onClick={toggleMostrarComentarios}
+            title="Ver comentarios"
+          >
+            <MessageCircle size={18} />
+            {totalComentarios > 0 && (
+              <span className="contador-comentarios-mini">{totalComentarios}</span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Sección de Me gusta / No me gusta */}
+      <div className="seccion-likes-recurso">
+        <div className="controles-likes">
+          <button 
+            className={`boton-me-gusta ${miReaccion === 'like' ? 'activo' : ''}`}
+            onClick={handleMeGusta}
+            disabled={cargandoLikes}
+            title="Me gusta"
+          >
+            {cargandoLikes && miReaccion === 'like' ? (
+              <div className="spinner-me-gusta"></div>
+            ) : (
+              <>
+                <ThumbsUp size={18} />
+                <span className="contador-me-gusta">{likesData.likes}</span>
+              </>
+            )}
+          </button>
+          
+          <button 
+            className={`boton-no-me-gusta ${miReaccion === 'dislike' ? 'activo' : ''}`}
+            onClick={handleNoMeGusta}
+            disabled={cargandoLikes}
+            title="No me gusta"
+          >
+            {cargandoLikes && miReaccion === 'dislike' ? (
+              <div className="spinner-no-me-gusta"></div>
+            ) : (
+              <>
+                <ThumbsDown size={18} />
+                <span className="contador-no-me-gusta">{likesData.dislikes}</span>
+              </>
+            )}
+          </button>
+          
+          <div className="total-reacciones">
+            <span>{likesData.total} reacciones</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sección de comentarios (colapsable) */}
+      {mostrarComentarios && (
+        <div className="seccion-comentarios-recurso">
+          <div className="cabecera-seccion-comentarios">
+            <h4>
+              <MessageCircle size={16} />
+              Comentarios ({totalComentarios})
+            </h4>
+            <button 
+              className="btn-cerrar-comentarios"
+              onClick={toggleMostrarComentarios}
+              title="Cerrar comentarios"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* Formulario para nuevo comentario */}
+          <form className="formulario-nuevo-comentario" onSubmit={handleEnviarComentario}>
+            <textarea
+              className="area-comentario"
+              value={nuevoComentario}
+              onChange={(e) => setNuevoComentario(e.target.value)}
+              placeholder="Escribe un comentario sobre este recurso..."
+              rows="3"
+              maxLength="500"
+            />
+            <div className="contador-caracteres">
+              {nuevoComentario.length}/500
+            </div>
+            <div className="acciones-formulario-comentario">
+              <button 
+                type="button"
+                className="btn-cancelar-comentario"
+                onClick={() => setNuevoComentario("")}
+                disabled={cargandoComentarios || !nuevoComentario.trim()}
+              >
+                Limpiar
+              </button>
+              <button 
+                type="submit"
+                className="btn-enviar-comentario"
+                disabled={cargandoComentarios || !nuevoComentario.trim()}
+              >
+                {cargandoComentarios ? (
+                  <>
+                    <div className="spinner-pequeno"></div>
+                    <span>Enviando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    <span>Comentar</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Mensajes de error/éxito */}
+          {errorComentarios && (
+            <div className="mensaje-error-comentario">
+              <AlertCircle size={14} />
+              <span>{errorComentarios}</span>
+            </div>
+          )}
+
+          {mensajeComentarios && (
+            <div className="mensaje-exito-comentario">
+              <Check size={14} />
+              <span>{mensajeComentarios}</span>
+            </div>
+          )}
+
+          {/* Lista de comentarios */}
+          <div className="lista-comentarios">
+            {cargandoComentarios ? (
+              <div className="cargando-comentarios">
+                <div className="spinner-pequeno"></div>
+                <span>Cargando comentarios...</span>
+              </div>
+            ) : comentarios.length > 0 ? (
+              comentarios.map((comentario) => (
+                <div key={comentario.id_comentario} className="tarjeta-comentario">
+                  <div className="cabecera-comentario">
+                    <div className="avatar-usuario">
+                      {obtenerAvatar(comentario)}
+                    </div>
+                    <div className="info-comentario">
+                      <div className="nombre-usuario">
+                        {obtenerNombre(comentario)}
+                      </div>
+                      <div className="fecha-comentario">
+                        <Clock size={12} />
+                        <span>{formatearFecha(comentario.fecha)}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Menú de acciones (solo para el autor) */}
+                    {verificarPermisosComentario(comentario) && (
+                      <div className="menu-comentario">
+                        {editandoComentario === comentario.id_comentario ? (
+                          <div className="acciones-edicion">
+                            <button 
+                              className="btn-guardar-edicion"
+                              onClick={guardarEdicion}
+                              disabled={cargandoComentarios}
+                              title="Guardar cambios"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button 
+                              className="btn-cancelar-edicion"
+                              onClick={cancelarEdicion}
+                              disabled={cargandoComentarios}
+                              title="Cancelar"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="acciones-comunes">
+                            <button 
+                              className="btn-editar-comentario"
+                              onClick={() => iniciarEdicion(comentario)}
+                              title="Editar comentario"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button 
+                              className="btn-eliminar-comentario"
+                              onClick={() => {
+                                if (window.confirm("¿Estás seguro de eliminar este comentario?")) {
+                                  eliminarComentario(comentario.id_comentario)
+                                }
+                              }}
+                              title="Eliminar comentario"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="contenido-comentario">
+                    {editandoComentario === comentario.id_comentario ? (
+                      <div className="formulario-edicion-comentario">
+                        <textarea
+                          className="area-edicion-comentario"
+                          value={textoEditando}
+                          onChange={(e) => setTextoEditando(e.target.value)}
+                          rows="2"
+                          maxLength="500"
+                          autoFocus
+                        />
+                        <div className="contador-caracteres-edicion">
+                          {textoEditando.length}/500
+                        </div>
+                      </div>
+                    ) : (
+                      <p>{comentario.comentario}</p>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="sin-comentarios">
+                <Smile size={32} />
+                <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="acciones-recurso">
+        <button 
+          className="boton-ver-recurso"
+          onClick={() => handleVerRecurso(recurso)}
+          title="Ver recurso"
+        >
+          <Eye size={16} />
+          <span>Ver</span>
+        </button>
+        <button 
+          className="boton-descargar-recurso"
+          onClick={() => handleDescargarRecurso(recurso)}
+          disabled={estaDescargando || recurso.id_categoria === 4}
+          title={recurso.id_categoria === 4 ? "Enlace web - No descargable" : "Descargar recurso"}
+        >
+          {estaDescargando ? (
+            <>
+              <div className="spinner-pequeno"></div>
+              <span>Descargando...</span>
+            </>
+          ) : (
+            <>
+              <Download size={16} />
+              <span>{recurso.id_categoria === 4 ? "Abrir" : "Descargar"}</span>
+            </>
+          )}
+        </button>
+      </div>
     </div>
   )
 }
