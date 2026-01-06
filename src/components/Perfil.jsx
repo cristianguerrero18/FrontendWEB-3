@@ -98,12 +98,7 @@ const Perfil = ({ perfil, cargando, mensaje, guardarPerfil }) => {
         setEditando(false);
     };
 
-    if (cargando) return (
-        <div className="estado-carga-perfil">
-            <div className="spinner-perfil"></div>
-            <p>Cargando datos del perfil...</p>
-        </div>
-    );
+
 
     if (!perfil) return (
         <div className="estado-inicial-perfil">

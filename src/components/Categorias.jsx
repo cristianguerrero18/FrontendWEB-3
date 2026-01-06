@@ -145,12 +145,6 @@ const Categorias = () => {
     }));
   };
 
-  if (cargando) return (
-    <div className="estado-carga">
-      <div className="spinner-grande"></div>
-      <p>Cargando categorías...</p>
-    </div>
-  );
 
   if (!categorias.length && !cargando) return (
     <div className="estado-inicial">

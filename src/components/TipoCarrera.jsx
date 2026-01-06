@@ -144,13 +144,6 @@ const TipoCarreras = () => {
     }));
   };
 
-  if (cargando) return (
-    <div className="estado-carga">
-      <div className="spinner-grande"></div>
-      <p>Cargando tipos de carrera...</p>
-    </div>
-  );
-
   if (!tiposCarrera.length && !cargando) return (
     <div className="estado-inicial">
       <h2>Tipos de carrera no disponibles</h2>

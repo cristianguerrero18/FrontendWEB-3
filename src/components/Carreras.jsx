@@ -179,12 +179,7 @@ const Carreras = () => {
     }));
   };
 
-  if (cargando) return (
-    <div className="estado-carga">
-      <div className="spinner-grande"></div>
-      <p>Cargando carreras...</p>
-    </div>
-  );
+
 
   if (!carreras.length && !cargando) return (
     <div className="estado-inicial">

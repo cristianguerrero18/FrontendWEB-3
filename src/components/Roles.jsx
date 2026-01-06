@@ -143,13 +143,7 @@ const Roles = () => {
     }));
   };
 
-  if (cargando) return (
-    <div className="estado-carga">
-      <div className="spinner-grande"></div>
-      <p>Cargando roles...</p>
-    </div>
-  );
-
+ 
   if (!roles.length && !cargando) return (
     <div className="estado-inicial">
       <h2>Roles no disponibles</h2>

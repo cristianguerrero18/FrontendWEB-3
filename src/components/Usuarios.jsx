@@ -230,13 +230,7 @@ const Usuarios = () => {
     }));
   };
 
-  if (cargando)
-    return (
-      <div className="estado-carga">
-        <div className="spinner-grande"></div>
-        <p>Cargando usuarios...</p>
-      </div>
-    );
+ 
 
   if (!usuarios.length && !cargando)
     return (

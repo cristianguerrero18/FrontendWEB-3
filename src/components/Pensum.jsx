@@ -211,12 +211,6 @@ const Pensum = () => {
     setPaginaActual(1);
   };
 
-  if (cargando) return (
-    <div className="estado-carga">
-      <div className="spinner-grande"></div>
-      <p>Cargando pensum...</p>
-    </div>
-  );
 
   if (!pensum || !Array.isArray(pensum) || pensum.length === 0 && !cargando) return (
     <div className="estado-inicial">

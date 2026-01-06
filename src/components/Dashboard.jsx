@@ -124,13 +124,6 @@ const Dashboard = () => {
   // Calcular total general
   const totalGeneral = Object.values(totales).reduce((a, b) => a + b, 0);
 
-  if (cargando) return (
-    <div className="estado-carga-dashboard">
-      <div className="spinner-grande-dashboard"></div>
-      <p>Cargando estadísticas...</p>
-    </div>
-  );
-
   return (
     <div className="contenedor-dashboard">
       {/* Cabecera */}
