@@ -144,12 +144,6 @@ const Asignaturas = () => {
     }));
   };
 
-  if (cargando) return (
-    <div className="estado-carga">
-      <div className="spinner-grande"></div>
-      <p>Cargando asignaturas...</p>
-    </div>
-  );
 
   if (!asignaturas.length && !cargando) return (
     <div className="estado-inicial">
