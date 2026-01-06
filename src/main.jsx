@@ -1,9 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 
 import "./index.css";
-import App from "./App.jsx";
 import Registro from "./pages/Registro.jsx";
 import Verificacion from "./pages/Verificacion.jsx";
 import RecuperarContrasena from "./pages/RecuperarContrasena.jsx";
@@ -12,12 +11,12 @@ import PanelAdministrador from "./pages/PanelAdministrador.jsx";
 import PanelEstudiante from "./pages/PanelEstudiante.jsx";
 import PanelDocente from "./pages/PanelDocente.jsx";
 import RutaProtegida from "./components/RutaProtegida.jsx";
-
-import { UserProvider } from "./context/UserContext.jsx"; // 👈 IMPORTANTE
+import { UserProvider } from "./context/UserContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-    <BrowserRouter>
-      <UserProvider> {/* 👈 AQUÍ */}
+  <StrictMode>
+    <HashRouter>
+      <UserProvider>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/Login" element={<Login />} />
@@ -33,6 +32,7 @@ createRoot(document.getElementById("root")).render(
               </RutaProtegida>
             }
           />
+
           <Route
             path="/PanelEstudiante"
             element={
@@ -41,6 +41,7 @@ createRoot(document.getElementById("root")).render(
               </RutaProtegida>
             }
           />
+
           <Route
             path="/PanelDocente"
             element={
@@ -51,5 +52,6 @@ createRoot(document.getElementById("root")).render(
           />
         </Routes>
       </UserProvider>
-    </BrowserRouter>
+    </HashRouter>
+  </StrictMode>
 );

@@ -1,27 +1,27 @@
 import { Navigate } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import { jwtDecode } from "jwt-decode";
 
 const RutaProtegida = ({ children }) => {
-  const { isAuthenticated, loading } = useUser();
+  const token = localStorage.getItem("token");
 
-  if (loading) {
-    return (
-      <div style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center"
-      }}>
-        Cargando...
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
+  if (!token) {
     return <Navigate to="/Login" replace />;
   }
 
-  return children;
+  try {
+    const decoded = jwtDecode(token);
+
+    if (decoded.exp * 1000 < Date.now()) {
+      localStorage.clear();
+      return <Navigate to="/Login" replace />;
+    }
+
+    return children;
+
+  } catch (error) {
+    localStorage.clear();
+    return <Navigate to="/Login" replace />;
+  }
 };
 
 export default RutaProtegida;
