@@ -26,14 +26,14 @@ import {
 
 import "../css/Principal.css";
 import "../css/Recursos.css";
-import Perfil from "../components/Perfil.jsx";
-import Recursos from "../components/Semestres.jsx";
-import MisRecursos from "../components/MisRecursos.jsx";
-import Favoritos from "../components/Favoritos.jsx";
-import PQRSStudent from "../components/PQRSStudent.jsx";
-import Notificaciones from "../components/NotificacionesStudent.jsx";
-import NotificacionesSuperior from "../components/NotificacionesSuperior.jsx";
-import DashboardEstudiante from "../components/Dashboards.jsx"; // Nueva importación
+import Perfil from "../components/Admin/Perfil.jsx";
+import Recursos from "../components/Usuarios/Semestres.jsx";
+import MisRecursos from "../components/Usuarios/MisRecursos.jsx";
+import Favoritos from "../components/Usuarios/Favoritos.jsx";
+import PQRSStudent from "../components/Usuarios/PQRSStudent.jsx";
+import Notificaciones from "../components/Usuarios/NotificacionesStudent.jsx";
+import NotificacionesSuperior from "../components/Admin/NotificacionesSuperior.jsx";
+import DashboardEstudiante from "../components/Usuarios/Dashboards.jsx"; // Nueva importación
 import { usePerfil } from "../hooks/usePerfil.js";
 import { useUser } from "../context/UserContext.jsx";
 

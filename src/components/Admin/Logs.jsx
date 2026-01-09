@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useLogs } from "../hooks/useLogs.js";
-import "../css/Logs.css";
+import { useLogs } from "../../hooks/useLogs.js";
+import "../../css/Logs.css";
 
 const Logs = () => {
   const {

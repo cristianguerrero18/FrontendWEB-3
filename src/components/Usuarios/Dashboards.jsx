@@ -14,7 +14,7 @@ import {
   RotateCw,
   AlertCircle
 } from "lucide-react";
-import "../css/DashboardS.css";
+import "../../css/DashboardS.css";
 
 const DashboardEstudiante = () => {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useUsuarios } from "../hooks/useUsuarios.js";
-import "../css/Principal.css";
-import "../css/Usuarios.css";
+import { useUsuarios } from "../../hooks/useUsuarios.js";
+import "../../css/Principal.css";
+import "../../css/Usuarios.css";
 
 const Usuarios = () => {
   const {

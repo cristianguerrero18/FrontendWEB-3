@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { Bell, Check, AlertCircle, Info, X, RefreshCw, AlertTriangle, Clock, Star } from "lucide-react";
-import { useNotificacionesSuperior } from "../hooks/useNotificacionesSuperior.js";
-import "../css/NotificacionesSuperior.css";
+import { useNotificacionesSuperior } from "../../hooks/useNotificacionesSuperior.js";
+import "../../css/NotificacionesSuperior.css";
 
 const NotificacionesSuperior = ({ onVerTodas }) => { // <-- Agrega prop
   const {

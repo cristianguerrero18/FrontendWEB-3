@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useReportes } from "../hooks/useReportes.js";
-import "../css/Principal.css";
-import "../css/Reportes.css";
+import { useReportes } from "../../hooks/useReportes.js";
+import "../../css/Principal.css";
+import "../../css/Reportes.css";
 
 const Reportes = ({ idRecursoFiltro = null }) => {
   const {

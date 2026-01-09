@@ -13,7 +13,7 @@ import {
   Calendar,
   AlertCircle
 } from "lucide-react";
-import "../css/Perfil.css";
+import "../../css/Perfil.css";
 
 const Perfil = ({ perfil, cargando, mensaje, guardarPerfil }) => {
     const [mostrarPassword, setMostrarPassword] = useState(false);

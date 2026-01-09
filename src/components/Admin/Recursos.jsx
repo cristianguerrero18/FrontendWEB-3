@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useRecursos } from "../hooks/useRecursos.js";
-import "../css/Principal.css";
-import "../css/Recursos.css";
+import { useRecursos } from "../../hooks/useRecursos.js";
+import "../../css/Principal.css";
+import "../../css/Recursos.css";
 
 const Recursos = () => {
   const usuarioStorage = JSON.parse(localStorage.getItem("usuario") || "{}");

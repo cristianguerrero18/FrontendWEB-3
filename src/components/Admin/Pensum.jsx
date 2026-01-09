@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { usePensum } from "../hooks/UsePensum.js";
-import "../css/Principal.css";
-import "../css/Pensum.css";
+import { usePensum } from "../../hooks/UsePensum.js";
+import "../../css/Principal.css";
+import "../../css/Pensum.css";
 
 const Pensum = () => {
   const { 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useRoles } from "../hooks/useRoles.js";
-import "../css/Principal.css";
-import "../css/Roles.css";
+import { useRoles } from "../../hooks/useRoles.js";
+import "../../css/Principal.css";
+import "../../css/Roles.css";
 
 const Roles = () => {
   const { 

@@ -10,7 +10,7 @@ import Login from "./pages/Login.jsx";
 import PanelAdministrador from "./pages/PanelAdministrador.jsx";
 import PanelEstudiante from "./pages/PanelEstudiante.jsx";
 import PanelDocente from "./pages/PanelDocente.jsx";
-import RutaProtegida from "./components/RutaProtegida.jsx";
+import RutaProtegida from "./components/Admin/RutaProtegida.jsx";
 import { UserProvider } from "./context/UserContext.jsx";
 
 createRoot(document.getElementById("root")).render(

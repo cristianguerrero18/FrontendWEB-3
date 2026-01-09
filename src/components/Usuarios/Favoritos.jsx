@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useFavoritos } from '../hooks/useFavoritos.js';
-import { getRecursoPorId } from '../api/Admin/Recursos.js';
+import { useFavoritos } from '../../hooks/useFavoritos.js';
+import { getRecursoPorId } from '../../api/Admin/Recursos.js';
 import { 
   Heart, 
   FolderOpen, 
@@ -15,7 +15,7 @@ import {
   Book,
   AlertCircle
 } from 'lucide-react';
-import '../css/semestres.css';
+import '../../css/semestres.css';
 
 const Favoritos = ({ onVolver }) => {
   const {

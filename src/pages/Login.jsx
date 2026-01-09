@@ -32,20 +32,20 @@ function Login() {
         return;
       }
 
-      // 🔐 Guardar en localStorage tradicional
+      // Guardar en localStorage tradicional
       localStorage.setItem("token", res.token);
       localStorage.setItem("usuario", JSON.stringify(res.usuario));
       localStorage.setItem("carrera", JSON.stringify(res.carrera));
       localStorage.setItem("id_rol", res.usuario.id_rol);
 
-      // 🔎 Decodificar token
+      // Decodificar token
       const decoded = jwtDecode(res.token);
       
-      // 🆕 ALMACENAR EN EL SISTEMA GLOBAL DE TOKENS (sin logs)
+      // Almacenar en el sistema global de tokens
       const userId = res.usuario.id_usuario || decoded.sub || email;
       storeUserToken(userId, res.token, res.usuario, res.carrera);
 
-      // ✅ Redirección según rol
+      // ✅ IMPORTANTE: Redirección según rol - DOCENTES (id_rol === 3)
       if (decoded.id_rol === 1) {
         navigate("/PanelAdministrador", { replace: true });
         return;
@@ -56,6 +56,7 @@ function Login() {
         return;
       }
 
+      // 🔥 NUEVO: Redirección para docentes (rol 3)
       if (decoded.id_rol === 3) {
         navigate("/PanelDocente", { replace: true });
         return;

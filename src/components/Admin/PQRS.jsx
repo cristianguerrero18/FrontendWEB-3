@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { usePQRS } from "../hooks/usePQRS.js";
-import { getUsuarioPorId } from "../api/Admin/PQRS.js";
-import "../css/Principal.css";
-import "../css/PQRS.css";
+import { usePQRS } from "../../hooks/usePQRS.js";
+import { getUsuarioPorId } from "../../api/Admin/PQRS.js";
+import "../../css/Principal.css";
+import "../../css/PQRS.css";
 
 const PQRS = () => {
   const { 

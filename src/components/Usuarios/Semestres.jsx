@@ -1,12 +1,13 @@
-import { useSemestres } from "../hooks/useSemestres.js"
-import { useMaterias } from "../hooks/useMaterias.js"
-import { useRecursosMateria } from "../hooks/useRecursosMateria.js"
-import { useAsignaturasEstudiante } from "../hooks/useAsignaturasEstudiante.js"
-import { useAgregarRecurso } from "../hooks/useAgregarRecurso.js"
-import { useFavoritos } from "../hooks/useFavoritos.js"
-import { useReportes } from "../hooks/useReportes.js"
-import { useRecursoLikes } from "../hooks/useRecursoLikes.js"
-import { useComentarios } from "../hooks/useComentarios.js" // <-- Nuevo hook agregado
+import { useSemestres } from "../../hooks/useSemestres.js"
+import { useMaterias } from "../../hooks/useMaterias.js"
+import { useRecursosMateria } from "../../hooks/useRecursosMateria.js"
+import { useAsignaturasEstudiante } from "../../hooks/useAsignaturasEstudiante.js"
+import { useAgregarRecurso } from "../../hooks/useAgregarRecurso.js"
+import { useFavoritos } from "../../hooks/useFavoritos.js"
+import { useReportes } from "../../hooks/useReportes.js"
+import { useRecursoLikes } from "../../hooks/useRecursoLikes.js"
+import { useComentarios } from "../../hooks/useComentarios.js"
+import { useUser } from "../../context/UserContext.jsx" // Importamos el contexto
 import { 
   BookOpen, 
   GraduationCap, 
@@ -42,7 +43,7 @@ import {
   Smile,
   Clock
 } from "lucide-react"
-import "../css/semestres.css"
+import "../../css/semestres.css"
 import { useState, useEffect, useCallback, useRef } from "react"
 
 const Semestres = () => {
@@ -114,6 +115,9 @@ const Semestres = () => {
     limpiarMensajes: limpiarMensajesReporte
   } = useReportes()
 
+  // Contexto de usuario para obtener id_usuario
+  const { getUserId } = useUser()
+
   const [semestreSeleccionado, setSemestreSeleccionado] = useState(null)
   const [materiaSeleccionada, setMateriaSeleccionada] = useState(null)
   const [mostrarMaterias, setMostrarMaterias] = useState(false)
@@ -136,23 +140,23 @@ const Semestres = () => {
   // Ref para controlar las descargas
   const descargaRef = useRef(null)
 
-  // Estados para el formulario de recurso
+  // Estados para el formulario de recurso - AHORA INCLUYE id_usuario
   const [formularioRecurso, setFormularioRecurso] = useState({
     titulo: '',
     tema: '',
     URL: '',
     id_asignatura: null,
-    id_categoria: null
+    id_categoria: null,
+    id_usuario: null // <-- Se agregará desde el contexto
   })
   const [archivoRecurso, setArchivoRecurso] = useState(null)
 
-  // Estados para el modal de derechos de autor
+  // Estados para el modal de derechos de autor - SIMPLIFICADO
   const [formularioDerechos, setFormularioDerechos] = useState({
     esAutor: 'si',
     autorOriginal: '',
     fuenteOriginal: '',
     licencia: '',
-    usoPermitido: false,
     aceptaTerminos: false
   })
 
@@ -181,6 +185,17 @@ const Semestres = () => {
   useEffect(() => {
     cargarFavoritosUsuario()
   }, [cargarFavoritosUsuario])
+
+  // Obtener id_usuario del contexto y asignarlo al formulario
+  useEffect(() => {
+    const userId = getUserId()
+    if (userId) {
+      setFormularioRecurso(prev => ({
+        ...prev,
+        id_usuario: userId
+      }))
+    }
+  }, [getUserId])
 
   // Memoizar funciones para evitar recreaciones innecesarias
   const cargarMateriasDelSemestre = useCallback(() => {
@@ -280,7 +295,6 @@ const Semestres = () => {
       autorOriginal: '',
       fuenteOriginal: '',
       licencia: '',
-      usoPermitido: false,
       aceptaTerminos: false
     })
   }
@@ -293,7 +307,8 @@ const Semestres = () => {
       tema: '',
       URL: '',
       id_asignatura: materiaSeleccionada?.id || null,
-      id_categoria: null
+      id_categoria: null,
+      id_usuario: getUserId() // Mantener el id_usuario
     })
     setArchivoRecurso(null)
   }
@@ -324,10 +339,10 @@ const Semestres = () => {
 
   // Validar formulario de derechos
   const validarDerechos = () => {
-    const { esAutor, autorOriginal, fuenteOriginal, usoPermitido, aceptaTerminos } = formularioDerechos
+    const { esAutor, autorOriginal, fuenteOriginal, aceptaTerminos } = formularioDerechos
     
     // Validar términos obligatorios
-    if (!usoPermitido || !aceptaTerminos) {
+    if (!aceptaTerminos) {
       return {
         valido: false,
         error: 'Debes aceptar los términos y condiciones de uso'
@@ -359,11 +374,17 @@ const Semestres = () => {
     
     // Validar formulario básico primero
     if (!formularioRecurso.id_categoria) {
-      alert('Por favor selecciona una categoría')
+      mostrarNotificacion('error', 'Por favor selecciona una categoría')
       return
     }
     if (!formularioRecurso.id_asignatura) {
-      alert('Por favor selecciona una asignatura')
+      mostrarNotificacion('error', 'Por favor selecciona una asignatura')
+      return
+    }
+
+    // Verificar que tenemos id_usuario
+    if (!formularioRecurso.id_usuario) {
+      mostrarNotificacion('error', 'No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.')
       return
     }
 
@@ -379,19 +400,22 @@ const Semestres = () => {
   const handleEnviarConDerechos = async () => {
     const validacion = validarDerechos()
     if (!validacion.valido) {
-      alert(validacion.error)
+      mostrarNotificacion('error', validacion.error)
       return
     }
 
-    // Aquí podrías guardar los datos de derechos en algún lugar si lo necesitas
+    // El TRIGGER se encargará de insertar en derechos_autor automáticamente
     console.log('Datos de derechos de autor:', formularioDerechos)
     
     setMostrarModalDerechos(false)
     
     try {
+      // Agregar el recurso (el trigger insertará en derechos_autor)
       const resultado = await agregarRecurso(formularioRecurso, archivoRecurso)
       
       if (resultado.exito) {
+        mostrarNotificacion('success', 'Recurso agregado exitosamente. La declaración de derechos se registró automáticamente.')
+        
         // Actualizar recursos de la materia
         if (materiaSeleccionada) {
           await recargarRecursosMateria(materiaSeleccionada.id)
@@ -406,6 +430,7 @@ const Semestres = () => {
       }
     } catch (error) {
       console.error('Error al agregar recurso:', error)
+      mostrarNotificacion('error', 'Error al agregar recurso')
     }
   }
 
@@ -611,7 +636,7 @@ const Semestres = () => {
   // Función para enviar reporte
   const handleReportarRecurso = async () => {
     if (!recursoAReporter || !motivoReporte.trim()) {
-      alert('Por favor, proporciona un motivo para reportar')
+      mostrarNotificacion('error', 'Por favor, proporciona un motivo para reportar')
       return
     }
 
@@ -937,7 +962,7 @@ const Semestres = () => {
                 <div className="alerta-importante">
                   <AlertTriangle size={20} />
                   <p>
-                    <strong>Importante:</strong> Antes de subir cualquier recurso, debes asegurarte de tener los derechos para compartirlo. El uso indebido de contenido protegido puede acarrear consecuencias legales.
+                    <strong>Importante:</strong> Al aceptar estos términos, se registrará automáticamente tu declaración de derechos de autor en el sistema.
                   </p>
                 </div>
 
@@ -1014,26 +1039,13 @@ const Semestres = () => {
                     <div className="check-termino">
                       <input
                         type="checkbox"
-                        id="usoPermitido"
-                        name="usoPermitido"
-                        checked={formularioDerechos.usoPermitido}
-                        onChange={handleChangeDerechos}
-                      />
-                      <label htmlFor="usoPermitido">
-                        Declaro que tengo el permiso para usar y compartir este contenido con fines educativos.
-                      </label>
-                    </div>
-
-                    <div className="check-termino">
-                      <input
-                        type="checkbox"
                         id="aceptaTerminos"
                         name="aceptaTerminos"
                         checked={formularioDerechos.aceptaTerminos}
                         onChange={handleChangeDerechos}
                       />
                       <label htmlFor="aceptaTerminos">
-                        Acepto los términos y condiciones de uso de la plataforma, comprendiendo que soy responsable del contenido que subo.
+                        <strong>Acepto los términos y condiciones:</strong> Declaro que tengo los derechos o el permiso necesario para compartir este contenido con fines educativos en esta plataforma, y soy responsable del material que estoy subiendo. Se registrará automáticamente mi declaración en el sistema.
                       </label>
                     </div>
                   </div>
@@ -1041,7 +1053,7 @@ const Semestres = () => {
                   <div className="informacion-legal">
                     <p className="texto-legal">
                       <small>
-                        * Esta plataforma está diseñada para uso educativo. Al subir contenido, te comprometes a respetar los derechos de autor y a usar únicamente material para el cual tengas permiso de distribución.
+                        * El sistema registrará automáticamente tu aceptación en la tabla de derechos de autor. Esta plataforma está diseñada para uso educativo. Al subir contenido, te comprometes a respetar los derechos de autor y a usar únicamente material para el cual tengas permiso de distribución.
                       </small>
                     </p>
                   </div>
@@ -1060,7 +1072,7 @@ const Semestres = () => {
                   type="button"
                   className="boton-confirmar-derechos"
                   onClick={handleEnviarConDerechos}
-                  disabled={cargandoRecurso}
+                  disabled={cargandoRecurso || !formularioDerechos.aceptaTerminos}
                 >
                   {cargandoRecurso ? (
                     <>

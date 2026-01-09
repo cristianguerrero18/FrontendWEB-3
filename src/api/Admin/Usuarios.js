@@ -185,3 +185,46 @@ export const getRolPorId = async (id_rol) => {
   }
 };
 
+
+// ======================
+// VALIDAR SI CORREO EXISTE
+// ======================
+export const existeCorreo = async (correo) => {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/usuarios/existe-correo/${encodeURIComponent(correo)}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!res.ok) throw new Error(res.status);
+    return res.json(); // { existe: true | false }
+  } catch (error) {
+    console.error("Error en existeCorreo:", error.message);
+    return { existe: false };
+  }
+};
+
+// ======================
+// VALIDAR SI CORREO ESTÁ VERIFICADO
+// ======================
+export const correoVerificado = async (correo) => {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/usuarios/correo-verificado/${encodeURIComponent(correo)}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!res.ok) throw new Error(res.status);
+    return res.json(); // { verificado: true | false }
+  } catch (error) {
+    console.error("Error en correoVerificado:", error.message);
+    return { verificado: false };
+  }
+};
+

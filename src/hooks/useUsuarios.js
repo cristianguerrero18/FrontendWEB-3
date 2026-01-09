@@ -6,7 +6,9 @@ import {
   putUsuario, 
   deleteUsuario,
   loginUsuario,
-  recuperarClave
+  recuperarClave,
+  existeCorreo,
+  correoVerificado  
 } from "../api/Admin/Usuarios.js";
 
 export const useUsuarios = (idUsuario = null) => {
@@ -293,6 +295,19 @@ export const useUsuarios = (idUsuario = null) => {
     }
   };
 
+  // Validar si el correo ya existe
+const validarCorreo = async (correo) => {
+  if (!correo) return false;
+
+  try {
+    const resultado = await existeCorreo(correo);
+    return resultado.existe === true;
+  } catch (error) {
+    console.error("Error al validar correo:", error);
+    return false;
+  }
+};
+
   // Logout
   const logout = () => {
     setUsuarioAutenticado(null);
@@ -338,6 +353,7 @@ export const useUsuarios = (idUsuario = null) => {
     getContrasenaAMostrar,
     login,
     logout,
+    validarCorreo, 
     recuperarContrasena,
     limpiarMensaje,
     setToken

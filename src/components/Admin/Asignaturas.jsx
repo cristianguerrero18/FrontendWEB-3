@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useTipoCarreras } from "../hooks/useTipoCarreras.js";
-import "../css/Principal.css";
-import "../css/TipoCarrera.css";
+import { useAsignaturas } from "../../hooks/UseAsignaturas.js";
+import "../../css/Principal.css";
+import "../../css/Asignaturas.css";
 
-const TipoCarreras = () => {
+const Asignaturas = () => {
   const { 
-    tiposCarrera, 
+    asignaturas, 
     cargando, 
     mensaje, 
-    recargarTiposCarrera,
-    crearTipoCarrera,
-    actualizarTipoCarrera,
-    eliminarTipoCarrera,
+    recargarAsignaturas,
+    crearAsignaturas,
+    actualizarAsignatura,
+    eliminarAsignatura,
     limpiarMensaje 
-  } = useTipoCarreras();
+  } = useAsignaturas();
   
   const [paginaActual, setPaginaActual] = useState(1);
   const [elementosPorPagina, setElementosPorPagina] = useState(10);
@@ -22,17 +22,17 @@ const TipoCarreras = () => {
   // Estados para el modal de formulario
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [tipoCarreraActual, setTipoCarreraActual] = useState({
-    id_tipo_carrera: 0,
-    nombre_tipo_carrera: ""
+  const [asignaturaActual, setAsignaturaActual] = useState({
+    id_asignatura: 0,
+    nombre_asignatura: ""
   });
   
   // Estado para confirmar eliminación
   const [mostrarConfirmacionEliminar, setMostrarConfirmacionEliminar] = useState(false);
-  const [tipoCarreraAEliminar, setTipoCarreraAEliminar] = useState(null);
+  const [asignaturaAEliminar, setAsignaturaAEliminar] = useState(null);
 
   useEffect(() => {
-    recargarTiposCarrera();
+    recargarAsignaturas();
   }, []);
 
   useEffect(() => {
@@ -44,16 +44,16 @@ const TipoCarreras = () => {
     }
   }, [mensaje, limpiarMensaje]);
 
-  // Filtrar tipos de carrera por búsqueda
-  const tiposCarreraFiltrados = tiposCarrera.filter(tipo =>
-    tipo.nombre_tipo_carrera.toLowerCase().includes(busqueda.toLowerCase())
+  // Filtrar asignaturas por búsqueda
+  const asignaturasFiltradas = asignaturas.filter(asignatura =>
+    asignatura.nombre_asignatura.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   // Calcular elementos para la página actual
   const indiceUltimoElemento = paginaActual * elementosPorPagina;
   const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
-  const elementosActuales = tiposCarreraFiltrados.slice(indicePrimerElemento, indiceUltimoElemento);
-  const totalPaginas = Math.ceil(tiposCarreraFiltrados.length / elementosPorPagina);
+  const elementosActuales = asignaturasFiltradas.slice(indicePrimerElemento, indiceUltimoElemento);
+  const totalPaginas = Math.ceil(asignaturasFiltradas.length / elementosPorPagina);
 
   // Funciones de paginación
   const cambiarPagina = (numeroPagina) => {
@@ -76,7 +76,7 @@ const TipoCarreras = () => {
   };
 
   // Función para obtener color según ID
-  const getColorTipoCarrera = (id) => {
+  const getColorAsignatura = (id) => {
     const colores = [
       { bg: '#e3f2fd', color: '#1976d2', border: '#bbdefb' }, // Azul
       { bg: '#e8f5e9', color: '#388e3c', border: '#c8e6c9' }, // Verde
@@ -91,74 +91,75 @@ const TipoCarreras = () => {
   };
 
   // Funciones CRUD usando el hook
-  const handleNuevoTipoCarrera = () => {
-    setTipoCarreraActual({
-      id_tipo_carrera: 0,
-      nombre_tipo_carrera: ""
+  const handleNuevaAsignatura = () => {
+    setAsignaturaActual({
+      id_asignatura: 0,
+      nombre_asignatura: ""
     });
     setModoEdicion(false);
     setMostrarModal(true);
   };
 
-  const handleEditarTipoCarrera = (tipo) => {
-    setTipoCarreraActual({
-      id_tipo_carrera: tipo.id_tipo_carrera,
-      nombre_tipo_carrera: tipo.nombre_tipo_carrera
+  const handleEditarAsignatura = (asignatura) => {
+    setAsignaturaActual({
+      id_asignatura: asignatura.id_asignatura,
+      nombre_asignatura: asignatura.nombre_asignatura
     });
     setModoEdicion(true);
     setMostrarModal(true);
   };
 
-  const handleEliminarTipoCarrera = (tipo) => {
-    setTipoCarreraAEliminar(tipo);
+  const handleEliminarAsignatura = (asignatura) => {
+    setAsignaturaAEliminar(asignatura);
     setMostrarConfirmacionEliminar(true);
   };
 
-  const confirmarEliminarTipoCarrera = async () => {
-    if (tipoCarreraAEliminar) {
-      await eliminarTipoCarrera(tipoCarreraAEliminar.id_tipo_carrera);
+  const confirmarEliminarAsignatura = async () => {
+    if (asignaturaAEliminar) {
+      await eliminarAsignatura(asignaturaAEliminar.id_asignatura);
       setMostrarConfirmacionEliminar(false);
-      setTipoCarreraAEliminar(null);
+      setAsignaturaAEliminar(null);
     }
   };
 
-  const handleSubmitTipoCarrera = async (e) => {
+  const handleSubmitAsignatura = async (e) => {
     e.preventDefault();
     
     if (modoEdicion) {
-      // Actualizar tipo de carrera existente
-      await actualizarTipoCarrera(tipoCarreraActual);
+      // Actualizar asignatura existente
+      await actualizarAsignatura(asignaturaActual);
     } else {
-      // Crear nuevo tipo de carrera
-      await crearTipoCarrera(tipoCarreraActual);
+      // Crear nueva asignatura (como array según la API)
+      await crearAsignaturas([asignaturaActual]);
     }
     
     setMostrarModal(false);
   };
 
-  const handleChangeTipoCarrera = (e) => {
+  const handleChangeAsignatura = (e) => {
     const { name, value } = e.target;
-    setTipoCarreraActual(prev => ({
+    setAsignaturaActual(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  if (!tiposCarrera.length && !cargando) return (
+
+  if (!asignaturas.length && !cargando) return (
     <div className="estado-inicial">
-      <h2>Tipos de carrera no disponibles</h2>
-      <p>No se encontraron tipos de carrera en la base de datos.</p>
+      <h2>Asignaturas no disponibles</h2>
+      <p>No se encontraron asignaturas en la base de datos.</p>
       <button 
-        className="boton-nuevo-tipo-carrera"
-        onClick={handleNuevoTipoCarrera}
+        className="boton-nueva-asignatura"
+        onClick={handleNuevaAsignatura}
       >
-        + Crear Primer Tipo
+        + Crear Primera Asignatura
       </button>
     </div>
   );
 
   return (
-    <div className="contenedor-tipo-carreras">
+    <div className="contenedor-asignaturas">
       {mensaje && (
         <div className={`mensaje-api ${mensaje.includes("Error") ? "error" : "exito"}`}>
           <p>{mensaje}</p>
@@ -171,35 +172,35 @@ const TipoCarreras = () => {
         </div>
       )}
 
-      <div className="cabecera-tipo-carreras">
-        <div className="titulo-tipo-carreras-con-boton">
+      <div className="cabecera-asignaturas">
+        <div className="titulo-asignaturas-con-boton">
           <div>
-            <h3> Tipos de Carrera</h3>
+            <h3>Gestión de Asignaturas</h3>
           </div>
           <button 
-            className="boton-nuevo-tipo-carrera"
-            onClick={handleNuevoTipoCarrera}
+            className="boton-nueva-asignatura"
+            onClick={handleNuevaAsignatura}
           >
-            + Nuevo Tipo
+            + Nueva Asignatura
           </button>
         </div>
         
-        <div className="controles-tipo-carreras">
-          <div className="buscador-tipo-carreras">
+        <div className="controles-asignaturas">
+          <div className="buscador-asignaturas">
             <input
               type="text"
-              placeholder="Buscar tipo de carrera..."
+              placeholder="Buscar asignatura..."
               value={busqueda}
               onChange={(e) => {
                 setBusqueda(e.target.value);
                 setPaginaActual(1);
               }}
-              className="input-busqueda-tipo-carreras"
+              className="input-busqueda-asignaturas"
             />
           </div>
           
           <div className="controles-paginacion-superior">
-            <div className="seleccion-elementos-tipo-carreras">
+            <div className="seleccion-elementos-asignaturas">
               <span>Mostrar:</span>
               <select 
                 value={elementosPorPagina} 
@@ -207,7 +208,7 @@ const TipoCarreras = () => {
                   setElementosPorPagina(Number(e.target.value));
                   setPaginaActual(1);
                 }}
-                className="select-elementos-tipo-carreras"
+                className="select-elementos-asignaturas"
               >
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -216,57 +217,65 @@ const TipoCarreras = () => {
               </select>
             </div>
             
-            <div className="info-cantidad-tipo-carreras">
-              {tiposCarreraFiltrados.length} {tiposCarreraFiltrados.length === 1 ? 'tipo encontrado' : 'tipos encontrados'}
+            <div className="info-cantidad-asignaturas">
+              {asignaturasFiltradas.length} {asignaturasFiltradas.length === 1 ? 'asignatura encontrada' : 'asignaturas encontradas'}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="contenedor-tabla-tipo-carreras">
-        <table className="tabla-tipo-carreras">
+      <div className="contenedor-tabla-asignaturas">
+        <table className="tabla-asignaturas">
           <thead>
             <tr>
-              <th className="columna-id-tipo-carrera">ID</th>
-              <th className="columna-nombre-tipo-carrera">Nombre del Tipo</th>
-              <th className="columna-acciones-tipo-carrera">Acciones</th>
+              <th className="columna-id-asignatura">ID</th>
+              <th className="columna-nombre-asignatura">Nombre de la Asignatura</th>
+              <th className="columna-codigo-asignatura">Código</th>
+              <th className="columna-acciones-asignatura">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {elementosActuales.map((tipo) => {
-              const colorTipo = getColorTipoCarrera(tipo.id_tipo_carrera);
+            {elementosActuales.map((asignatura) => {
+              const colorAsignatura = getColorAsignatura(asignatura.id_asignatura);
+              // Generar código basado en ID (puedes adaptarlo según tu lógica)
+              const codigo = `ASG-${asignatura.id_asignatura.toString().padStart(3, '0')}`;
               
               return (
-                <tr key={tipo.id_tipo_carrera} className="fila-tipo-carrera">
-                  <td className="celda-id-tipo-carrera">
-                    <div className="badge-id-tipo-carrera" style={{ 
-                      backgroundColor: colorTipo.bg,
-                      color: colorTipo.color,
-                      borderColor: colorTipo.border
+                <tr key={asignatura.id_asignatura} className="fila-asignatura">
+                  <td className="celda-id-asignatura">
+                    <div className="badge-id-asignatura" style={{ 
+                      backgroundColor: colorAsignatura.bg,
+                      color: colorAsignatura.color,
+                      borderColor: colorAsignatura.border
                     }}>
-                      {tipo.id_tipo_carrera}
+                      {asignatura.id_asignatura}
                     </div>
                   </td>
-                  <td className="celda-nombre-tipo-carrera">
-                    <div className="nombre-tipo-carrera-contenedor">
-                      <div className="nombre-tipo-carrera">{tipo.nombre_tipo_carrera}</div>
-                      <div className="descripcion-tipo-carrera">
-                        {/* Puedes agregar descripción si existe */}
-                        {tipo.descripcion || "Tipo de carrera académica"}
+                  <td className="celda-nombre-asignatura">
+                    <div className="nombre-asignatura-contenedor">
+                      <div className="nombre-asignatura">{asignatura.nombre_asignatura}</div>
+                      <div className="tipo-asignatura">
+                        {/* Puedes agregar lógica para mostrar tipo si existe */}
+                        {asignatura.tipo || "Asignatura Regular"}
                       </div>
                     </div>
                   </td>
-                  <td className="celda-acciones-tipo-carrera">
-                    <div className="botones-acciones-tipo-carrera">
+                  <td className="celda-codigo-asignatura">
+                    <div className="codigo-asignatura">
+                      {codigo}
+                    </div>
+                  </td>
+                  <td className="celda-acciones-asignatura">
+                    <div className="botones-acciones-asignatura">
                       <button 
-                        className="boton-editar-tipo-carrera"
-                        onClick={() => handleEditarTipoCarrera(tipo)}
+                        className="boton-editar-asignatura"
+                        onClick={() => handleEditarAsignatura(asignatura)}
                       >
                         Editar
                       </button>
                       <button 
-                        className="boton-eliminar-tipo-carrera"
-                        onClick={() => handleEliminarTipoCarrera(tipo)}
+                        className="boton-eliminar-asignatura"
+                        onClick={() => handleEliminarAsignatura(asignatura)}
                       >
                         Eliminar
                       </button>
@@ -279,59 +288,59 @@ const TipoCarreras = () => {
         </table>
       </div>
 
-      {/* Modal para crear/editar tipos de carrera */}
+      {/* Modal para crear/editar asignaturas */}
       {mostrarModal && (
-        <div className="modal-fondo-tipo-carreras">
-          <div className="modal-contenido-tipo-carreras">
-            <div className="modal-cabecera-tipo-carreras">
-              <h2>{modoEdicion ? 'Editar Tipo de Carrera' : 'Nuevo Tipo de Carrera'}</h2>
+        <div className="modal-fondo-asignaturas">
+          <div className="modal-contenido-asignaturas">
+            <div className="modal-cabecera-asignaturas">
+              <h2>{modoEdicion ? 'Editar Asignatura' : 'Nueva Asignatura'}</h2>
               <button 
-                className="modal-cerrar-tipo-carreras"
+                className="modal-cerrar-asignaturas"
                 onClick={() => setMostrarModal(false)}
               >
                 ×
               </button>
             </div>
             
-            <form onSubmit={handleSubmitTipoCarrera}>
-              <div className="modal-cuerpo-tipo-carreras">
+            <form onSubmit={handleSubmitAsignatura}>
+              <div className="modal-cuerpo-asignaturas">
                 {modoEdicion && (
-                  <div className="campo-formulario-tipo-carreras">
-                    <label>ID del Tipo:</label>
+                  <div className="campo-formulario-asignaturas">
+                    <label>ID de la Asignatura:</label>
                     <input
                       type="text"
-                      value={tipoCarreraActual.id_tipo_carrera}
+                      value={asignaturaActual.id_asignatura}
                       disabled
-                      className="input-formulario-tipo-carreras disabled"
+                      className="input-formulario-asignaturas disabled"
                     />
                   </div>
                 )}
                 
-                <div className="campo-formulario-tipo-carreras">
-                  <label>Nombre del Tipo:</label>
+                <div className="campo-formulario-asignaturas">
+                  <label>Nombre de la Asignatura:</label>
                   <input
                     type="text"
-                    name="nombre_tipo_carrera"
-                    value={tipoCarreraActual.nombre_tipo_carrera}
-                    onChange={handleChangeTipoCarrera}
+                    name="nombre_asignatura"
+                    value={asignaturaActual.nombre_asignatura}
+                    onChange={handleChangeAsignatura}
                     required
-                    className="input-formulario-tipo-carreras"
-                    placeholder="Ej: Tecnológica, Profesional, Técnica"
+                    className="input-formulario-asignaturas"
+                    placeholder="Ej: Matemáticas, Programación, Historia"
                   />
                 </div>
               </div>
               
-              <div className="modal-pie-tipo-carreras">
+              <div className="modal-pie-asignaturas">
                 <button 
                   type="button" 
-                  className="boton-cancelar-tipo-carreras"
+                  className="boton-cancelar-asignaturas"
                   onClick={() => setMostrarModal(false)}
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
-                  className="boton-guardar-tipo-carreras"
+                  className="boton-guardar-asignaturas"
                   disabled={cargando}
                 >
                   {cargando ? 'Procesando...' : (modoEdicion ? 'Actualizar' : 'Crear')}
@@ -344,30 +353,30 @@ const TipoCarreras = () => {
 
       {/* Modal de confirmación para eliminar */}
       {mostrarConfirmacionEliminar && (
-        <div className="modal-fondo-tipo-carreras">
-          <div className="modal-contenido-tipo-carreras modal-confirmacion">
-            <div className="modal-cabecera-tipo-carreras">
+        <div className="modal-fondo-asignaturas">
+          <div className="modal-contenido-asignaturas modal-confirmacion">
+            <div className="modal-cabecera-asignaturas">
               <h2>Confirmar Eliminación</h2>
               <button 
-                className="modal-cerrar-tipo-carreras"
+                className="modal-cerrar-asignaturas"
                 onClick={() => setMostrarConfirmacionEliminar(false)}
               >
                 ×
               </button>
             </div>
             
-            <div className="modal-cuerpo-tipo-carreras">
-              <p>¿Estás seguro de que deseas eliminar el tipo de carrera:</p>
-              <p className="tipo-carrera-a-eliminar">{tipoCarreraAEliminar?.nombre_tipo_carrera}</p>
-              <p>Esta acción no se puede deshacer. Todas las carreras asociadas perderán este tipo.</p>
+            <div className="modal-cuerpo-asignaturas">
+              <p>¿Estás seguro de que deseas eliminar la asignatura:</p>
+              <p className="asignatura-a-eliminar">{asignaturaAEliminar?.nombre_asignatura}</p>
+              <p>Esta acción no se puede deshacer.</p>
             </div>
             
-            <div className="modal-pie-tipo-carreras">
+            <div className="modal-pie-asignaturas">
               <button 
-                className="boton-cancelar-tipo-carreras"
+                className="boton-cancelar-asignaturas"
                 onClick={() => {
                   setMostrarConfirmacionEliminar(false);
-                  setTipoCarreraAEliminar(null);
+                  setAsignaturaAEliminar(null);
                 }}
                 disabled={cargando}
               >
@@ -375,7 +384,7 @@ const TipoCarreras = () => {
               </button>
               <button 
                 className="boton-eliminar-confirmar"
-                onClick={confirmarEliminarTipoCarrera}
+                onClick={confirmarEliminarAsignatura}
                 disabled={cargando}
               >
                 {cargando ? 'Eliminando...' : 'Eliminar'}
@@ -386,21 +395,21 @@ const TipoCarreras = () => {
       )}
 
       {/* Paginador */}
-      <div className="paginador-tipo-carreras">
-        <div className="info-paginacion-tipo-carreras">
-          Mostrando {indicePrimerElemento + 1} - {Math.min(indiceUltimoElemento, tiposCarreraFiltrados.length)} de {tiposCarreraFiltrados.length} tipos
+      <div className="paginador-asignaturas">
+        <div className="info-paginacion-asignaturas">
+          Mostrando {indicePrimerElemento + 1} - {Math.min(indiceUltimoElemento, asignaturasFiltradas.length)} de {asignaturasFiltradas.length} asignaturas
         </div>
         
-        <div className="controles-navegacion-tipo-carreras">
+        <div className="controles-navegacion-asignaturas">
           <button 
             onClick={paginaAnterior} 
             disabled={paginaActual === 1}
-            className="boton-paginador-tipo-carreras boton-anterior-tipo-carreras"
+            className="boton-paginador-asignaturas boton-anterior-asignaturas"
           >
             ← Anterior
           </button>
 
-          <div className="numeros-pagina-tipo-carreras">
+          <div className="numeros-pagina-asignaturas">
             {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
               let numeroPagina;
               if (totalPaginas <= 5) {
@@ -417,7 +426,7 @@ const TipoCarreras = () => {
                 <button
                   key={numeroPagina}
                   onClick={() => cambiarPagina(numeroPagina)}
-                  className={`numero-pagina-tipo-carreras ${paginaActual === numeroPagina ? 'activa' : ''}`}
+                  className={`numero-pagina-asignaturas ${paginaActual === numeroPagina ? 'activa' : ''}`}
                 >
                   {numeroPagina}
                 </button>
@@ -426,10 +435,10 @@ const TipoCarreras = () => {
             
             {totalPaginas > 5 && paginaActual < totalPaginas - 2 && (
               <>
-                <span className="puntos-suspensivos-tipo-carreras">...</span>
+                <span className="puntos-suspensivos-asignaturas">...</span>
                 <button
                   onClick={() => cambiarPagina(totalPaginas)}
-                  className={`numero-pagina-tipo-carreras ${paginaActual === totalPaginas ? 'activa' : ''}`}
+                  className={`numero-pagina-asignaturas ${paginaActual === totalPaginas ? 'activa' : ''}`}
                 >
                   {totalPaginas}
                 </button>
@@ -440,14 +449,14 @@ const TipoCarreras = () => {
           <button 
             onClick={paginaSiguiente} 
             disabled={paginaActual === totalPaginas}
-            className="boton-paginador-tipo-carreras boton-siguiente-tipo-carreras"
+            className="boton-paginador-asignaturas boton-siguiente-asignaturas"
           >
             Siguiente →
           </button>
         </div>
         
-        <div className="totales-tipo-carreras">
-          <div className="total-paginas-tipo-carreras">
+        <div className="totales-asignaturas">
+          <div className="total-paginas-asignaturas">
             Página {paginaActual} de {totalPaginas}
           </div>
         </div>
@@ -456,4 +465,4 @@ const TipoCarreras = () => {
   );
 };
 
-export default TipoCarreras;
+export default Asignaturas;

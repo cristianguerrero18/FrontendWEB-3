@@ -1,8 +1,8 @@
 // src/components/PQRS/PQRSStudent.jsx - VERSIÓN CON MANEJO DE CONTEXTO
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { usePQRSStudent } from "../hooks/usePQRSStudent.js";
-import { useUser } from "../context/UserContext";
-import "../css/PQRS.css";
+import { usePQRSStudent } from "../../hooks/usePQRSStudent.js";
+import { useUser } from "../../context/UserContext.jsx";
+import "../../css/PQRS.css";
 import { MessageCircle, FileText, Clock, CheckCircle, AlertCircle, Plus, RefreshCw, User } from "lucide-react";
 
 const PQRSStudent = () => {

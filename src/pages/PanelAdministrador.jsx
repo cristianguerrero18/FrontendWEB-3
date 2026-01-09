@@ -41,22 +41,22 @@ import {
 } from "lucide-react";
 
 import "../css/Principal.css";
-import Perfil from "../components/Perfil.jsx";
-import Carreras from "../components/Carreras.jsx";
-import TiposCarrera from "../components/TipoCarrera.jsx";
-import Roles from "../components/Roles.jsx";
-import Asignaturas from "../components/Asignaturas.jsx";
-import Usuarios from "../components/Usuarios.jsx";
-import Pensum from "../components/Pensum.jsx";
-import Recursos from "../components/Recursos.jsx";
-import Categorias from "../components/Categorias.jsx";
-import Reportes from "../components/Reportes.jsx";
-import PQRS from "../components/PQRS.jsx";
-import Logs from "../components/Logs.jsx";
-import Notificaciones from "../components/Notificaciones.jsx";
-import NotificacionesSuperior from "../components/NotificacionesSuperior.jsx";
-import Dashboard from "../components/Dashboard.jsx";
-import VideoTutorial from "../components/VideoTutorial.jsx";
+import Perfil from "../components/Admin/Perfil.jsx";
+import Carreras from "../components/Admin/Carreras.jsx";
+import TiposCarrera from "../components/Admin/TipoCarrera.jsx";
+import Roles from "../components/Admin/Roles.jsx";
+import Asignaturas from "../components/Admin/Asignaturas.jsx";
+import Usuarios from "../components/Admin/Usuarios.jsx";
+import Pensum from "../components/Admin/Pensum.jsx";
+import Recursos from "../components/Admin/Recursos.jsx";
+import Categorias from "../components/Admin/Categorias.jsx";
+import Reportes from "../components/Admin/Reportes.jsx";
+import PQRS from "../components/Admin/PQRS.jsx";
+import Logs from "../components/Admin/Logs.jsx";
+import Notificaciones from "../components/Admin/Notificaciones.jsx";
+import NotificacionesSuperior from "../components/Admin/NotificacionesSuperior.jsx";
+import Dashboard from "../components/Admin/Dashboard.jsx";
+import VideoTutorial from "../components/Usuarios/VideoTutorial.jsx";
 import { usePerfil } from "../hooks/usePerfil.js";
 
 

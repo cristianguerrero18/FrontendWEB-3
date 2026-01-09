@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDashboard } from "../hooks/useDashboard.js";
+import { useDashboard } from "../../hooks/useDashboard.js";
 import { 
   Users, 
   GraduationCap, 
@@ -15,7 +15,7 @@ import {
   Info,
   Zap
 } from "lucide-react";
-import "../css/Dashboard.css";
+import "../../css/Dashboard.css";
 
 const Dashboard = () => {
   const { 

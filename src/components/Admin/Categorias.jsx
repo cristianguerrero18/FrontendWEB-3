@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useCategorias } from "../hooks/useCategorias.js";
-import "../css/Principal.css";
-import "../css/Categorias.css";
+import { useCategorias } from "../../hooks/useCategorias.js";
+import "../../css/Principal.css";
+import "../../css/Categorias.css";
 
 const Categorias = () => {
   const { 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useNotificaciones } from "../hooks/useNotificaciones.js";
-import { useUser } from "../context/UserContext.jsx";
-import "../css/Principal.css";
-import "../css/Notificaciones.css";
+import { useNotificaciones } from "../../hooks/useNotificaciones.js";
+import { useUser } from "../../context/UserContext.jsx";
+import "../../css/Principal.css";
+import "../../css/Notificaciones.css";
 
 const Notificaciones = () => {
   // 1. PRIMERO: Hooks de React

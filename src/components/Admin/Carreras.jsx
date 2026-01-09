@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useCarreras } from "../hooks/useCarreras.js";
-import "../css/Principal.css";
-import "../css/Carreras.css";
+import { useCarreras } from "../../hooks/useCarreras.js";
+import "../../css/Principal.css";
+import "../../css/Carreras.css";
 
 const Carreras = () => {
   const { 

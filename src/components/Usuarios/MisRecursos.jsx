@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useRecursosUsuario } from "../hooks/useRecursosUsuario.js";
-import { useUser } from "../context/UserContext.jsx";
-import { getNombresAsignaturasPorCarrera } from "../api/Admin/Pensum.js";
-import "../css/Recursos.css";
+import { useRecursosUsuario } from "../../hooks/useRecursosUsuario.js";
+import { useUser } from "../../context/UserContext.jsx";
+import { getNombresAsignaturasPorCarrera } from "../../api/Admin/Pensum.js";
+import "../../css/Recursos.css";
 
 const MisRecursos = () => {
   const {

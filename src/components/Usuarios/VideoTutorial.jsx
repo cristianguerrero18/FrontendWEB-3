@@ -21,7 +21,7 @@ import {
   Settings,
   HelpCircle
 } from 'lucide-react';
-import '../css/VideoTutorial.css';
+import '../../css/VideoTutorial.css';
 
 const VideoTutorial = () => {
   const [reproduciendo, setReproduciendo] = useState(false);
