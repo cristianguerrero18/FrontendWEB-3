@@ -1,5 +1,5 @@
 // src/api/Admin/PQRS.js - VERSIÓN COMPLETA CON DEBUG
-const API_URL = "http://localhost:4000";
+const API_URL = "https://proyectoweb-2-ir8x.onrender.com";
 const authHeaders = () => ({
   
   "Content-Type": "application/json",

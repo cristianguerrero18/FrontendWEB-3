@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000";
+const API_URL = "https://proyectoweb-2-ir8x.onrender.com";
 
 // ======================
 // LOGS DE ACCESO

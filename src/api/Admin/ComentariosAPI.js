@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000"; // ajusta si cambia el puerto
+const API_URL = "https://proyectoweb-2-ir8x.onrender.com"; // ajusta si cambia el puerto
 
 // ======================
 // COMENTARIOS
