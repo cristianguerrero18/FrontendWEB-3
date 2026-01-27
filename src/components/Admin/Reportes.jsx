@@ -12,63 +12,65 @@ const Reportes = ({ idRecursoFiltro = null }) => {
     eliminarReporte,
     cargarReporteCompleto,
     cargarUsuario,
-    limpiarMensaje,
+    limpiarMensajesReporte,
   } = useReportes(idRecursoFiltro);
 
   const [paginaActual, setPaginaActual] = useState(1);
   const [elementosPorPagina, setElementosPorPagina] = useState(10);
   const [busqueda, setBusqueda] = useState("");
-  const [mostrarConfirmacionEliminar, setMostrarConfirmacionEliminar] =
-    useState(false);
+  const [mostrarConfirmacionEliminar, setMostrarConfirmacionEliminar] = useState(false);
   const [reporteAEliminar, setReporteAEliminar] = useState(null);
   const [mostrarModalDetalles, setMostrarModalDetalles] = useState(false);
   const [reporteDetallado, setReporteDetallado] = useState(null);
   const [cargandoDetalles, setCargandoDetalles] = useState(false);
   const [usuariosCache, setUsuariosCache] = useState({});
-  const [cargandoUsuarios, setCargandoUsuarios] = useState(false);
+  const [recursosCache, setRecursosCache] = useState({});
+  const [reportesCompletosCache, setReportesCompletosCache] = useState({});
 
   // Limpiar mensaje después de 5 segundos
   useEffect(() => {
     if (mensaje) {
       const timer = setTimeout(() => {
-        limpiarMensaje();
+        limpiarMensajesReporte();
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [mensaje, limpiarMensaje]);
+  }, [mensaje, limpiarMensajesReporte]);
 
-  // Cargar usuarios para los reportes visibles
+  // Cargar información completa para reportes visibles
   useEffect(() => {
-    const cargarUsuarios = async () => {
-      if (!reportes.length || cargandoUsuarios) return;
+    const cargarInformacionCompleta = async () => {
+      if (!reportes.length || cargando) return;
 
-      setCargandoUsuarios(true);
       const nuevosUsuarios = { ...usuariosCache };
-      let cambios = false;
+      const nuevosRecursos = { ...recursosCache };
+      let cambiosUsuarios = false;
+      let cambiosRecursos = false;
 
-      // Solo cargar usuarios para reportes que no tienen usuario en cache
-      for (const reporte of reportes) {
-        if (
-          reporte.id_reporte &&
-          reporte.id_usuario &&
-          !usuariosCache[reporte.id_reporte]
-        ) {
+      // Solo cargar información para reportes visibles en la página actual
+      const reportesVisibles = reportes.slice(
+        (paginaActual - 1) * elementosPorPagina,
+        paginaActual * elementosPorPagina
+      );
+
+      for (const reporte of reportesVisibles) {
+        if (!reporte || !reporte.id_reporte) continue;
+
+        // Cargar información del usuario si no está en caché
+        if (reporte.id_usuario && !usuariosCache[reporte.id_reporte]) {
           try {
-            // Si el reporte ya trae id_usuario, usarlo directamente
-            if (reporte.id_usuario) {
-              const usuario = await cargarUsuario(reporte.id_usuario);
-              if (usuario) {
-                nuevosUsuarios[reporte.id_reporte] = {
-                  id_usuario: reporte.id_usuario,
-                  nombres_usuario: usuario.nombres_usuario,
-                  apellidos_usuario: usuario.apellidos_usuario,
-                  nombreCompleto:
-                    `${usuario.nombres_usuario || ""} ${
-                      usuario.apellidos_usuario || ""
-                    }`.trim() || `Usuario #${reporte.id_usuario}`,
-                };
-                cambios = true;
-              }
+            const usuario = await cargarUsuario(reporte.id_usuario);
+            if (usuario) {
+              nuevosUsuarios[reporte.id_reporte] = {
+                id_usuario: reporte.id_usuario,
+                nombres_usuario: usuario.nombres_usuario,
+                apellidos_usuario: usuario.apellidos_usuario,
+                nombreCompleto:
+                  `${usuario.nombres_usuario || ""} ${
+                    usuario.apellidos_usuario || ""
+                  }`.trim() || `Usuario #${reporte.id_usuario}`,
+              };
+              cambiosUsuarios = true;
             }
           } catch (error) {
             console.error(
@@ -79,32 +81,49 @@ const Reportes = ({ idRecursoFiltro = null }) => {
               id_usuario: reporte.id_usuario,
               nombreCompleto: `Usuario #${reporte.id_usuario}`,
             };
-            cambios = true;
+            cambiosUsuarios = true;
+          }
+        }
+
+        // Si ya tenemos el reporte completo en caché, extraer título del recurso
+        if (reportesCompletosCache[reporte.id_reporte]) {
+          const reporteCompleto = reportesCompletosCache[reporte.id_reporte];
+          if (reporteCompleto.titulo && !recursosCache[reporte.id_reporte]) {
+            nuevosRecursos[reporte.id_reporte] = {
+              id_recurso: reporte.id_recurso,
+              titulo: reporteCompleto.titulo,
+            };
+            cambiosRecursos = true;
           }
         }
       }
 
-      if (cambios) {
+      if (cambiosUsuarios) {
         setUsuariosCache(nuevosUsuarios);
       }
-
-      setCargandoUsuarios(false);
+      if (cambiosRecursos) {
+        setRecursosCache(nuevosRecursos);
+      }
     };
 
-    cargarUsuarios();
-  }, [reportes]); // Solo se ejecuta cuando cambian los reportes
+    cargarInformacionCompleta();
+  }, [reportes, paginaActual, elementosPorPagina, cargarUsuario, reportesCompletosCache]);
 
   // Filtrar reportes por búsqueda
   const reportesFiltrados = useMemo(() => {
     if (!reportes.length) return [];
 
-    const textoBusqueda = busqueda.toLowerCase();
+    const textoBusqueda = busqueda.toLowerCase().trim();
+
+    if (!textoBusqueda) return reportes;
 
     return reportes.filter((reporte) => {
       if (!reporte) return false;
 
       const usuarioInfo = usuariosCache[reporte.id_reporte];
       const nombreUsuario = usuarioInfo?.nombreCompleto || "";
+      const recursoInfo = recursosCache[reporte.id_reporte];
+      const tituloRecurso = recursoInfo?.titulo || "";
 
       return (
         (reporte.motivo &&
@@ -113,10 +132,13 @@ const Reportes = ({ idRecursoFiltro = null }) => {
           reporte.id_recurso.toString().includes(textoBusqueda)) ||
         (reporte.id_usuario &&
           reporte.id_usuario.toString().includes(textoBusqueda)) ||
-        nombreUsuario.toLowerCase().includes(textoBusqueda)
+        nombreUsuario.toLowerCase().includes(textoBusqueda) ||
+        tituloRecurso.toLowerCase().includes(textoBusqueda) ||
+        (reporte.id_reporte &&
+          reporte.id_reporte.toString().includes(textoBusqueda))
       );
     });
-  }, [reportes, busqueda, usuariosCache]);
+  }, [reportes, busqueda, usuariosCache, recursosCache]);
 
   // Calcular elementos para la página actual
   const indiceUltimoElemento = paginaActual * elementosPorPagina;
@@ -127,27 +149,39 @@ const Reportes = ({ idRecursoFiltro = null }) => {
   );
   const totalPaginas = Math.ceil(reportesFiltrados.length / elementosPorPagina);
 
-  // Función para ver detalles del reporte - CORREGIDA para traer fecha_reporte
+  // Función para ver detalles del reporte
   const handleVerDetalles = useCallback(
     async (id_reporte) => {
       if (!id_reporte) return;
 
       setCargandoDetalles(true);
       try {
-        // Cargar el reporte completo
-        const reporteCompleto = await cargarReporteCompleto(id_reporte);
+        let reporteCompleto;
+        
+        // Primero intentar obtener del caché
+        if (reportesCompletosCache[id_reporte]) {
+          reporteCompleto = reportesCompletosCache[id_reporte];
+        } else {
+          reporteCompleto = await cargarReporteCompleto(id_reporte);
+          // Guardar en caché para uso futuro
+          if (reporteCompleto) {
+            setReportesCompletosCache(prev => ({
+              ...prev,
+              [id_reporte]: reporteCompleto
+            }));
+          }
+        }
 
         if (reporteCompleto) {
-          // Si el reporte completo no tiene fecha_reporte, buscarla en los reportes normales
+          // Si no trae fecha_reporte, buscarla en el reporte original
           if (!reporteCompleto.fecha_reporte) {
             const reporteOriginal = reportes.find(
               (r) => r.id_reporte === id_reporte
             );
-            if (reporteOriginal && reporteOriginal.fecha_reporte) {
+            if (reporteOriginal) {
               reporteCompleto.fecha_reporte = reporteOriginal.fecha_reporte;
             }
           }
-
           setReporteDetallado(reporteCompleto);
           setMostrarModalDetalles(true);
         }
@@ -157,7 +191,7 @@ const Reportes = ({ idRecursoFiltro = null }) => {
         setCargandoDetalles(false);
       }
     },
-    [cargarReporteCompleto, reportes]
+    [cargarReporteCompleto, reportes, reportesCompletosCache]
   );
 
   // Función para eliminar reporte
@@ -170,19 +204,31 @@ const Reportes = ({ idRecursoFiltro = null }) => {
   const confirmarEliminarReporte = useCallback(async () => {
     if (reporteAEliminar && reporteAEliminar.id_reporte) {
       await eliminarReporte(reporteAEliminar.id_reporte);
+      // Limpiar cachés para el reporte eliminado
+      const nuevoUsuariosCache = { ...usuariosCache };
+      const nuevoRecursosCache = { ...recursosCache };
+      const nuevoReportesCompletosCache = { ...reportesCompletosCache };
+      
+      delete nuevoUsuariosCache[reporteAEliminar.id_reporte];
+      delete nuevoRecursosCache[reporteAEliminar.id_reporte];
+      delete nuevoReportesCompletosCache[reporteAEliminar.id_reporte];
+      
+      setUsuariosCache(nuevoUsuariosCache);
+      setRecursosCache(nuevoRecursosCache);
+      setReportesCompletosCache(nuevoReportesCompletosCache);
+      
       setMostrarConfirmacionEliminar(false);
       setReporteAEliminar(null);
     }
-  }, [reporteAEliminar, eliminarReporte]);
+  }, [reporteAEliminar, eliminarReporte, usuariosCache, recursosCache, reportesCompletosCache]);
 
-  // Formatear fecha - MEJORADA
+  // Formatear fecha
   const formatearFecha = useCallback((fechaString) => {
     if (!fechaString) return "Fecha no disponible";
     try {
       const fecha = new Date(fechaString);
       if (isNaN(fecha.getTime())) return "Fecha inválida";
 
-      // Formato mejorado
       const opciones = {
         year: "numeric",
         month: "short",
@@ -204,15 +250,18 @@ const Reportes = ({ idRecursoFiltro = null }) => {
     setPaginaActual(1);
   }, [busqueda]);
 
-  if (cargando && !reportes.length)
+  // Si está cargando inicialmente
+  if (cargando && !reportes.length) {
     return (
       <div className="estado-carga">
         <div className="spinner-grande"></div>
         <p>Cargando reportes...</p>
       </div>
     );
+  }
 
-  if (!reportes.length && !cargando)
+  // Si no hay reportes después de cargar
+  if (!cargando && reportes.length === 0) {
     return (
       <div className="estado-inicial">
         <h2>No hay reportes disponibles</h2>
@@ -223,17 +272,14 @@ const Reportes = ({ idRecursoFiltro = null }) => {
         </p>
       </div>
     );
+  }
 
   return (
     <div className="contenedor-reportes">
       {mensaje && (
-        <div
-          className={`mensaje-api ${
-            mensaje.includes("Error") ? "error" : "exito"
-          }`}
-        >
-          <p>{mensaje}</p>
-          <button className="boton-cerrar-mensaje" onClick={limpiarMensaje}>
+        <div className={`mensaje-api ${mensaje.tipo}`}>
+          <p>{mensaje.texto}</p>
+          <button className="boton-cerrar-mensaje" onClick={limpiarMensajesReporte}>
             ×
           </button>
         </div>
@@ -262,7 +308,7 @@ const Reportes = ({ idRecursoFiltro = null }) => {
           <div className="buscador-reportes">
             <input
               type="text"
-              placeholder="Buscar por motivo, ID recurso o usuario..."
+              placeholder="Buscar por motivo, título de recurso, nombre de usuario..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="input-busqueda-reportes"
@@ -292,7 +338,6 @@ const Reportes = ({ idRecursoFiltro = null }) => {
               {reportesFiltrados.length === 1
                 ? "reporte encontrado"
                 : "reportes encontrados"}
-              {cargandoUsuarios && " (Cargando usuarios...)"}
             </div>
           </div>
         </div>
@@ -315,6 +360,8 @@ const Reportes = ({ idRecursoFiltro = null }) => {
               if (!reporte) return null;
 
               const usuarioInfo = usuariosCache[reporte.id_reporte];
+              const recursoInfo = recursosCache[reporte.id_reporte];
+              const reporteCompleto = reportesCompletosCache[reporte.id_reporte];
 
               return (
                 <tr key={reporte.id_reporte} className="fila-reporte">
@@ -325,25 +372,30 @@ const Reportes = ({ idRecursoFiltro = null }) => {
                   </td>
                   <td className="celda-recurso-reporte">
                     <div className="info-recurso">
+                      <div className="titulo-recurso" title={recursoInfo?.titulo || reporteCompleto?.titulo || `Recurso #${reporte.id_recurso}`}>
+                        {recursoInfo?.titulo || reporteCompleto?.titulo || `Recurso #${reporte.id_recurso}`}
+                      </div>
                       <div className="id-recurso">
-                        Recurso #{reporte.id_recurso}
+                        ID: {reporte.id_recurso}
                       </div>
                     </div>
                   </td>
                   <td className="celda-motivo-reporte">
                     <div className="motivo-reporte" title={reporte.motivo}>
-                      {reporte.motivo.length > 50
+                      {reporte.motivo && reporte.motivo.length > 50
                         ? reporte.motivo.substring(0, 50) + "..."
-                        : reporte.motivo}
+                        : reporte.motivo || "Sin motivo"}
                     </div>
                   </td>
                   <td className="celda-usuario-reporte">
                     <div className="usuario-info">
                       <div className="nombre-usuario">
                         {usuarioInfo?.nombreCompleto ||
-                          (reporte.id_usuario
+                          (reporteCompleto?.nombres_usuario && reporteCompleto?.apellidos_usuario 
+                            ? `${reporteCompleto.nombres_usuario} ${reporteCompleto.apellidos_usuario}`
+                            : reporte.id_usuario
                             ? `Usuario #${reporte.id_usuario}`
-                            : "Cargando...")}
+                            : "Desconocido")}
                       </div>
                       <div className="id-usuario">
                         {reporte.id_usuario
@@ -384,13 +436,12 @@ const Reportes = ({ idRecursoFiltro = null }) => {
         </table>
       </div>
 
-      {/* Modal de detalles del reporte - CORREGIDO */}
-      {/* Modal de detalles del reporte */}
+      {/* Modal de detalles del reporte - Diseño simplificado y profesional */}
       {mostrarModalDetalles && reporteDetallado && (
         <div className="modal-fondo-reportes">
           <div className="modal-contenido-reportes modal-detalles">
             <div className="modal-cabecera-reportes">
-              <h2>Detalles del Reporte #{reporteDetallado.id_reporte}</h2>
+              <h2>Detalles del Reporte</h2>
               <button
                 className="modal-cerrar-reportes"
                 onClick={() => {
@@ -403,102 +454,130 @@ const Reportes = ({ idRecursoFiltro = null }) => {
             </div>
 
             <div className="modal-cuerpo-reportes">
-              <div className="detalles-grid">
-                <div className="detalle-seccion">
-                  <h3>Información del Reporte</h3>
-                  <div className="detalle-item">
-                    <strong>ID Reporte:</strong>
-                    <span>{reporteDetallado.id_reporte}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Motivo:</strong>
-                    <span>{reporteDetallado.motivo || "No especificado"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Fecha del Reporte:</strong>
-                    <span>
-                      {formatearFecha(reporteDetallado.fecha_reporte)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="detalle-seccion">
-                  <h3>Información del Recurso</h3>
-                  <div className="detalle-item">
-                    <strong>ID Recurso:</strong>
-                    <span>{reporteDetallado.id_recurso}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Título:</strong>
-                    <span>{reporteDetallado.titulo || "No disponible"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Tema:</strong>
-                    <span>{reporteDetallado.tema || "No disponible"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Asignatura ID:</strong>
-                    <span>{reporteDetallado.id_asignatura || "N/A"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Categoría ID:</strong>
-                    <span>{reporteDetallado.id_categoria || "N/A"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Fecha de Subida:</strong>
-                    <span>{formatearFecha(reporteDetallado.fecha_subida)}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>URL:</strong>
-                    <span>
-                      {reporteDetallado.URL ? (
-                        <a
-                          href={reporteDetallado.URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="enlace-recurso"
-                        >
-                          Ver recurso
-                        </a>
-                      ) : (
-                        "No disponible"
-                      )}
-                    </span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Total de Reportes:</strong>
-                    <span>{reporteDetallado.contador_reportes || 0}</span>
+              <div className="detalles-simples">
+                
+                {/* Sección principal del reporte */}
+                <div className="seccion-principal">
+                  <div className="tarjeta-destacada">
+                    <div className="tarjeta-header">
+                      <span className="badge-reporte">Reporte #{reporteDetallado.id_reporte}</span>
+                      <span className="fecha-reporte">
+                        {formatearFecha(reporteDetallado.fecha_reporte)}
+                      </span>
+                    </div>
+                    <div className="tarjeta-contenido">
+                      <h3 className="motivo-titulo">Motivo del Reporte</h3>
+                      <p className="motivo-texto">
+                        {reporteDetallado.motivo || "No especificado"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="detalle-seccion">
-                  <h3>Información del Usuario</h3>
-                  <div className="detalle-item">
-                    <strong>ID Usuario:</strong>
-                    <span>{reporteDetallado.id_usuario || "N/A"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Nombre:</strong>
-                    <span>
-                      {(reporteDetallado.nombres_usuario || "") +
-                        " " +
-                        (reporteDetallado.apellidos_usuario || "") ||
-                        "No disponible"}
-                    </span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Correo:</strong>
-                    <span>{reporteDetallado.correo || "No disponible"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Carrera ID:</strong>
-                    <span>{reporteDetallado.id_carrera || "N/A"}</span>
-                  </div>
-                  <div className="detalle-item">
-                    <strong>Rol ID:</strong>
-                    <span>{reporteDetallado.id_rol || "N/A"}</span>
+                {/* Información del recurso reportado */}
+                <div className="seccion-recurso">
+                  <h3 className="seccion-titulo">
+                    <span className="icono-recurso">📚</span>
+                    Recurso Reportado
+                  </h3>
+                  <div className="info-cards">
+                    <div className="info-card">
+                      <div className="info-card-header">
+                        <span className="info-card-icon">#</span>
+                        <span className="info-card-label">ID Recurso</span>
+                      </div>
+                      <div className="info-card-value">
+                        {reporteDetallado.id_recurso}
+                      </div>
+                    </div>
+                    <div className="info-card">
+                      <div className="info-card-header">
+                        <span className="info-card-icon">📝</span>
+                        <span className="info-card-label">Título</span>
+                      </div>
+                      <div className="info-card-value">
+                        {reporteDetallado.titulo || "No disponible"}
+                      </div>
+                    </div>
+                    <div className="info-card">
+                      <div className="info-card-header">
+                        <span className="info-card-icon">🏷️</span>
+                        <span className="info-card-label">Tema</span>
+                      </div>
+                      <div className="info-card-value">
+                        {reporteDetallado.tema || "No especificado"}
+                      </div>
+                    </div>
+                    {reporteDetallado.URL && (
+                      <div className="info-card enlace-card">
+                        <div className="info-card-header">
+                          <span className="info-card-icon">🔗</span>
+                          <span className="info-card-label">Enlace</span>
+                        </div>
+                        <div className="info-card-value">
+                          <a
+                            href={reporteDetallado.URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="enlace-recurso-simple"
+                          >
+                            Ver recurso
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* Información del usuario que reportó */}
+                <div className="seccion-usuario">
+                  <h3 className="seccion-titulo">
+                    <span className="icono-usuario">👤</span>
+                    Reportado por
+                  </h3>
+                  <div className="usuario-card">
+                    <div className="usuario-avatar">
+                      {reporteDetallado.nombres_usuario?.[0] || "U"}
+                    </div>
+                    <div className="usuario-info">
+                      <div className="usuario-nombre">
+                        {reporteDetallado.nombres_usuario && reporteDetallado.apellidos_usuario
+                          ? `${reporteDetallado.nombres_usuario} ${reporteDetallado.apellidos_usuario}`
+                          : `Usuario #${reporteDetallado.id_usuario || "Desconocido"}`}
+                      </div>
+                      <div className="usuario-detalles">
+                        {reporteDetallado.correo && (
+                          <span className="usuario-correo">
+                            {reporteDetallado.correo}
+                          </span>
+                        )}
+                        <span className="usuario-id">
+                          ID: {reporteDetallado.id_usuario || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Estadísticas (opcional) */}
+                {reporteDetallado.contador_reportes !== undefined && (
+                  <div className="seccion-estadisticas">
+                    <h3 className="seccion-titulo">
+                      <span className="icono-estadisticas">📊</span>
+                      Estadísticas
+                    </h3>
+                    <div className="estadistica-card">
+                      <div className="estadistica-icon">⚠️</div>
+                      <div className="estadistica-info">
+                        <div className="estadistica-label">Reportes totales en este recurso</div>
+                        <div className={`estadistica-valor ${reporteDetallado.contador_reportes > 0 ? 'alto' : ''}`}>
+                          {reporteDetallado.contador_reportes || 0}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
 

@@ -138,3 +138,29 @@ export const getUsuarioPorId = async (id_usuario) => {
     return { error: true, mensaje: error.message };
   }
 };
+// Obtener reporte completo (reporte + recurso + usuario)
+export const getReporteCompleto = async (id_reporte) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${API_URL}/api/reportes/completo/${id_reporte}`, {
+      method: "GET",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error en getReporteCompleto:", errorText);
+      throw new Error(`Error ${res.status}: ${errorText}`);
+    }
+
+    return await res.json();
+
+  } catch (error) {
+    console.error("Error en getReporteCompleto:", error.message);
+    return { error: true, mensaje: error.message };
+  }
+};

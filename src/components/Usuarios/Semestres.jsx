@@ -112,7 +112,7 @@ const Semestres = () => {
     operacion: operacionReporte,
     reportarRecurso,
     usuarioReportoRecurso,
-    limpiarMensajes: limpiarMensajesReporte
+    limpiarMensajesReporte: limpiarMensajesReporte
   } = useReportes()
 
   // Contexto de usuario para obtener id_usuario
