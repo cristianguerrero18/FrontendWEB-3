@@ -1,127 +1,186 @@
 /* ========================================
-   Variables CSS para Tutoriales
+   VARIABLES CSS - SISTEMA DE DISEÑO
    ======================================== */
    :root {
-    --tutoriales-primario: #4a90e2;
-    --tutoriales-secundario: #1e3a8a;
-    --tutoriales-acento: #f39c12;
-    --tutoriales-peligro: #e74c3c;
-    --tutoriales-exito: #27ae60;
-    --tutoriales-info: #3498db;
-    --tutoriales-purpura: #9b59b6;
-  
-    --tutoriales-fondo: #f8f9fa;
-    --tutoriales-fondo-secundario: #ffffff;
-    --tutoriales-texto: #2c3e50;
-    --tutoriales-texto-secundario: #7f8c8d;
-    --tutoriales-borde: #e1e8ed;
-  
-    --tutoriales-sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-    --tutoriales-sombra-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --tutoriales-sombra-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-    --tutoriales-sombra-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
-  
-    --tutoriales-radio: 12px;
-    --tutoriales-radio-sm: 8px;
-    --tutoriales-radio-lg: 16px;
-  
-    --tutoriales-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Colores primarios */
+    --video-primario: #4a90e2;
+    --video-primario-dark: #357abd;
+    --video-primario-light: #6ba5e8;
+    --video-secundario: #1e40af;
+    
+    /* Fondos */
+    --video-fondo: #f8fafc;
+    --video-fondo-secundario: #ffffff;
+    --video-fondo-oscuro: #1e293b;
+    --video-fondo-overlay: rgba(0, 0, 0, 0.8);
+    --video-fondo-gradient: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    
+    /* Textos */
+    --video-texto: #1e293b;
+    --video-texto-secundario: #64748b;
+    --video-texto-claro: #ffffff;
+    --video-texto-oscuro: #0f172a;
+    
+    /* Bordes */
+    --video-borde: #e2e8f0;
+    --video-borde-oscuro: #cbd5e1;
+    --video-borde-enfasis: #4a90e2;
+    
+    /* Sombras */
+    --video-sombra-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --video-sombra-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --video-sombra-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --video-sombra-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    
+    /* Radios de borde */
+    --video-radio-sm: 6px;
+    --video-radio: 8px;
+    --video-radio-md: 12px;
+    --video-radio-lg: 16px;
+    
+    /* Transiciones */
+    --video-transicion: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --video-transicion-rapida: all 0.15s ease;
+    
+    /* Espaciado */
+    --video-spacing-xs: 4px;
+    --video-spacing-sm: 8px;
+    --video-spacing-md: 12px;
+    --video-spacing-lg: 16px;
+    --video-spacing-xl: 20px;
+    --video-spacing-2xl: 24px;
+    --video-spacing-3xl: 32px;
   }
   
   /* ========================================
-     Contenedor Principal
+     ANIMACIONES GLOBALES
+     ======================================== */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* ========================================
+     CONTENEDOR PRINCIPAL
      ======================================== */
   .contenedor-tutoriales {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
-    background: var(--tutoriales-fondo);
+    padding: var(--video-spacing-3xl);
+    background: var(--video-fondo);
     min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    animation: fadeIn 0.5s ease;
   }
   
   /* ========================================
-     Cabecera de Tutoriales
+     CABECERA
      ======================================== */
   .cabecera-tutoriales {
-    background: linear-gradient(135deg, var(--tutoriales-primario), var(--tutoriales-secundario));
-    border-radius: var(--tutoriales-radio-lg);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--tutoriales-sombra-md);
-    color: white;
+    margin-bottom: var(--video-spacing-3xl);
+    text-align: center;
+    position: relative;
+    padding: var(--video-spacing-2xl) 0;
   }
   
-  .info-titulo-tutoriales h1 {
-    font-size: 2rem;
+  .cabecera-tutoriales h1 {
+    font-size: 2.8rem;
+    color: var(--video-texto);
+    margin: 0 0 var(--video-spacing-sm) 0;
     font-weight: 700;
-    margin-bottom: 0.5rem;
-    margin-top: 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--video-primario), var(--video-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: slideUp 0.6s ease;
   }
   
-  .info-titulo-tutoriales p {
-    opacity: 0.9;
-    font-size: 1rem;
+  .cabecera-tutoriales p {
+    color: var(--video-texto-secundario);
+    font-size: 1.2rem;
     margin: 0;
-  }
-  
-  .estadisticas-tutoriales {
-    display: flex;
-    gap: 2rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .estadistica-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .estadistica-valor {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
-  }
-  
-  .estadistica-label {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    margin-top: 0.25rem;
+    font-weight: 400;
+    animation: slideUp 0.7s ease;
   }
   
   /* ========================================
-     Contenido Principal
+     CONTENIDO PRINCIPAL
      ======================================== */
   .contenido-tutoriales {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-  }
-  
-  @media (max-width: 1200px) {
-    .contenido-tutoriales {
-      grid-template-columns: 1fr;
-    }
+    grid-template-columns: 1fr 380px;
+    gap: var(--video-spacing-2xl);
+    animation: fadeIn 0.8s ease;
   }
   
   /* ========================================
-     Panel de Video Principal
+     PANEL DE VIDEO PRINCIPAL
      ======================================== */
   .panel-video-principal {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .contenedor-video {
-    background: #000;
-    border-radius: var(--tutoriales-radio-lg);
+    background: var(--video-fondo-secundario);
+    border-radius: var(--video-radio-lg);
     overflow: hidden;
-    box-shadow: var(--tutoriales-sombra-lg);
+    box-shadow: var(--video-sombra-lg);
+    transition: var(--video-transicion);
+    border: 1px solid var(--video-borde);
     position: relative;
   }
   
+  .panel-video-principal:hover {
+    box-shadow: var(--video-sombra-hover);
+    transform: translateY(-2px);
+  }
+  
+  /* ========================================
+     CONTENEDOR DE VIDEO
+     ======================================== */
+  .contenedor-video {
+    position: relative;
+    background: var(--video-fondo-oscuro);
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+  
+  .video-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  
+  /* ========================================
+     MODO PANTALLA COMPLETA
+     ======================================== */
   .contenedor-video.pantalla-completa {
     position: fixed;
     top: 0;
@@ -129,602 +188,647 @@
     width: 100vw;
     height: 100vh;
     z-index: 9999;
-    border-radius: 0;
+    background: var(--video-fondo-oscuro);
+    aspect-ratio: auto;
   }
   
-  .video-placeholder {
-    width: 100%;
-    height: 400px;
-    background: linear-gradient(135deg, #2c3e50, #4a90e2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+  .contenedor-video.pantalla-completa .controles-video {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
   }
   
-  .mensaje-video-placeholder {
-    text-align: center;
-    color: white;
-    padding: 2rem;
-    max-width: 600px;
-  }
-  
-  .mensaje-video-placeholder h2 {
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
-    font-weight: 700;
-  }
-  
-  .mensaje-video-placeholder p {
-    opacity: 0.9;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
-  
-  .tags-video {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .tag {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--tutoriales-radio-sm);
-    font-size: 0.85rem;
-    backdrop-filter: blur(10px);
-  }
-  
-  /* Controles del Video */
+  /* ========================================
+     CONTROLES DE VIDEO
+     ======================================== */
   .controles-video {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 1rem;
-    backdrop-filter: blur(10px);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--video-fondo-gradient);
+    padding: var(--video-spacing-xl) var(--video-spacing-xl) var(--video-spacing-lg);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(0);
   }
   
+  .contenedor-video:hover .controles-video {
+    opacity: 1;
+  }
+  
+  /* ========================================
+     BARRA DE PROGRESO
+     ======================================== */
   .barra-progreso {
-    margin-bottom: 1rem;
+    margin-bottom: var(--video-spacing-md);
+    position: relative;
   }
   
   .input-progreso {
     width: 100%;
-    height: 4px;
+    height: 6px;
     -webkit-appearance: none;
-    appearance: none;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
+    border-radius: 10px;
     cursor: pointer;
+    transition: var(--video-transicion-rapida);
+  }
+  
+  .input-progreso:hover {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
   }
   
   .input-progreso::-webkit-slider-thumb {
     -webkit-appearance: none;
-    appearance: none;
     width: 16px;
     height: 16px;
+    background: var(--video-primario);
     border-radius: 50%;
-    background: var(--tutoriales-primario);
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: var(--video-transicion-rapida);
     border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  .input-progreso::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--video-primario-dark);
   }
   
   .input-progreso::-moz-range-thumb {
     width: 16px;
     height: 16px;
+    background: var(--video-primario);
     border-radius: 50%;
-    background: var(--tutoriales-primario);
     cursor: pointer;
     border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   }
   
+  .input-progreso::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    background: var(--video-primario-dark);
+  }
+  
+  /* ========================================
+     TIEMPO DEL VIDEO
+     ======================================== */
   .tiempo-video {
     display: flex;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 0.25rem;
+    gap: var(--video-spacing-xs);
+    color: var(--video-texto-claro);
+    font-size: 0.9rem;
+    margin-top: var(--video-spacing-xs);
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.3px;
   }
   
+  .tiempo-video span {
+    opacity: 0.9;
+  }
+  
+  /* ========================================
+     BOTONES DE CONTROL
+     ======================================== */
   .botones-control {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: var(--video-spacing-md);
   }
   
-  .botones-izquierda, .botones-derecha {
+  .botones-izquierda,
+  .botones-derecha {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--video-spacing-sm);
   }
   
   .boton-control {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: var(--tutoriales-radio-sm);
-    transition: var(--tutoriales-transicion);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--video-texto-claro);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: var(--video-transicion);
+    backdrop-filter: blur(4px);
+    position: relative;
+    overflow: hidden;
   }
   
-  .boton-control:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
+  .boton-control::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  
+  .boton-control:hover::before {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .boton-control:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+  
+  .boton-control:active {
+    transform: scale(0.95);
   }
   
   .boton-control:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
+    transform: none;
   }
   
-  .boton-control.completado {
-    color: var(--tutoriales-exito);
+  .boton-control:disabled::before {
+    display: none;
   }
   
+  .boton-control svg {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* ========================================
+     CONTROL DE VOLUMEN
+     ======================================== */
   .control-volumen {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--video-spacing-sm);
+    margin-left: var(--video-spacing-sm);
+    position: relative;
   }
   
   .input-volumen {
-    width: 80px;
-    height: 4px;
+    width: 90px;
+    height: 6px;
     -webkit-appearance: none;
-    appearance: none;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--video-transicion-rapida);
+  }
+  
+  .input-volumen:hover {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
   }
   
   .input-volumen::-webkit-slider-thumb {
     -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
+    background: var(--video-texto-claro);
     border-radius: 50%;
-    background: white;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: var(--video-transicion-rapida);
+    border: 2px solid var(--video-primario);
+  }
+  
+  .input-volumen::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--video-primario);
   }
   
   /* ========================================
-     Información del Tutorial Actual
+     INFORMACIÓN DEL VIDEO ACTUAL
      ======================================== */
-  .info-tutorial-actual {
-    background: var(--tutoriales-fondo-secundario);
-    border-radius: var(--tutoriales-radio-lg);
-    padding: 1.5rem;
-    box-shadow: var(--tutoriales-sombra-md);
+  .info-video-actual {
+    padding: var(--video-spacing-2xl);
+    border-top: 1px solid var(--video-borde);
+    background: var(--video-fondo-secundario);
   }
   
-  .cabecera-info-tutorial {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+  .info-video-actual h2 {
+    margin: 0 0 var(--video-spacing-sm) 0;
+    font-size: 1.8rem;
+    color: var(--video-texto);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
   }
   
-  .cabecera-info-tutorial h2 {
+  .descripcion-video {
     margin: 0;
-    color: var(--tutoriales-texto);
-    font-size: 1.5rem;
-    font-weight: 700;
-    flex: 1;
-  }
-  
-  .meta-info-tutorial {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-  }
-  
-  .badge-dificultad {
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--tutoriales-radio-sm);
-    font-weight: 600;
-    font-size: 0.85rem;
-  }
-  
-  .duracion-tutorial {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    color: var(--tutoriales-texto-secundario);
-    font-size: 0.9rem;
-  }
-  
-  .descripcion-tutorial {
-    color: var(--tutoriales-texto);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-  
-  .acciones-tutorial {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-  
-  .boton-accion-secundario {
-    background: var(--tutoriales-fondo);
-    border: 2px solid var(--tutoriales-borde);
-    color: var(--tutoriales-texto);
-    padding: 0.625rem 1rem;
-    border-radius: var(--tutoriales-radio);
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--tutoriales-transicion);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .boton-accion-secundario:hover {
-    background: var(--tutoriales-primario);
-    color: white;
-    border-color: var(--tutoriales-primario);
-    transform: translateY(-2px);
+    color: var(--video-texto-secundario);
+    line-height: 1.7;
+    font-size: 1.1rem;
   }
   
   /* ========================================
-     Panel de Lista de Tutoriales
+     PANEL LATERAL DE LISTA DE VIDEOS
      ======================================== */
-  .panel-lista-tutoriales {
+  .panel-lista-videos {
+    background: var(--video-fondo-secundario);
+    border-radius: var(--video-radio-lg);
+    padding: var(--video-spacing-2xl);
+    box-shadow: var(--video-sombra-md);
+    border: 1px solid var(--video-borde);
+    height: fit-content;
+    position: sticky;
+    top: var(--video-spacing-2xl);
+    transition: var(--video-transicion);
+  }
+  
+  .panel-lista-videos:hover {
+    box-shadow: var(--video-sombra-lg);
+  }
+  
+  .panel-lista-videos h3 {
+    margin: 0 0 var(--video-spacing-xl) 0;
+    font-size: 1.4rem;
+    color: var(--video-texto);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding-bottom: var(--video-spacing-md);
+    border-bottom: 2px solid var(--video-borde);
+    position: relative;
+  }
+  
+  .panel-lista-videos h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--video-primario);
+    border-radius: 2px;
+  }
+  
+  /* ========================================
+     LISTA DE VIDEOS
+     ======================================== */
+  .lista-videos {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .cabecera-lista-tutoriales {
-    background: var(--tutoriales-fondo-secundario);
-    border-radius: var(--tutoriales-radio-lg);
-    padding: 1.5rem;
-    box-shadow: var(--tutoriales-sombra-md);
-  }
-  
-  .cabecera-lista-tutoriales h3 {
-    margin: 0 0 1rem 0;
-    color: var(--tutoriales-texto);
-    font-size: 1.25rem;
-    font-weight: 700;
-  }
-  
-  .filtros-tutoriales {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  
-  .filtro-categoria {
-    border: 2px solid;
-    padding: 0.5rem 0.875rem;
-    border-radius: var(--tutoriales-radio-sm);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--tutoriales-transicion);
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-  
-  .filtro-categoria:hover:not(.activa) {
-    opacity: 0.8;
-    transform: translateY(-2px);
-  }
-  
-  .filtro-categoria.activa {
-    box-shadow: var(--tutoriales-sombra-sm);
-  }
-  
-  /* ========================================
-     Lista de Tutoriales
-     ======================================== */
-  .lista-tutoriales {
-    background: var(--tutoriales-fondo-secundario);
-    border-radius: var(--tutoriales-radio-lg);
-    padding: 1rem;
-    box-shadow: var(--tutoriales-sombra-md);
+    gap: var(--video-spacing-md);
     max-height: 600px;
     overflow-y: auto;
+    padding-right: var(--video-spacing-sm);
   }
   
-  .lista-tutoriales::-webkit-scrollbar {
+  /* Scrollbar personalizada */
+  .lista-videos::-webkit-scrollbar {
     width: 6px;
   }
   
-  .lista-tutoriales::-webkit-scrollbar-track {
-    background: var(--tutoriales-fondo);
-    border-radius: 3px;
+  .lista-videos::-webkit-scrollbar-track {
+    background: var(--video-borde);
+    border-radius: 10px;
   }
   
-  .lista-tutoriales::-webkit-scrollbar-thumb {
-    background: var(--tutoriales-borde);
-    border-radius: 3px;
+  .lista-videos::-webkit-scrollbar-thumb {
+    background: var(--video-primario-light);
+    border-radius: 10px;
+    transition: var(--video-transicion-rapida);
   }
   
-  .lista-tutoriales::-webkit-scrollbar-thumb:hover {
-    background: var(--tutoriales-texto-secundario);
+  .lista-videos::-webkit-scrollbar-thumb:hover {
+    background: var(--video-primario);
   }
   
-  .tarjeta-tutorial {
+  /* ========================================
+     ITEM DE VIDEO EN LISTA
+     ======================================== */
+  .item-video {
     display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: var(--tutoriales-radio);
+    gap: var(--video-spacing-md);
+    padding: var(--video-spacing-md);
+    border-radius: var(--video-radio-md);
     cursor: pointer;
-    transition: var(--tutoriales-transicion);
-    margin-bottom: 0.75rem;
+    transition: var(--video-transicion);
     border: 2px solid transparent;
-  }
-  
-  .tarjeta-tutorial:hover {
-    background: var(--tutoriales-fondo);
-    transform: translateX(4px);
-    box-shadow: var(--tutoriales-sombra-sm);
-  }
-  
-  .tarjeta-tutorial.seleccionada {
-    background: linear-gradient(135deg, rgba(74, 144, 226, 0.08), rgba(255, 255, 255, 0.2));
-    border-color: var(--tutoriales-primario);
-    box-shadow: var(--tutoriales-sombra-md);
-  }
-  
-  .tarjeta-tutorial.completada {
-    opacity: 0.8;
-  }
-  
-  .vista-previa-tutorial {
+    background: var(--video-fondo);
     position: relative;
-    width: 120px;
-    height: 70px;
-    flex-shrink: 0;
-    border-radius: var(--tutoriales-radio-sm);
     overflow: hidden;
   }
   
-  .imagen-vista-previa {
-    width: 100%;
+  .item-video::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 0;
+    background: var(--video-primario);
+    transition: height 0.3s ease;
+  }
+  
+  .item-video:hover {
+    transform: translateX(4px);
+    box-shadow: var(--video-sombra-md);
+    border-color: var(--video-borde);
+    background: var(--video-fondo-secundario);
+  }
+  
+  .item-video:hover::before {
     height: 100%;
+  }
+  
+  .item-video.seleccionado {
+    border-color: var(--video-primario);
+    background: linear-gradient(135deg, #f0f7ff, #ffffff);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
+  }
+  
+  .item-video.seleccionado::before {
+    height: 100%;
+    background: var(--video-primario);
+  }
+  
+  /* ========================================
+     MINIATURA DE VIDEO
+     ======================================== */
+  .miniatura-video {
+    position: relative;
+    width: 140px;
+    flex-shrink: 0;
+    border-radius: var(--video-radio-sm);
+    overflow: hidden;
+    box-shadow: var(--video-sombra-sm);
+  }
+  
+  .miniatura-video img {
+    width: 100%;
+    height: 80px;
     object-fit: cover;
+    transition: var(--video-transicion);
+    display: block;
+  }
+  
+  .item-video:hover .miniatura-video img {
+    transform: scale(1.1);
   }
   
   .duracion-badge {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 0.125rem 0.375rem;
-    border-radius: var(--tutoriales-radio-sm);
-    font-size: 0.75rem;
+    bottom: var(--video-spacing-xs);
+    right: var(--video-spacing-xs);
+    background: var(--video-fondo-overlay);
+    color: var(--video-texto-claro);
+    padding: var(--video-spacing-xs) var(--video-spacing-sm);
+    border-radius: var(--video-radio-sm);
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+    letter-spacing: 0.3px;
   }
   
-  .badge-completado {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    background: var(--tutoriales-exito);
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--tutoriales-sombra-sm);
+  .duracion-badge svg {
+    width: 12px;
+    height: 12px;
   }
   
-  .info-tarjeta-tutorial {
+  /* ========================================
+     INFORMACIÓN DEL ITEM DE VIDEO
+     ======================================== */
+  .info-item-video {
     flex: 1;
     min-width: 0;
   }
   
-  .titulo-tarjeta-tutorial {
-    margin: 0 0 0.375rem 0;
-    color: var(--tutoriales-texto);
+  .info-item-video h4 {
+    margin: 0 0 var(--video-spacing-xs) 0;
     font-size: 1rem;
+    color: var(--video-texto);
     font-weight: 600;
     line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
-  .descripcion-tarjeta-tutorial {
-    color: var(--tutoriales-texto-secundario);
+  .info-item-video p {
+    margin: 0;
     font-size: 0.85rem;
+    color: var(--video-texto-secundario);
     line-height: 1.5;
-    margin-bottom: 0.5rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
   
-  .meta-tarjeta-tutorial {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .dificultad-tarjeta {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.125rem 0.5rem;
-    border-radius: var(--tutoriales-radio-sm);
-    background: var(--tutoriales-fondo);
-  }
-  
-  .tags-tarjeta {
-    display: flex;
-    gap: 0.25rem;
-  }
-  
-  .tag-tarjeta {
-    font-size: 0.7rem;
-    background: rgba(74, 144, 226, 0.1);
-    color: var(--tutoriales-primario);
-    padding: 0.125rem 0.375rem;
-    border-radius: var(--tutoriales-radio-sm);
-  }
-  
   /* ========================================
-     Panel de Progreso
+     MEDIA QUERIES - RESPONSIVE
      ======================================== */
-  .panel-progreso {
-    background: linear-gradient(135deg, var(--tutoriales-fondo-secundario), #ffffff);
-    border-radius: var(--tutoriales-radio-lg);
-    padding: 1.5rem;
-    box-shadow: var(--tutoriales-sombra-md);
-    border: 2px solid var(--tutoriales-borde);
+  
+  /* Pantallas grandes */
+  @media (max-width: 1200px) {
+    .contenido-tutoriales {
+      grid-template-columns: 1fr 340px;
+      gap: var(--video-spacing-xl);
+    }
+    
+    .cabecera-tutoriales h1 {
+      font-size: 2.4rem;
+    }
   }
   
-  .panel-progreso h4 {
-    margin: 0 0 1rem 0;
-    color: var(--tutoriales-texto);
-    font-size: 1.125rem;
-    font-weight: 700;
-  }
-  
-  .barra-progreso-general {
-    height: 8px;
-    background: var(--tutoriales-fondo);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 0.75rem;
-  }
-  
-  .progreso-llenado {
-    height: 100%;
-    background: linear-gradient(135deg, var(--tutoriales-primario), var(--tutoriales-secundario));
-    border-radius: 4px;
-    transition: width 0.6s ease;
-  }
-  
-  .estadisticas-progreso {
-    display: flex;
-    justify-content: space-between;
-    color: var(--tutoriales-texto-secundario);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
-  
-  .consejo-ayuda {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    background: rgba(74, 144, 226, 0.08);
-    border-radius: var(--tutoriales-radio);
-    border-left: 3px solid var(--tutoriales-primario);
-  }
-  
-  .consejo-ayuda svg {
-    color: var(--tutoriales-primario);
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-  }
-  
-  .consejo-ayuda p {
-    margin: 0;
-    color: var(--tutoriales-texto);
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-  
-  /* ========================================
-     Responsive
-     ======================================== */
+  /* Tablets y pantallas medianas */
   @media (max-width: 1024px) {
     .contenedor-tutoriales {
-      padding: 1.5rem;
+      padding: var(--video-spacing-xl);
     }
-  
+    
     .contenido-tutoriales {
-      gap: 1.5rem;
+      grid-template-columns: 1fr;
+      gap: var(--video-spacing-xl);
+    }
+    
+    .panel-lista-videos {
+      position: static;
+      order: 2;
+    }
+    
+    .lista-videos {
+      max-height: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--video-spacing-md);
+    }
+    
+    .cabecera-tutoriales h1 {
+      font-size: 2.2rem;
+    }
+    
+    .info-video-actual h2 {
+      font-size: 1.6rem;
     }
   }
   
+  /* Móviles grandes */
   @media (max-width: 768px) {
     .contenedor-tutoriales {
-      padding: 1rem;
+      padding: var(--video-spacing-md);
     }
-  
+    
     .cabecera-tutoriales {
-      padding: 1.5rem;
+      margin-bottom: var(--video-spacing-xl);
+      padding: var(--video-spacing-lg) 0;
     }
-  
-    .estadisticas-tutoriales {
-      gap: 1.5rem;
+    
+    .cabecera-tutoriales h1 {
+      font-size: 1.8rem;
     }
-  
-    .video-placeholder {
-      height: 300px;
+    
+    .cabecera-tutoriales p {
+      font-size: 1rem;
     }
-  
-    .mensaje-video-placeholder h2 {
-      font-size: 1.5rem;
-    }
-  
-    .cabecera-info-tutorial {
+    
+    .botones-control {
       flex-direction: column;
+      gap: var(--video-spacing-sm);
     }
-  
-    .filtros-tutoriales {
-      flex-direction: column;
-    }
-  
-    .filtro-categoria {
-      justify-content: center;
-    }
-  
-    .acciones-tutorial {
-      flex-direction: column;
-    }
-  
-    .boton-accion-secundario {
+    
+    .botones-derecha {
       width: 100%;
-      justify-content: center;
+      justify-content: flex-end;
+    }
+    
+    .control-volumen {
+      display: none;
+    }
+    
+    .boton-control {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .input-progreso {
+      height: 4px;
+    }
+    
+    .info-video-actual {
+      padding: var(--video-spacing-lg);
+    }
+    
+    .info-video-actual h2 {
+      font-size: 1.4rem;
+    }
+    
+    .descripcion-video {
+      font-size: 1rem;
+    }
+    
+    .panel-lista-videos {
+      padding: var(--video-spacing-lg);
+    }
+    
+    .lista-videos {
+      grid-template-columns: 1fr;
+    }
+    
+    .item-video {
+      padding: var(--video-spacing-sm);
+    }
+    
+    .miniatura-video {
+      width: 120px;
+    }
+    
+    .miniatura-video img {
+      height: 70px;
     }
   }
   
+  /* Móviles pequeños */
   @media (max-width: 480px) {
-    .video-placeholder {
-      height: 250px;
+    .contenedor-tutoriales {
+      padding: var(--video-spacing-sm);
     }
-  
-    .tarjeta-tutorial {
+    
+    .cabecera-tutoriales h1 {
+      font-size: 1.5rem;
+    }
+    
+    .cabecera-tutoriales p {
+      font-size: 0.9rem;
+    }
+    
+    .boton-control {
+      width: 36px;
+      height: 36px;
+    }
+    
+    .boton-control svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .tiempo-video {
+      font-size: 0.8rem;
+    }
+    
+    .info-video-actual {
+      padding: var(--video-spacing-md);
+    }
+    
+    .info-video-actual h2 {
+      font-size: 1.2rem;
+    }
+    
+    .descripcion-video {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    
+    .item-video {
       flex-direction: column;
+      gap: var(--video-spacing-sm);
     }
-  
-    .vista-previa-tutorial {
+    
+    .miniatura-video {
       width: 100%;
-      height: 150px;
+      height: auto;
     }
-  
-    .botones-control {
-      flex-direction: column;
-      gap: 1rem;
+    
+    .miniatura-video img {
+      height: 120px;
     }
-  
-    .botones-izquierda, .botones-derecha {
-      width: 100%;
-      justify-content: center;
+    
+    .info-item-video h4 {
+      font-size: 0.95rem;
+    }
+    
+    .info-item-video p {
+      font-size: 0.8rem;
+    }
+    
+    .panel-lista-videos h3 {
+      font-size: 1.2rem;
+      margin-bottom: var(--video-spacing-lg);
     }
   }
   
   /* ========================================
-     Accesibilidad
+     ACCESIBILIDAD
      ======================================== */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -733,11 +837,128 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
   
-  button:focus-visible,
-  input:focus-visible {
-    outline: 3px solid var(--tutoriales-primario);
+  button:focus-visible {
+    outline: 3px solid var(--video-primario);
     outline-offset: 2px;
+  }
+  
+  button:focus:not(:focus-visible) {
+    outline: none;
+  }
+  
+  /* ========================================
+     UTILIDADES
+     ======================================== */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+  
+  /* ========================================
+     ESTADOS DE CARGA (opcional)
+     ======================================== */
+  .video-cargando {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--video-fondo-oscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  
+  .spinner-video {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--video-primario);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  /* ========================================
+     MEJORAS VISUALES ADICIONALES
+     ======================================== */
+  .panel-video-principal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--video-primario), var(--video-secundario));
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .panel-video-principal:hover::before {
+    opacity: 1;
+  }
+  
+  /* Efecto de brillo en controles */
+  .boton-control::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .boton-control:hover::after {
+    opacity: 1;
+  }
+  
+  /* Indicador de reproducción en item seleccionado */
+  .item-video.seleccionado::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: var(--video-spacing-md);
+    transform: translateY(-50%);
+    color: var(--video-primario);
+    font-size: 1.2rem;
+    opacity: 0.7;
+    animation: pulse 2s infinite;
+  }
+  
+  /* Tooltip personalizado */
+  [title] {
+    position: relative;
+  }
+  
+  [title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--video-fondo-oscuro);
+    color: var(--video-texto-claro);
+    padding: var(--video-spacing-xs) var(--video-spacing-sm);
+    border-radius: var(--video-radio-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 100;
+    margin-bottom: var(--video-spacing-xs);
+    box-shadow: var(--video-sombra-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }

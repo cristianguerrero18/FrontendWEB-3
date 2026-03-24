@@ -1,14 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Lock, Mail } from "lucide-react";
+import { Lock, Mail, BookOpen, ArrowRight } from "lucide-react";
 import { loginUsuario } from "../api/auth/Auth.js";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
-// Importar storage
 import { storeUserToken } from "./../utils/tokenStorage.js";
-
-// Importar imagen de fondo
 import backgroundImage from "../assets/fondo.png";
 
 function Login() {
@@ -16,6 +12,10 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "UTS - Iniciar Sesión | Plataforma Educativa";
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,20 +32,15 @@ function Login() {
         return;
       }
 
-      // Guardar en localStorage tradicional
       localStorage.setItem("token", res.token);
       localStorage.setItem("usuario", JSON.stringify(res.usuario));
       localStorage.setItem("carrera", JSON.stringify(res.carrera));
       localStorage.setItem("id_rol", res.usuario.id_rol);
 
-      // Decodificar token
       const decoded = jwtDecode(res.token);
-      
-      // Almacenar en el sistema global de tokens
       const userId = res.usuario.id_usuario || decoded.sub || email;
       storeUserToken(userId, res.token, res.usuario, res.carrera);
 
-      // ✅ IMPORTANTE: Redirección según rol - DOCENTES (id_rol === 3)
       if (decoded.id_rol === 1) {
         navigate("/PanelAdministrador", { replace: true });
         return;
@@ -56,13 +51,11 @@ function Login() {
         return;
       }
 
-      // 🔥 NUEVO: Redirección para docentes (rol 3)
       if (decoded.id_rol === 3) {
         navigate("/PanelDocente", { replace: true });
         return;
       }
 
-      // ❌ Rol no permitido
       localStorage.clear();
       setError("No tienes permisos para acceder");
     } catch (err) {
@@ -71,85 +64,115 @@ function Login() {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4"
+    <div
+      className="relative min-h-screen flex items-center justify-center px-4 py-8"
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Capa de superposición para mejor legibilidad */}
-      <div className="absolute inset-0 bg-black/20"></div>
-      
-      <div className="w-full max-w-md relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20"
-        >
-          {/* HEADER */}
-          <div className="bg-gradient-to-r from-[#1e3a8a] to-[#4a90e2] py-6 px-6">
-            <h2 className="text-center text-2xl md:text-3xl font-bold text-white mb-2">
-              Iniciar Sesión
-            </h2>
-            <p className="text-center text-blue-100 text-sm">
-              Acceso al sistema académico
+      {/* Overlay elegante */}
+      <div className="absolute inset-0 bg-slate-950/55"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-950/40 via-slate-900/30 to-sky-800/30"></div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55 }}
+        className="relative z-10 w-full max-w-lg"
+      >
+        <div className="rounded-3xl border border-white/15 bg-white/92 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] overflow-hidden">
+          
+          {/* Encabezado */}
+          <div className="px-8 pt-8 pb-6 text-center bg-gradient-to-b from-[#153e75] to-[#1e4d8f]">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur-sm">
+              <BookOpen size={30} className="text-white" />
+            </div>
+
+            <h1 className="text-3xl font-bold tracking-tight text-white">
+              UTS
+            </h1>
+
+            <p className="mt-2 text-sm text-blue-100 font-medium">
+              Plataforma Web de Recursos Digitales
+            </p>
+
+            <p className="mt-3 text-xs text-blue-200/90 max-w-xs mx-auto leading-relaxed">
+              Accede con tu cuenta institucional para consultar y gestionar recursos académicos.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
-            {error && (
-              <p className="text-red-600 text-sm text-center font-semibold bg-red-50 py-2 rounded-lg">
-                {error}
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="px-8 py-8 space-y-5">
+            <div className="text-center mb-2">
+              <h2 className="text-2xl font-semibold text-slate-800">
+                Iniciar sesión
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Ingresa tus credenciales para continuar
               </p>
+            </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 text-center font-medium"
+              >
+                {error}
+              </motion.div>
             )}
 
-            {/* EMAIL */}
-            <div className="relative">
-              <Mail
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-                size={20}
-              />
-              <input
-                type="email"
-                placeholder="Correo institucional"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl 
-                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none 
-                text-gray-700 placeholder-gray-400 bg-white/80"
-              />
+            {/* Correo */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">
+                Correo institucional
+              </label>
+              <div className="relative group">
+                <Mail
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1e4d8f] transition-colors"
+                />
+                <input
+                  type="email"
+                  placeholder="ejemplo@uts.edu.co"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-3.5 text-slate-700 placeholder:text-slate-400 outline-none transition-all duration-200 focus:border-[#1e4d8f] focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
             </div>
 
-            {/* PASSWORD */}
-            <div className="relative">
-              <Lock
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-                size={20}
-              />
-              <input
-                type="password"
-                placeholder="Contraseña"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl 
-                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none 
-                text-gray-700 placeholder-gray-400 bg-white/80"
-              />
+            {/* Contraseña */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">
+                Contraseña
+              </label>
+              <div className="relative group">
+                <Lock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1e4d8f] transition-colors"
+                />
+                <input
+                  type="password"
+                  placeholder="Ingresa tu contraseña"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-3.5 text-slate-700 placeholder:text-slate-400 outline-none transition-all duration-200 focus:border-[#1e4d8f] focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
             </div>
 
-            {/* LINKS */}
-            <div className="flex justify-between text-sm">
+            {/* Acciones secundarias */}
+            <div className="flex items-center justify-between gap-4 text-sm pt-1">
               <button
                 type="button"
                 onClick={() => navigate("/recuperar-contrasena")}
-                className="text-[#1e3a8a] hover:text-blue-900 font-medium 
-                cursor-pointer hover:underline transition"
+                className="text-[#1e4d8f] font-medium hover:text-[#153e75] hover:underline transition"
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -157,33 +180,44 @@ function Login() {
               <button
                 type="button"
                 onClick={() => navigate("/Registro")}
-                className="text-[#1e3a8a] hover:text-blue-900 font-semibold 
-                cursor-pointer hover:underline transition"
+                className="text-slate-600 font-medium hover:text-slate-900 transition"
               >
-                Regístrate
+                Crear cuenta
               </button>
             </div>
 
-            {/* BOTÓN */}
+            {/* Botón principal */}
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
               type="submit"
-              className="w-full bg-gradient-to-r from-[#1e3a8a] to-[#4a90e2] 
-              hover:from-blue-900 hover:to-blue-600 
-              text-white font-bold py-3 rounded-xl 
-              transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="w-full rounded-2xl bg-[#1e4d8f] py-3.5 text-white font-semibold shadow-lg shadow-blue-900/20 transition-all duration-300 hover:bg-[#153e75] focus:outline-none focus:ring-4 focus:ring-blue-200 flex items-center justify-center gap-2"
             >
-              Iniciar Sesión
+              <span>Ingresar</span>
+              <ArrowRight size={18} />
             </motion.button>
-          </form>
-        </motion.div>
 
-        <div className="text-center mt-6">
-          <p className="text-xs text-white drop-shadow-md bg-black/20 px-3 py-1 rounded-full">
-            Plataforma Educativa © 2025
-          </p>
+            {/* Texto inferior */}
+            <div className="border-t border-slate-200 pt-4">
+              <p className="text-center text-xs leading-relaxed text-slate-500">
+                Acceso exclusivo para estudiantes, docentes y personal administrativo.
+              </p>
+            </div>
+          </form>
         </div>
-      </div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="mt-5 text-center"
+        >
+          <p className="inline-block rounded-full bg-black/25 px-4 py-2 text-xs text-white/90 backdrop-blur-md shadow-md">
+            © 2025 UTS - Unidades Tecnológicas de Santander
+          </p>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

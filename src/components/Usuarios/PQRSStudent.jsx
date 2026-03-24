@@ -344,12 +344,6 @@ const PQRSStudent = () => {
 
       <div className="cabecera-pqrs">
         <div className="titulo-pqrs-con-boton">
-          <div>
-            <h2>Mis PQRS</h2>
-            <p className="subtitulo-pqrs">
-              Gestiona tus peticiones, quejas, reclamos y sugerencias
-            </p>
-          </div>
           <div className="botones-acciones-superiores">
             <button 
               className="boton-nuevo-pqr"

@@ -1,0 +1,85 @@
+/* Animaciones adicionales para el login */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Estilos para el autocompletado de navegadores */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
+  box-shadow: 0 0 0 30px #f9fafb inset !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Responsive para dispositivos muy pequeños */
+@media (max-width: 380px) {
+  .text-xs {
+    font-size: 0.7rem;
+  }
+}
+/* Animación flotante sutil */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.floating {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Mejor apariencia del autocompletado */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #334155 !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Suaviza renderizado */
+input,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Pantallas pequeñas */
+@media (max-width: 420px) {
+  .login-card-padding {
+    padding: 1.25rem;
+  }
+}

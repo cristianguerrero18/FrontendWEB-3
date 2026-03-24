@@ -219,15 +219,6 @@ const Notificaciones = () => {
 
       <div className="cabecera-notificaciones">
         <div className="titulo-notificaciones-con-boton">
-          <div>
-            <h2>Mis Notificaciones</h2>
-            <p className="subtitulo-notificaciones">
-              Notificaciones del usuario #{idUsuario}
-              {userData && userData.nombres_usuario && 
-                ` - ${userData.nombres_usuario} ${userData.apellidos_usuario || ''}`
-              }
-            </p>
-          </div>
           <div className="botones-superiores">
             <button 
               className="boton-nuevo-notificacion boton-secundario"

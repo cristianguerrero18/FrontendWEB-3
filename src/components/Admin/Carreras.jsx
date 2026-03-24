@@ -4,25 +4,24 @@ import "../../css/Principal.css";
 import "../../css/Carreras.css";
 
 const Carreras = () => {
-  const { 
-    carreras, 
-    tiposCarrera,        // ✅ Array de tipos reales desde backend
-    cargando, 
-    cargandoTipos,       // ✅ Estado de carga de tipos
-    mensaje, 
+  const {
+    carreras,
+    tiposCarrera,
+    cargando,
+    cargandoTipos,
+    mensaje,
     recargarCarreras,
     crearCarreras,
     actualizarCarrera,
     eliminarCarrera,
-    getNombreTipoCarrera, // ✅ Función para obtener nombre
+    getNombreTipoCarrera,
     limpiarMensaje
   } = useCarreras();
-  
+
   const [paginaActual, setPaginaActual] = useState(1);
   const [elementosPorPagina, setElementosPorPagina] = useState(10);
   const [busqueda, setBusqueda] = useState("");
-  
-  // Estados para el modal de formulario
+
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [carreraActual, setCarreraActual] = useState({
@@ -31,8 +30,7 @@ const Carreras = () => {
     id_tipo_carrera: "",
     Descripcion: ""
   });
-  
-  // Estado para confirmar eliminación
+
   const [mostrarConfirmacionEliminar, setMostrarConfirmacionEliminar] = useState(false);
   const [carreraAEliminar, setCarreraAEliminar] = useState(null);
 
@@ -49,11 +47,10 @@ const Carreras = () => {
     }
   }, [mensaje, limpiarMensaje]);
 
-  // Filtrar carreras por búsqueda
   const carrerasFiltradas = carreras.filter(carrera => {
     const busquedaLower = busqueda.toLowerCase();
     const tipoNombre = getNombreTipoCarrera(carrera.id_tipo_carrera).toLowerCase();
-    
+
     return (
       carrera.nombre_carrera.toLowerCase().includes(busquedaLower) ||
       (carrera.Descripcion?.toLowerCase() || "").includes(busquedaLower) ||
@@ -62,49 +59,45 @@ const Carreras = () => {
     );
   });
 
-  // Calcular elementos para la página actual
   const indiceUltimoElemento = paginaActual * elementosPorPagina;
   const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
   const elementosActuales = carrerasFiltradas.slice(indicePrimerElemento, indiceUltimoElemento);
   const totalPaginas = Math.ceil(carrerasFiltradas.length / elementosPorPagina);
 
-  // Funciones de paginación
   const cambiarPagina = (numeroPagina) => {
     setPaginaActual(numeroPagina);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const paginaAnterior = () => {
     if (paginaActual > 1) {
       setPaginaActual(paginaActual - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const paginaSiguiente = () => {
     if (paginaActual < totalPaginas) {
       setPaginaActual(paginaActual + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  // Función para obtener color según tipo de carrera
   const getColorTipoCarrera = (idTipo) => {
     const colores = [
-      { bg: '#e3f2fd', color: '#1976d2', border: '#bbdefb' }, // Azul
-      { bg: '#e8f5e9', color: '#388e3c', border: '#c8e6c9' }, // Verde
-      { bg: '#fff3e0', color: '#f57c00', border: '#ffe0b2' }, // Naranja
-      { bg: '#f3e5f5', color: '#7b1fa2', border: '#e1bee7' }, // Púrpura
-      { bg: '#ffebee', color: '#d32f2f', border: '#ffcdd2' }, // Rojo
-      { bg: '#e0f2f1', color: '#00796b', border: '#b2dfdb' }, // Turquesa
-      { bg: '#fff8e1', color: '#ff8f00', border: '#ffecb3' }, // Ámbar
+      { bg: "#e3f2fd", color: "#1976d2", border: "#bbdefb" },
+      { bg: "#e8f5e9", color: "#388e3c", border: "#c8e6c9" },
+      { bg: "#fff3e0", color: "#f57c00", border: "#ffe0b2" },
+      { bg: "#f3e5f5", color: "#7b1fa2", border: "#e1bee7" },
+      { bg: "#ffebee", color: "#d32f2f", border: "#ffcdd2" },
+      { bg: "#e0f2f1", color: "#00796b", border: "#b2dfdb" },
+      { bg: "#fff8e1", color: "#ff8f00", border: "#ffecb3" }
     ];
-    
+
     const index = (idTipo - 1) % colores.length;
-    return colores[index] || { bg: '#f5f5f5', color: '#616161', border: '#e0e0e0' };
+    return colores[index] || { bg: "#f5f5f5", color: "#616161", border: "#e0e0e0" };
   };
 
-  // Funciones CRUD usando el hook
   const handleNuevaCarrera = () => {
     setCarreraActual({
       id_carrera: 0,
@@ -142,8 +135,7 @@ const Carreras = () => {
 
   const handleSubmitCarrera = async (e) => {
     e.preventDefault();
-    
-    // Validación básica
+
     if (!carreraActual.nombre_carrera.trim()) {
       alert("El nombre de la carrera es obligatorio");
       return;
@@ -154,20 +146,17 @@ const Carreras = () => {
       return;
     }
 
-    // Convertir id_tipo_carrera a número
     const carreraParaEnviar = {
       ...carreraActual,
       id_tipo_carrera: parseInt(carreraActual.id_tipo_carrera)
     };
 
     if (modoEdicion) {
-      // Actualizar carrera existente
       await actualizarCarrera(carreraParaEnviar);
     } else {
-      // Crear nueva carrera (como array según la API)
       await crearCarreras([carreraParaEnviar]);
     }
-    
+
     setMostrarModal(false);
   };
 
@@ -179,51 +168,46 @@ const Carreras = () => {
     }));
   };
 
-
-
-  if (!carreras.length && !cargando) return (
-    <div className="estado-inicial">
-      <h2>Carreras no disponibles</h2>
-      <p>No se encontraron carreras en la base de datos.</p>
-      <button 
-        className="boton-nueva-carrera"
-        onClick={handleNuevaCarrera}
-      >
-        + Crear Primera Carrera
-      </button>
-    </div>
-  );
+  if (!carreras.length && !cargando)
+    return (
+      <div className="estado-inicial">
+        <h2>Carreras no disponibles</h2>
+        <p>No se encontraron carreras en la base de datos.</p>
+        <button className="boton-nueva-carrera" onClick={handleNuevaCarrera}>
+          + Crear Primera Carrera
+        </button>
+      </div>
+    );
 
   return (
-    <div className="contenedor-carreras">
+    <div className="contenedor-carreras carreras-pro">
       {mensaje && (
         <div className={`mensaje-api ${mensaje.includes("Error") ? "error" : "exito"}`}>
           <p>{mensaje}</p>
-          <button 
-            className="boton-cerrar-mensaje"
-            onClick={limpiarMensaje}
-          >
+          <button className="boton-cerrar-mensaje" onClick={limpiarMensaje}>
             ×
           </button>
         </div>
       )}
 
-      <div className="cabecera-carreras">
-        <div className="titulo-carreras-con-boton">
-          <h1>Carreras Académicas</h1>
-          <button 
-            className="boton-nueva-carrera"
-            onClick={handleNuevaCarrera}
-          >
-            + Nueva Carrera
+      <div className="cabecera-carreras carreras-header-pro">
+        <div className="titulo-carreras-con-boton carreras-header-minimal">
+          <div className="carreras-header-info">
+            <div className="carreras-badge-superior">
+              <span>Listado académico activo</span>
+            </div>
+          </div>
+
+          <button className="boton-nueva-carrera" onClick={handleNuevaCarrera}>
+            + Nueva carrera
           </button>
         </div>
-        
+
         <div className="controles-carreras">
           <div className="buscador-carreras">
             <input
               type="text"
-              placeholder="Buscar por nombre, descripción o tipo de carrera..."
+              placeholder="Buscar por nombre, tipo o descripción"
               value={busqueda}
               onChange={(e) => {
                 setBusqueda(e.target.value);
@@ -232,12 +216,12 @@ const Carreras = () => {
               className="input-busqueda-carreras"
             />
           </div>
-          
+
           <div className="controles-paginacion-superior">
             <div className="seleccion-elementos-carreras">
               <span>Mostrar:</span>
-              <select 
-                value={elementosPorPagina} 
+              <select
+                value={elementosPorPagina}
                 onChange={(e) => {
                   setElementosPorPagina(Number(e.target.value));
                   setPaginaActual(1);
@@ -250,9 +234,10 @@ const Carreras = () => {
                 <option value="50">50</option>
               </select>
             </div>
-            
+
             <div className="info-cantidad-carreras">
-              {carrerasFiltradas.length} {carrerasFiltradas.length === 1 ? 'carrera encontrada' : 'carreras encontradas'}
+              {carrerasFiltradas.length}{" "}
+              {carrerasFiltradas.length === 1 ? "carrera encontrada" : "carreras encontradas"}
             </div>
           </div>
         </div>
@@ -273,15 +258,18 @@ const Carreras = () => {
             {elementosActuales.map((carrera) => {
               const colorTipo = getColorTipoCarrera(carrera.id_tipo_carrera);
               const nombreTipo = getNombreTipoCarrera(carrera.id_tipo_carrera);
-              
+
               return (
                 <tr key={carrera.id_carrera} className="fila-carrera">
                   <td className="celda-id-carrera">
-                    <div className="badge-id-carrera" style={{ 
-                      backgroundColor: colorTipo.bg,
-                      color: colorTipo.color,
-                      borderColor: colorTipo.border
-                    }}>
+                    <div
+                      className="badge-id-carrera"
+                      style={{
+                        backgroundColor: colorTipo.bg,
+                        color: colorTipo.color,
+                        borderColor: colorTipo.border
+                      }}
+                    >
                       {carrera.id_carrera}
                     </div>
                   </td>
@@ -292,9 +280,9 @@ const Carreras = () => {
                   </td>
                   <td className="celda-tipo-carrera">
                     <div className="info-con-badge">
-                      <div 
+                      <div
                         className="badge-tipo-carrera"
-                        style={{ 
+                        style={{
                           backgroundColor: colorTipo.bg,
                           color: colorTipo.color,
                           borderColor: colorTipo.border
@@ -303,9 +291,7 @@ const Carreras = () => {
                         {nombreTipo}
                       </div>
                       {carrera.id_tipo_carrera && (
-                        <div className="badge-id-secundario">
-                          ID: {carrera.id_tipo_carrera}
-                        </div>
+                        <div className="badge-id-secundario">ID: {carrera.id_tipo_carrera}</div>
                       )}
                     </div>
                   </td>
@@ -316,13 +302,13 @@ const Carreras = () => {
                   </td>
                   <td className="celda-acciones-carrera">
                     <div className="botones-acciones-carrera">
-                      <button 
+                      <button
                         className="boton-editar-carrera"
                         onClick={() => handleEditarCarrera(carrera)}
                       >
                         Editar
                       </button>
-                      <button 
+                      <button
                         className="boton-eliminar-carrera"
                         onClick={() => handleEliminarCarrera(carrera)}
                       >
@@ -337,24 +323,20 @@ const Carreras = () => {
         </table>
       </div>
 
-      {/* Modal para crear/editar carreras */}
       {mostrarModal && (
         <div className="modal-fondo-carreras">
           <div className="modal-contenido-carreras">
             <div className="modal-cabecera-carreras">
-              <h2>{modoEdicion ? 'Editar Carrera' : 'Nueva Carrera'}</h2>
-              <button 
-                className="modal-cerrar-carreras"
-                onClick={() => setMostrarModal(false)}
-              >
+              <h2>{modoEdicion ? "Editar carrera" : "Nueva carrera"}</h2>
+              <button className="modal-cerrar-carreras" onClick={() => setMostrarModal(false)}>
                 ×
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmitCarrera}>
               <div className="modal-cuerpo-carreras">
                 <div className="campo-formulario-carreras">
-                  <label>Nombre de la Carrera *</label>
+                  <label>Nombre de la carrera *</label>
                   <input
                     type="text"
                     name="nombre_carrera"
@@ -365,13 +347,13 @@ const Carreras = () => {
                     placeholder="Ingrese el nombre de la carrera"
                   />
                 </div>
-                
+
                 <div className="campo-formulario-carreras">
-                  <label>Tipo de Carrera *</label>
+                  <label>Tipo de carrera *</label>
                   {cargandoTipos ? (
                     <div className="cargando-tipos">
                       <small>Cargando tipos de carrera...</small>
-                      <select 
+                      <select
                         name="id_tipo_carrera"
                         value={carreraActual.id_tipo_carrera}
                         onChange={handleChangeCarrera}
@@ -417,7 +399,7 @@ const Carreras = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="campo-formulario-carreras">
                   <label>Descripción</label>
                   <textarea
@@ -430,21 +412,17 @@ const Carreras = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="modal-pie-carreras">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="boton-cancelar-carreras"
                   onClick={() => setMostrarModal(false)}
                 >
                   Cancelar
                 </button>
-                <button 
-                  type="submit" 
-                  className="boton-guardar-carreras"
-                  disabled={cargando}
-                >
-                  {cargando ? 'Procesando...' : (modoEdicion ? 'Actualizar' : 'Crear')}
+                <button type="submit" className="boton-guardar-carreras" disabled={cargando}>
+                  {cargando ? "Procesando..." : modoEdicion ? "Actualizar" : "Crear"}
                 </button>
               </div>
             </form>
@@ -452,20 +430,19 @@ const Carreras = () => {
         </div>
       )}
 
-      {/* Modal de confirmación para eliminar */}
       {mostrarConfirmacionEliminar && (
         <div className="modal-fondo-carreras">
           <div className="modal-contenido-carreras modal-confirmacion">
             <div className="modal-cabecera-carreras">
-              <h2>Confirmar Eliminación</h2>
-              <button 
+              <h2>Confirmar eliminación</h2>
+              <button
                 className="modal-cerrar-carreras"
                 onClick={() => setMostrarConfirmacionEliminar(false)}
               >
                 ×
               </button>
             </div>
-            
+
             <div className="modal-cuerpo-carreras">
               <p>¿Estás seguro de que deseas eliminar la carrera:</p>
               <p className="carrera-a-eliminar">{carreraAEliminar?.nombre_carrera}</p>
@@ -473,9 +450,9 @@ const Carreras = () => {
               <p><strong>ID:</strong> {carreraAEliminar?.id_carrera}</p>
               <p className="alerta-eliminacion">⚠️ Esta acción no se puede deshacer.</p>
             </div>
-            
+
             <div className="modal-pie-carreras">
-              <button 
+              <button
                 className="boton-cancelar-carreras"
                 onClick={() => {
                   setMostrarConfirmacionEliminar(false);
@@ -485,27 +462,26 @@ const Carreras = () => {
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 className="boton-eliminar-confirmar"
                 onClick={confirmarEliminarCarrera}
                 disabled={cargando}
               >
-                {cargando ? 'Eliminando...' : 'Eliminar'}
+                {cargando ? "Eliminando..." : "Eliminar"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Paginador */}
       <div className="paginador-carreras">
         <div className="info-paginacion-carreras">
           Mostrando {indicePrimerElemento + 1} - {Math.min(indiceUltimoElemento, carrerasFiltradas.length)} de {carrerasFiltradas.length} carreras
         </div>
-        
+
         <div className="controles-navegacion-carreras">
-          <button 
-            onClick={paginaAnterior} 
+          <button
+            onClick={paginaAnterior}
             disabled={paginaActual === 1}
             className="boton-paginador-carreras boton-anterior-carreras"
           >
@@ -529,19 +505,19 @@ const Carreras = () => {
                 <button
                   key={numeroPagina}
                   onClick={() => cambiarPagina(numeroPagina)}
-                  className={`numero-pagina-carreras ${paginaActual === numeroPagina ? 'activa' : ''}`}
+                  className={`numero-pagina-carreras ${paginaActual === numeroPagina ? "activa" : ""}`}
                 >
                   {numeroPagina}
                 </button>
               );
             })}
-            
+
             {totalPaginas > 5 && paginaActual < totalPaginas - 2 && (
               <>
                 <span className="puntos-suspensivos-carreras">...</span>
                 <button
                   onClick={() => cambiarPagina(totalPaginas)}
-                  className={`numero-pagina-carreras ${paginaActual === totalPaginas ? 'activa' : ''}`}
+                  className={`numero-pagina-carreras ${paginaActual === totalPaginas ? "activa" : ""}`}
                 >
                   {totalPaginas}
                 </button>
@@ -549,15 +525,15 @@ const Carreras = () => {
             )}
           </div>
 
-          <button 
-            onClick={paginaSiguiente} 
+          <button
+            onClick={paginaSiguiente}
             disabled={paginaActual === totalPaginas}
             className="boton-paginador-carreras boton-siguiente-carreras"
           >
             Siguiente →
           </button>
         </div>
-        
+
         <div className="totales-carreras">
           <div className="total-paginas-carreras">
             Página {paginaActual} de {totalPaginas}

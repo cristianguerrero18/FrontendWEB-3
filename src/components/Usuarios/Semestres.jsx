@@ -7,15 +7,15 @@ import { useFavoritos } from "../../hooks/useFavoritos.js"
 import { useReportes } from "../../hooks/useReportes.js"
 import { useRecursoLikes } from "../../hooks/useRecursoLikes.js"
 import { useComentarios } from "../../hooks/useComentarios.js"
-import { useUser } from "../../context/UserContext.jsx" // Importamos el contexto
-import { 
-  BookOpen, 
-  GraduationCap, 
-  ArrowLeft, 
-  Book, 
-  AlertCircle, 
-  Home, 
-  FolderOpen, 
+import { useUser } from "../../context/UserContext.jsx"
+import {
+  BookOpen,
+  GraduationCap,
+  ArrowLeft,
+  Book,
+  AlertCircle,
+  Home,
+  FolderOpen,
   Hash,
   FileText,
   Image,
@@ -23,7 +23,6 @@ import {
   File,
   Download,
   Eye,
-  ChevronRight,
   X,
   Plus,
   Upload,
@@ -31,7 +30,6 @@ import {
   Check,
   AlertTriangle,
   Copyright,
-  User,
   Heart,
   ThumbsUp,
   ThumbsDown,
@@ -39,9 +37,8 @@ import {
   Send,
   Edit2,
   Trash2,
-  MoreVertical,
   Smile,
-  Clock
+  Clock,
 } from "lucide-react"
 import "../../css/semestres.css"
 import { useState, useEffect, useCallback, useRef } from "react"
@@ -72,7 +69,7 @@ const Semestres = () => {
     getRecursosPorIdAsignatura,
     materiaTieneRecursos,
     contarRecursosPorTipo,
-    recargarRecursosMateria
+    recargarRecursosMateria,
   } = useRecursosMateria()
 
   const {
@@ -80,7 +77,7 @@ const Semestres = () => {
     loading: loadingAsignaturas,
     error: errorAsignaturas,
     getAsignaturasPorSemestre,
-    cargarAsignaturas
+    cargarAsignaturas,
   } = useAsignaturasEstudiante()
 
   const {
@@ -90,10 +87,9 @@ const Semestres = () => {
     categorias,
     cargarCategorias,
     agregarRecurso,
-    limpiarMensajes
+    limpiarMensajes,
   } = useAgregarRecurso()
 
-  // Hook de favoritos
   const {
     favoritosPorUsuario,
     loading: loadingFavoritos,
@@ -101,10 +97,9 @@ const Semestres = () => {
     esFavorito,
     alternarFavorito,
     operacion: operacionFavorito,
-    cargarFavoritosUsuario
+    cargarFavoritosUsuario,
   } = useFavoritos()
 
-  // Hook de reportes
   const {
     cargando: cargandoReporte,
     error: errorReporte,
@@ -112,10 +107,9 @@ const Semestres = () => {
     operacion: operacionReporte,
     reportarRecurso,
     usuarioReportoRecurso,
-    limpiarMensajesReporte: limpiarMensajesReporte
+    limpiarMensajesReporte,
   } = useReportes()
 
-  // Contexto de usuario para obtener id_usuario
   const { getUserId } = useUser()
 
   const [semestreSeleccionado, setSemestreSeleccionado] = useState(null)
@@ -133,34 +127,32 @@ const Semestres = () => {
   const [motivoReporte, setMotivoReporte] = useState("")
   const [descargando, setDescargando] = useState({})
   const [notificacion, setNotificacion] = useState(null)
-
-  // Estado para mostrar/ocultar comentarios por recurso
   const [mostrarComentarios, setMostrarComentarios] = useState({})
 
-  // Ref para controlar las descargas
   const descargaRef = useRef(null)
 
-  // Estados para el formulario de recurso - AHORA INCLUYE id_usuario
   const [formularioRecurso, setFormularioRecurso] = useState({
-    titulo: '',
-    tema: '',
-    URL: '',
+    titulo: "",
+    tema: "",
+    URL: "",
     id_asignatura: null,
     id_categoria: null,
-    id_usuario: null // <-- Se agregará desde el contexto
+    id_usuario: null,
   })
+
   const [archivoRecurso, setArchivoRecurso] = useState(null)
 
-  // Estados para el modal de derechos de autor - SIMPLIFICADO
   const [formularioDerechos, setFormularioDerechos] = useState({
-    esAutor: 'si',
-    autorOriginal: '',
-    fuenteOriginal: '',
-    licencia: '',
-    aceptaTerminos: false
+    tipo_autoria: "propio",
+    declara_autoria: false,
+    acepta_terminos: false,
+    nombre_autor_original: "",
+    fuente_original: "",
+    referencia_bibliografica: "",
+    tipo_licencia: "",
+    observaciones_licencia: "",
   })
 
-  // Función para mostrar notificaciones
   const mostrarNotificacion = (tipo, mensaje) => {
     setNotificacion({ tipo, mensaje })
     setTimeout(() => {
@@ -168,36 +160,44 @@ const Semestres = () => {
     }, 3000)
   }
 
-  // Toggle para mostrar/ocultar comentarios de un recurso
   const toggleMostrarComentarios = (idRecurso) => {
-    setMostrarComentarios(prev => ({
+    setMostrarComentarios((prev) => ({
       ...prev,
-      [idRecurso]: !prev[idRecurso]
+      [idRecurso]: !prev[idRecurso],
     }))
   }
 
-  // Cargar categorías al montar el componente
+  const resetFormularioDerechos = () => {
+    setFormularioDerechos({
+      tipo_autoria: "propio",
+      declara_autoria: false,
+      acepta_terminos: false,
+      nombre_autor_original: "",
+      fuente_original: "",
+      referencia_bibliografica: "",
+      tipo_licencia: "",
+      observaciones_licencia: "",
+    })
+  }
+
   useEffect(() => {
     cargarCategorias()
   }, [cargarCategorias])
 
-  // Cargar favoritos al montar
   useEffect(() => {
     cargarFavoritosUsuario()
   }, [cargarFavoritosUsuario])
 
-  // Obtener id_usuario del contexto y asignarlo al formulario
   useEffect(() => {
     const userId = getUserId()
     if (userId) {
-      setFormularioRecurso(prev => ({
+      setFormularioRecurso((prev) => ({
         ...prev,
-        id_usuario: userId
+        id_usuario: userId,
       }))
     }
   }, [getUserId])
 
-  // Memoizar funciones para evitar recreaciones innecesarias
   const cargarMateriasDelSemestre = useCallback(() => {
     if (semestreSeleccionado) {
       const materias = getMateriasPorSemestre(semestreSeleccionado.numero)
@@ -208,43 +208,37 @@ const Semestres = () => {
   const cargarRecursosDeMateria = useCallback(async () => {
     if (materiaSeleccionada) {
       await cargarRecursosMateria(materiaSeleccionada.id)
-      const recursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
-      setRecursosMateria(recursos)
-      
-      // Pre-fill asignatura en el formulario
-      setFormularioRecurso(prev => ({
+      const recursosAsignatura = getRecursosPorIdAsignatura(materiaSeleccionada.id)
+      setRecursosMateria(recursosAsignatura)
+
+      setFormularioRecurso((prev) => ({
         ...prev,
-        id_asignatura: materiaSeleccionada.id
+        id_asignatura: materiaSeleccionada.id,
       }))
     }
   }, [materiaSeleccionada, cargarRecursosMateria, getRecursosPorIdAsignatura])
 
-  // Cargar materias cuando se selecciona un semestre
   useEffect(() => {
     cargarMateriasDelSemestre()
   }, [cargarMateriasDelSemestre])
 
-  // Cargar recursos cuando se selecciona una materia
   useEffect(() => {
     cargarRecursosDeMateria()
-    setMostrarFavoritos(false) // Resetear filtro al cambiar de materia
+    setMostrarFavoritos(false)
   }, [cargarRecursosDeMateria])
 
-  // Limpiar mensajes cuando se cierra el formulario
   useEffect(() => {
     if (!mostrarFormularioRecurso) {
       limpiarMensajes()
     }
   }, [mostrarFormularioRecurso, limpiarMensajes])
 
-  // Limpiar mensajes de reporte cuando se cierra el modal
   useEffect(() => {
     if (!mostrarModalReportar) {
       limpiarMensajesReporte()
     }
   }, [mostrarModalReportar, limpiarMensajesReporte])
 
-  // Manejar clic en un semestre
   const handleSeleccionarSemestre = (semestre) => {
     setSemestreSeleccionado(semestre)
     setMostrarMaterias(true)
@@ -254,16 +248,14 @@ const Semestres = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // Manejar clic en una materia
   const handleSeleccionarMateria = (materia) => {
     setMateriaSeleccionada(materia)
     setMostrarRecursos(true)
     setMostrarFormularioRecurso(false)
-    setMostrarFavoritos(false) // Resetear filtro
+    setMostrarFavoritos(false)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // Volver a la vista de materias
   const handleVolverAMaterias = () => {
     setMostrarRecursos(false)
     setMostrarFormularioRecurso(false)
@@ -271,7 +263,6 @@ const Semestres = () => {
     setMateriaSeleccionada(null)
   }
 
-  // Volver a la vista de semestres
   const handleVolverASemestres = () => {
     setMostrarMaterias(false)
     setMostrarRecursos(false)
@@ -281,310 +272,335 @@ const Semestres = () => {
     setMateriaSeleccionada(null)
   }
 
-  // Refrescar materias
   const handleRefrescarMaterias = () => {
     cargarMaterias()
   }
 
-  // Abrir formulario para agregar recurso
   const handleAbrirFormularioRecurso = () => {
     setMostrarFormularioRecurso(true)
-    // Resetear formulario de derechos cuando se abre el formulario
-    setFormularioDerechos({
-      esAutor: 'si',
-      autorOriginal: '',
-      fuenteOriginal: '',
-      licencia: '',
-      aceptaTerminos: false
-    })
+    resetFormularioDerechos()
   }
 
-  // Cerrar formulario de recurso
   const handleCerrarFormularioRecurso = () => {
     setMostrarFormularioRecurso(false)
     setFormularioRecurso({
-      titulo: '',
-      tema: '',
-      URL: '',
+      titulo: "",
+      tema: "",
+      URL: "",
       id_asignatura: materiaSeleccionada?.id || null,
       id_categoria: null,
-      id_usuario: getUserId() // Mantener el id_usuario
+      id_usuario: getUserId(),
     })
     setArchivoRecurso(null)
+    resetFormularioDerechos()
   }
 
-  // Manejar cambio en el formulario
   const handleChangeFormulario = (e) => {
     const { name, value } = e.target
-    setFormularioRecurso(prev => ({
+    setFormularioRecurso((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }))
   }
 
-  // Manejar cambio de archivo
   const handleArchivoChange = (e) => {
     const file = e.target.files[0]
     setArchivoRecurso(file)
   }
 
-  // Manejar cambio en el formulario de derechos
   const handleChangeDerechos = (e) => {
     const { name, value, type, checked } = e.target
-    setFormularioDerechos(prev => ({
+    setFormularioDerechos((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }))
   }
 
-  // Validar formulario de derechos
   const validarDerechos = () => {
-    const { esAutor, autorOriginal, fuenteOriginal, aceptaTerminos } = formularioDerechos
-    
-    // Validar términos obligatorios
-    if (!aceptaTerminos) {
+    if (!formularioDerechos.declara_autoria) {
       return {
         valido: false,
-        error: 'Debes aceptar los términos y condiciones de uso'
+        error: "Debes declarar la titularidad o legitimidad del recurso antes de continuar.",
       }
     }
 
-    // Si no es autor, debe completar información del autor original
-    if (esAutor === 'no') {
-      if (!autorOriginal.trim()) {
+    if (!formularioDerechos.acepta_terminos) {
+      return {
+        valido: false,
+        error: "Debes aceptar los términos y condiciones de publicación.",
+      }
+    }
+
+    if (
+      ["tercero", "licencia", "dominio_publico"].includes(
+        formularioDerechos.tipo_autoria
+      )
+    ) {
+      if (!formularioDerechos.nombre_autor_original.trim()) {
         return {
           valido: false,
-          error: 'Debes especificar el autor original del contenido'
+          error: "Debes indicar el nombre del autor original del recurso.",
         }
       }
-      if (!fuenteOriginal.trim()) {
+
+      if (!formularioDerechos.fuente_original.trim()) {
         return {
           valido: false,
-          error: 'Debes especificar la fuente original del contenido'
+          error: "Debes indicar la fuente, enlace o procedencia del recurso.",
         }
+      }
+
+      if (!formularioDerechos.referencia_bibliografica.trim()) {
+        return {
+          valido: false,
+          error: "Debes registrar una referencia o citación básica del recurso.",
+        }
+      }
+    }
+
+    if (
+      formularioDerechos.tipo_autoria === "licencia" &&
+      !formularioDerechos.tipo_licencia.trim()
+    ) {
+      return {
+        valido: false,
+        error: "Debes indicar el tipo de licencia o permiso de uso.",
       }
     }
 
     return { valido: true }
   }
 
-  // Abrir modal de derechos antes de enviar
   const handleAbrirModalDerechos = (e) => {
     e.preventDefault()
-    
-    // Validar formulario básico primero
+
     if (!formularioRecurso.id_categoria) {
-      mostrarNotificacion('error', 'Por favor selecciona una categoría')
-      return
-    }
-    if (!formularioRecurso.id_asignatura) {
-      mostrarNotificacion('error', 'Por favor selecciona una asignatura')
+      mostrarNotificacion("error", "Por favor selecciona una categoría")
       return
     }
 
-    // Verificar que tenemos id_usuario
+    if (!formularioRecurso.id_asignatura) {
+      mostrarNotificacion("error", "Por favor selecciona una asignatura")
+      return
+    }
+
     if (!formularioRecurso.id_usuario) {
-      mostrarNotificacion('error', 'No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.')
+      mostrarNotificacion(
+        "error",
+        "No se pudo identificar al usuario. Por favor, inicia sesión nuevamente."
+      )
+      return
+    }
+
+    if (!categoriaEsLink() && !archivoRecurso) {
+      mostrarNotificacion("error", "Debes seleccionar un archivo para subir")
+      return
+    }
+
+    if (categoriaEsLink() && !formularioRecurso.URL.trim()) {
+      mostrarNotificacion("error", "Debes ingresar la URL del enlace")
       return
     }
 
     setMostrarModalDerechos(true)
   }
 
-  // Cerrar modal de derechos
   const handleCerrarModalDerechos = () => {
     setMostrarModalDerechos(false)
   }
 
-  // Enviar recurso después de aceptar derechos
   const handleEnviarConDerechos = async () => {
     const validacion = validarDerechos()
+
     if (!validacion.valido) {
-      mostrarNotificacion('error', validacion.error)
+      mostrarNotificacion("error", validacion.error)
       return
     }
 
-    // El TRIGGER se encargará de insertar en derechos_autor automáticamente
-    console.log('Datos de derechos de autor:', formularioDerechos)
-    
+    console.log("Datos de derechos de autor:", {
+      ...formularioDerechos,
+      fecha_declaracion: new Date().toISOString(),
+    })
+
     setMostrarModalDerechos(false)
-    
+
     try {
-      // Agregar el recurso (el trigger insertará en derechos_autor)
-      const resultado = await agregarRecurso(formularioRecurso, archivoRecurso)
-      
+      const datosRecursoFinal = {
+        ...formularioRecurso,
+        copyright_simulado: {
+          ...formularioDerechos,
+          fecha_declaracion: new Date().toISOString(),
+        },
+      }
+
+      const resultado = await agregarRecurso(datosRecursoFinal, archivoRecurso)
+
       if (resultado.exito) {
-        mostrarNotificacion('success', 'Recurso agregado exitosamente. La declaración de derechos se registró automáticamente.')
-        
-        // Actualizar recursos de la materia
+        mostrarNotificacion(
+          "success",
+          "Recurso agregado exitosamente. La declaración de derechos se registró correctamente."
+        )
+
         if (materiaSeleccionada) {
           await recargarRecursosMateria(materiaSeleccionada.id)
           const nuevosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
           setRecursosMateria(nuevosRecursos)
         }
-        
-        // Cerrar formulario después de 2 segundos
+
         setTimeout(() => {
           handleCerrarFormularioRecurso()
         }, 2000)
       }
     } catch (error) {
-      console.error('Error al agregar recurso:', error)
-      mostrarNotificacion('error', 'Error al agregar recurso')
+      console.error("Error al agregar recurso:", error)
+      mostrarNotificacion("error", "Error al agregar recurso")
     }
   }
 
-  // Obtener icono por categoría
   const getIconoCategoria = (idCategoria) => {
-    switch(idCategoria) {
-      case 1: // Imágenes
+    switch (idCategoria) {
+      case 1:
         return <Image size={20} />
-      case 2: // PDF
+      case 2:
         return <FileText size={20} />
-      case 3: // Otros archivos
+      case 3:
         return <File size={20} />
-      case 4: // Links
+      case 4:
         return <Link size={20} />
       default:
         return <File size={20} />
     }
   }
 
-  // Obtener etiqueta por categoría
   const getEtiquetaCategoria = (idCategoria) => {
-    switch(idCategoria) {
-      case 1: return "Imagen"
-      case 2: return "PDF"
-      case 3: return "Archivo"
-      case 4: return "Enlace"
-      default: return "Recurso"
+    switch (idCategoria) {
+      case 1:
+        return "Imagen"
+      case 2:
+        return "PDF"
+      case 3:
+        return "Archivo"
+      case 4:
+        return "Enlace"
+      default:
+        return "Recurso"
     }
   }
 
-  // Obtener extensión basada en categoría o tipo de archivo
   const obtenerExtension = (recurso) => {
-    // Si es un enlace web
     if (recurso.id_categoria === 4) {
-      return 'html'
+      return "html"
     }
-    
-    // Si la URL contiene un tipo de archivo conocido
-    const url = recurso.URL || ''
+
+    const url = recurso.URL || ""
     const match = url.match(/\.([a-z0-9]+)(?:[\?#]|$)/i)
     if (match) {
       return match[1].toLowerCase()
     }
-    
-    // Si no, basarse en la categoría
-    switch(recurso.id_categoria) {
-      case 1: return 'jpg'
-      case 2: return 'pdf'
-      case 3: return 'bin'
-      default: return 'file'
+
+    switch (recurso.id_categoria) {
+      case 1:
+        return "jpg"
+      case 2:
+        return "pdf"
+      case 3:
+        return "bin"
+      default:
+        return "file"
     }
   }
 
-  // Función para generar un nombre de archivo seguro
   const generarNombreArchivo = (recurso) => {
     const tituloLimpio = recurso.titulo
-      .replace(/[^a-z0-9]/gi, '_')
+      .replace(/[^a-z0-9]/gi, "_")
       .toLowerCase()
       .substring(0, 50)
+
     const extension = obtenerExtension(recurso)
     return `${tituloLimpio}.${extension}`
   }
 
-  // Función para forzar descarga en Cloudinary
   const forzarDescargaCloudinary = (url) => {
-    // Si ya tiene el parámetro de descarga, no hacer nada
-    if (url.includes('/fl_attachment/')) {
+    if (url.includes("/fl_attachment/")) {
       return url
     }
-    
-    // Agregar el parámetro de descarga forzada
-    return url.replace('/upload/', '/upload/fl_attachment/')
+
+    return url.replace("/upload/", "/upload/fl_attachment/")
   }
 
-  // Descargar recurso usando el atributo download
   const handleDescargarRecurso = (recurso) => {
-    // Si es un enlace web, simplemente abrir en nueva pestaña
-    if (recurso.id_categoria === 4 || recurso.URL?.startsWith('http') && recurso.id_categoria !== 1 && recurso.id_categoria !== 2 && recurso.id_categoria !== 3) {
-      window.open(recurso.URL, '_blank')
+    if (
+      recurso.id_categoria === 4 ||
+      (recurso.URL?.startsWith("http") &&
+        recurso.id_categoria !== 1 &&
+        recurso.id_categoria !== 2 &&
+        recurso.id_categoria !== 3)
+    ) {
+      window.open(recurso.URL, "_blank")
       return
     }
 
-    // Si no tiene URL, no se puede descargar
     if (!recurso.URL) {
-      mostrarNotificacion('error', 'No se puede descargar este recurso')
+      mostrarNotificacion("error", "No se puede descargar este recurso")
       return
     }
 
-    // Marcar como descargando
-    setDescargando(prev => ({ ...prev, [recurso.id_recurso]: true }))
+    setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: true }))
 
     try {
       const nombreArchivo = generarNombreArchivo(recurso)
       let urlDescarga = recurso.URL
 
-      // Si es Cloudinary, forzar descarga
-      if (urlDescarga.includes('cloudinary.com')) {
+      if (urlDescarga.includes("cloudinary.com")) {
         urlDescarga = forzarDescargaCloudinary(urlDescarga)
       }
 
-      // Crear un enlace temporal
-      const enlace = document.createElement('a')
+      const enlace = document.createElement("a")
       enlace.href = urlDescarga
       enlace.download = nombreArchivo
-      enlace.target = '_blank'
-      enlace.rel = 'noopener noreferrer'
-      
-      // Estilos para ocultar el enlace
-      enlace.style.display = 'none'
-      
-      // Agregar al DOM
+      enlace.target = "_blank"
+      enlace.rel = "noopener noreferrer"
+      enlace.style.display = "none"
+
       document.body.appendChild(enlace)
-      
-      // Simular clic
       enlace.click()
-      
-      // Limpiar después de un tiempo
+
       setTimeout(() => {
         document.body.removeChild(enlace)
-        setDescargando(prev => ({ ...prev, [recurso.id_recurso]: false }))
-        mostrarNotificacion('success', `Descargando: ${recurso.titulo}`)
+        setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: false }))
+        mostrarNotificacion("success", `Descargando: ${recurso.titulo}`)
       }, 100)
-      
     } catch (error) {
-      console.error('Error al descargar:', error)
-      setDescargando(prev => ({ ...prev, [recurso.id_recurso]: false }))
-      mostrarNotificacion('error', 'Error al descargar el archivo')
+      console.error("Error al descargar:", error)
+      setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: false }))
+      mostrarNotificacion("error", "Error al descargar el archivo")
     }
   }
 
-  // Ver recurso
   const handleVerRecurso = (recurso) => {
-    if (recurso.id_categoria === 4) { // Link
-      window.open(recurso.URL, '_blank')
+    if (recurso.id_categoria === 4) {
+      window.open(recurso.URL, "_blank")
     } else if (recurso.URL) {
-      // Para archivos, intentar abrirlos en nueva pestaña
-      const ventana = window.open(recurso.URL, '_blank')
-      if (!ventana || ventana.closed || typeof ventana.closed === 'undefined') {
-        // Si falla al abrir (posible bloqueo de popup), ofrecer descarga
+      const ventana = window.open(recurso.URL, "_blank")
+      if (!ventana || ventana.closed || typeof ventana.closed === "undefined") {
         handleDescargarRecurso(recurso)
       }
     }
   }
 
-  // Verificar si la categoría seleccionada es "Links" (para mostrar/ocultar campos)
   const categoriaEsLink = () => {
-    const categoriaSeleccionada = categorias.find(c => c.id_categoria == formularioRecurso.id_categoria)
-    return categoriaSeleccionada?.nombre_categoria === "Links" || formularioRecurso.id_categoria == 4
+    const categoriaSeleccionada = categorias.find(
+      (c) => c.id_categoria == formularioRecurso.id_categoria
+    )
+    return (
+      categoriaSeleccionada?.nombre_categoria === "Links" ||
+      formularioRecurso.id_categoria == 4
+    )
   }
 
-  // Función para manejar clic en favorito
   const handleToggleFavorito = async (recurso) => {
     await alternarFavorito(recurso.id_recurso)
-    // Si estamos en vista de favoritos y eliminamos, recargar recursos
+
     if (mostrarFavoritos && materiaSeleccionada) {
       await recargarRecursosMateria(materiaSeleccionada.id)
       const nuevosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
@@ -592,20 +608,16 @@ const Semestres = () => {
     }
   }
 
-  // Función para ver solo favoritos
   const handleVerFavoritos = () => {
     setMostrarFavoritos(true)
-    // Filtrar recursos que son favoritos
-    const recursosFavoritos = recursosMateria.filter(recurso => 
+    const recursosFavoritos = recursosMateria.filter((recurso) =>
       esFavorito(recurso.id_recurso)
     )
     setRecursosMateria(recursosFavoritos)
   }
 
-  // Función para ver todos los recursos
   const handleVerTodosRecursos = async () => {
     setMostrarFavoritos(false)
-    // Recargar todos los recursos
     if (materiaSeleccionada) {
       await cargarRecursosMateria(materiaSeleccionada.id)
       const todosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
@@ -613,40 +625,35 @@ const Semestres = () => {
     }
   }
 
-  // Función para abrir modal de reporte
   const handleAbrirModalReportar = async (recurso) => {
     setRecursoAReporter(recurso)
-    
-    // Verificar si el usuario ya reportó este recurso
     const yaReporto = await usuarioReportoRecurso(recurso.id_recurso)
     setUsuarioYaReporto(yaReporto)
-    
     setMostrarModalReportar(true)
   }
 
-  // Función para cerrar modal de reporte
   const handleCerrarModalReportar = () => {
     setMostrarModalReportar(false)
     setRecursoAReporter(null)
     setUsuarioYaReporto(false)
     setMotivoReporte("")
-    limpiarMensajesReporte() 
+    limpiarMensajesReporte()
   }
 
-  // Función para enviar reporte
   const handleReportarRecurso = async () => {
     if (!recursoAReporter || !motivoReporte.trim()) {
-      mostrarNotificacion('error', 'Por favor, proporciona un motivo para reportar')
+      mostrarNotificacion("error", "Por favor, proporciona un motivo para reportar")
       return
     }
 
-    const resultado = await reportarRecurso(recursoAReporter.id_recurso, motivoReporte)
-    
+    const resultado = await reportarRecurso(
+      recursoAReporter.id_recurso,
+      motivoReporte
+    )
+
     if (resultado.exito) {
-      // Actualizar estado para mostrar que ya fue reportado
       setUsuarioYaReporto(true)
-      
-      // Recargar recursos después de 2 segundos
+
       setTimeout(() => {
         if (materiaSeleccionada) {
           recargarRecursosMateria(materiaSeleccionada.id)
@@ -655,8 +662,10 @@ const Semestres = () => {
     }
   }
 
-  const loading = loadingSemestres || loadingMaterias || loadingAsignaturas || loadingFavoritos
-  const error = errorSemestres || errorMaterias || errorRecursos || errorAsignaturas || errorFavoritos
+  const loading =
+    loadingSemestres || loadingMaterias || loadingAsignaturas || loadingFavoritos
+  const error =
+    errorSemestres || errorMaterias || errorRecursos || errorAsignaturas || errorFavoritos
 
   if (loading) {
     return (
@@ -682,17 +691,19 @@ const Semestres = () => {
     )
   }
 
-  // Calcular total de materias
-  const totalMaterias = Object.values(materiasPorSemestre).reduce((total, materias) => total + materias.length, 0)
+  const totalMaterias = Object.values(materiasPorSemestre).reduce(
+    (total, materias) => total + materias.length,
+    0
+  )
 
-  // VISTA DE RECURSOS DE LA MATERIA
   if (mostrarRecursos && materiaSeleccionada) {
     const conteoRecursos = contarRecursosPorTipo(materiaSeleccionada.id)
-    const conteoFavoritos = recursosMateria.filter(recurso => esFavorito(recurso.id_recurso)).length
+    const conteoFavoritos = recursosMateria.filter((recurso) =>
+      esFavorito(recurso.id_recurso)
+    ).length
 
     return (
       <div className="contenedor-recursos">
-        {/* Encabezado de navegación */}
         <div className="navegacion-materias">
           <button className="boton-volver-materias" onClick={handleVolverAMaterias}>
             <ArrowLeft size={20} />
@@ -700,11 +711,12 @@ const Semestres = () => {
           </button>
           <div className="info-navegacion">
             <Home size={18} />
-            <span>Semestre {semestreSeleccionado?.numero} / {materiaSeleccionada.nombre}</span>
+            <span>
+              Semestre {semestreSeleccionado?.numero} / {materiaSeleccionada.nombre}
+            </span>
           </div>
         </div>
 
-        {/* Cabecera de la materia */}
         <div className="cabecera-materias-simple">
           <div className="titulo-materias-con-info">
             <div>
@@ -717,7 +729,8 @@ const Semestres = () => {
               <div className="badge-contador-materias">
                 <FolderOpen size={20} />
                 <span>
-                  {recursosMateria.length} {recursosMateria.length === 1 ? "recurso" : "recursos"}
+                  {recursosMateria.length}{" "}
+                  {recursosMateria.length === 1 ? "recurso" : "recursos"}
                 </span>
                 {conteoFavoritos > 0 && (
                   <span className="contador-favoritos">
@@ -726,7 +739,7 @@ const Semestres = () => {
                   </span>
                 )}
               </div>
-              <button 
+              <button
                 className="boton-agregar-recurso"
                 onClick={handleAbrirFormularioRecurso}
               >
@@ -737,7 +750,6 @@ const Semestres = () => {
           </div>
         </div>
 
-        {/* Estadísticas de recursos */}
         {recursosMateria.length > 0 && (
           <div className="estadisticas-recursos">
             <div className="estadistica-recurso">
@@ -749,6 +761,7 @@ const Semestres = () => {
                 <div className="label-estadistica">Total</div>
               </div>
             </div>
+
             {conteoRecursos.imagenes > 0 && (
               <div className="estadistica-recurso">
                 <div className="icono-estadistica">
@@ -760,6 +773,7 @@ const Semestres = () => {
                 </div>
               </div>
             )}
+
             {conteoRecursos.pdf > 0 && (
               <div className="estadistica-recurso">
                 <div className="icono-estadistica">
@@ -771,6 +785,7 @@ const Semestres = () => {
                 </div>
               </div>
             )}
+
             {conteoRecursos.links > 0 && (
               <div className="estadistica-recurso">
                 <div className="icono-estadistica">
@@ -782,6 +797,7 @@ const Semestres = () => {
                 </div>
               </div>
             )}
+
             {conteoFavoritos > 0 && (
               <div className="estadistica-recurso">
                 <div className="icono-estadistica">
@@ -796,19 +812,20 @@ const Semestres = () => {
           </div>
         )}
 
-        {/* Formulario para agregar recurso */}
         {mostrarFormularioRecurso && (
           <div className="formulario-agregar-recurso">
             <div className="cabecera-formulario">
-              <h3><Plus size={24} /> Agregar Nuevo Recurso</h3>
-              <button 
+              <h3>
+                <Plus size={24} /> Agregar Nuevo Recurso
+              </h3>
+              <button
                 className="boton-cerrar-formulario"
                 onClick={handleCerrarFormularioRecurso}
               >
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={handleAbrirModalDerechos}>
               {errorAgregarRecurso && (
                 <div className="mensaje-error">
@@ -816,7 +833,7 @@ const Semestres = () => {
                   <span>{errorAgregarRecurso}</span>
                 </div>
               )}
-              
+
               {exitoAgregarRecurso && (
                 <div className="mensaje-exito">
                   <span>{exitoAgregarRecurso}</span>
@@ -855,13 +872,16 @@ const Semestres = () => {
                   <select
                     id="id_categoria"
                     name="id_categoria"
-                    value={formularioRecurso.id_categoria || ''}
+                    value={formularioRecurso.id_categoria || ""}
                     onChange={handleChangeFormulario}
                     required
                   >
                     <option value="">Selecciona una categoría</option>
-                    {categorias.map(categoria => (
-                      <option key={categoria.id_categoria} value={categoria.id_categoria}>
+                    {categorias.map((categoria) => (
+                      <option
+                        key={categoria.id_categoria}
+                        value={categoria.id_categoria}
+                      >
                         {categoria.nombre_categoria}
                       </option>
                     ))}
@@ -941,16 +961,15 @@ const Semestres = () => {
           </div>
         )}
 
-        {/* Modal de Derechos de Autor */}
         {mostrarModalDerechos && (
           <div className="modal-derechos">
-            <div className="modal-contenido-derechos">
+            <div className="modal-contenido-derechos modal-contenido-derechos-uniforme">
               <div className="cabecera-modal-derechos">
                 <div className="icono-cabecera-modal">
                   <Copyright size={24} />
-                  <h3>Declaración de Derechos de Autor</h3>
+                  <h3>Declaración de titularidad y derechos de autor</h3>
                 </div>
-                <button 
+                <button
                   className="boton-cerrar-modal"
                   onClick={handleCerrarModalDerechos}
                 >
@@ -959,101 +978,147 @@ const Semestres = () => {
               </div>
 
               <div className="contenido-modal-derechos">
-                <div className="alerta-importante">
-                  <AlertTriangle size={20} />
-                  <p>
-                    <strong>Importante:</strong> Al aceptar estos términos, se registrará automáticamente tu declaración de derechos de autor en el sistema.
-                  </p>
-                </div>
-
-                <div className="formulario-derechos">
-                  <div className="campo-derechos">
-                    <label htmlFor="esAutor">
-                      <User size={16} /> ¿Eres el autor original de este contenido? *
-                    </label>
-                    <div className="opciones-autoria">
-                      <label className="opcion-autoria">
-                        <input
-                          type="radio"
-                          name="esAutor"
-                          value="si"
-                          checked={formularioDerechos.esAutor === 'si'}
-                          onChange={handleChangeDerechos}
-                        />
-                        <span>Sí, soy el autor original</span>
-                      </label>
-                      <label className="opcion-autoria">
-                        <input
-                          type="radio"
-                          name="esAutor"
-                          value="no"
-                          checked={formularioDerechos.esAutor === 'no'}
-                          onChange={handleChangeDerechos}
-                        />
-                        <span>No, es contenido de terceros</span>
-                      </label>
+                <div className="bloque-legal-recurso bloque-legal-recurso-semestres">
+                  <div className="bloque-legal-header">
+                    <div className="bloque-legal-icono">©</div>
+                    <div>
+                      <h3>Declaración de titularidad y derechos de autor</h3>
+                      <p>
+                        Antes de publicar este recurso, debes declarar bajo tu
+                        responsabilidad la legitimidad del contenido.
+                      </p>
                     </div>
                   </div>
 
-                  {formularioDerechos.esAutor === 'no' && (
-                    <>
+                  <div className="campo-derechos">
+                    <label>Condición de autoría del recurso:</label>
+                    <select
+                      name="tipo_autoria"
+                      value={formularioDerechos.tipo_autoria}
+                      onChange={handleChangeDerechos}
+                      className="select-formulario-derechos"
+                    >
+                      <option value="propio">
+                        Soy el autor original del recurso
+                      </option>
+                      <option value="tercero">
+                        El recurso pertenece a un tercero y lo cito
+                      </option>
+                      <option value="licencia">
+                        El recurso tiene licencia o permiso de uso
+                      </option>
+                      <option value="dominio_publico">
+                        El recurso es de dominio público o uso libre
+                      </option>
+                    </select>
+                  </div>
+
+                  {formularioDerechos.tipo_autoria !== "propio" && (
+                    <div className="grid-copyright">
                       <div className="campo-derechos">
-                        <label htmlFor="autorOriginal">Autor original del contenido *</label>
+                        <label>Nombre del autor original:</label>
                         <input
                           type="text"
-                          id="autorOriginal"
-                          name="autorOriginal"
-                          value={formularioDerechos.autorOriginal}
+                          name="nombre_autor_original"
+                          value={formularioDerechos.nombre_autor_original}
                           onChange={handleChangeDerechos}
-                          placeholder="Nombre del autor o institución"
+                          className="input-formulario-derechos"
+                          placeholder="Nombre completo del autor, institución o entidad"
                         />
                       </div>
 
                       <div className="campo-derechos">
-                        <label htmlFor="fuenteOriginal">Fuente original *</label>
+                        <label>Fuente o procedencia del recurso:</label>
                         <input
                           type="text"
-                          id="fuenteOriginal"
-                          name="fuenteOriginal"
-                          value={formularioDerechos.fuenteOriginal}
+                          name="fuente_original"
+                          value={formularioDerechos.fuente_original}
                           onChange={handleChangeDerechos}
-                          placeholder="URL, libro, revista o publicación"
+                          className="input-formulario-derechos"
+                          placeholder="URL, libro, repositorio, editorial, revista, etc."
                         />
                       </div>
 
-                      <div className="campo-derechos">
-                        <label htmlFor="licencia">Licencia del contenido</label>
-                        <input
-                          type="text"
-                          id="licencia"
-                          name="licencia"
-                          value={formularioDerechos.licencia}
+                      <div className="campo-derechos campo-full">
+                        <label>Referencia o citación:</label>
+                        <textarea
+                          name="referencia_bibliografica"
+                          value={formularioDerechos.referencia_bibliografica}
                           onChange={handleChangeDerechos}
-                          placeholder="Ej: Creative Commons, Dominio Público, etc."
+                          rows="3"
+                          className="textarea-formulario-derechos"
+                          placeholder="Ejemplo: Apellido, N. (Año). Título del recurso. Editorial / URL"
                         />
                       </div>
-                    </>
+
+                      {formularioDerechos.tipo_autoria === "licencia" && (
+                        <>
+                          <div className="campo-derechos">
+                            <label>Tipo de licencia o permiso:</label>
+                            <input
+                              type="text"
+                              name="tipo_licencia"
+                              value={formularioDerechos.tipo_licencia}
+                              onChange={handleChangeDerechos}
+                              className="input-formulario-derechos"
+                              placeholder="Creative Commons, permiso institucional, licencia comercial, etc."
+                            />
+                          </div>
+
+                          <div className="campo-derechos">
+                            <label>Observaciones sobre la licencia:</label>
+                            <input
+                              type="text"
+                              name="observaciones_licencia"
+                              value={formularioDerechos.observaciones_licencia}
+                              onChange={handleChangeDerechos}
+                              className="input-formulario-derechos"
+                              placeholder="Condiciones de uso, restricciones o notas adicionales"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
                   )}
 
-                  <div className="terminos-condiciones">
-                    <div className="check-termino">
+                  <div className="checks-legales">
+                    <label className="check-termino check-termino-uniforme">
                       <input
                         type="checkbox"
-                        id="aceptaTerminos"
-                        name="aceptaTerminos"
-                        checked={formularioDerechos.aceptaTerminos}
+                        name="declara_autoria"
+                        checked={formularioDerechos.declara_autoria}
                         onChange={handleChangeDerechos}
                       />
-                      <label htmlFor="aceptaTerminos">
-                        <strong>Acepto los términos y condiciones:</strong> Declaro que tengo los derechos o el permiso necesario para compartir este contenido con fines educativos en esta plataforma, y soy responsable del material que estoy subiendo. Se registrará automáticamente mi declaración en el sistema.
-                      </label>
-                    </div>
+                      <span>
+                        Declaro bajo gravedad de juramento que este recurso es propio
+                        o que cuento con la debida autorización, cita, licencia o
+                        fundamento legal para compartirlo con fines académicos.
+                      </span>
+                    </label>
+
+                    <label className="check-termino check-termino-uniforme">
+                      <input
+                        type="checkbox"
+                        name="acepta_terminos"
+                        checked={formularioDerechos.acepta_terminos}
+                        onChange={handleChangeDerechos}
+                      />
+                      <span>
+                        Acepto los términos y condiciones de publicación, y asumo
+                        la responsabilidad por la veracidad de esta declaración y
+                        por el uso legítimo del contenido compartido.
+                      </span>
+                    </label>
                   </div>
 
-                  <div className="informacion-legal">
+                  <div className="informacion-legal informacion-legal-uniforme">
                     <p className="texto-legal">
                       <small>
-                        * El sistema registrará automáticamente tu aceptación en la tabla de derechos de autor. Esta plataforma está diseñada para uso educativo. Al subir contenido, te comprometes a respetar los derechos de autor y a usar únicamente material para el cual tengas permiso de distribución.
+                        Esta declaración se registra como evidencia de responsabilidad
+                        del usuario frente a la publicación del recurso. El uso
+                        inadecuado de material protegido por derechos de autor puede
+                        dar lugar al retiro del contenido y a las acciones
+                        correspondientes.
                       </small>
                     </p>
                   </div>
@@ -1072,7 +1137,7 @@ const Semestres = () => {
                   type="button"
                   className="boton-confirmar-derechos"
                   onClick={handleEnviarConDerechos}
-                  disabled={cargandoRecurso || !formularioDerechos.aceptaTerminos}
+                  disabled={cargandoRecurso || !formularioDerechos.acepta_terminos}
                 >
                   {cargandoRecurso ? (
                     <>
@@ -1091,7 +1156,6 @@ const Semestres = () => {
           </div>
         )}
 
-        {/* Modal para Reportar Recurso */}
         {mostrarModalReportar && recursoAReporter && (
           <div className="modal-reportar-recurso">
             <div className="modal-contenido-reportar">
@@ -1100,7 +1164,7 @@ const Semestres = () => {
                   <AlertTriangle size={24} />
                   <h3>Reportar Recurso</h3>
                 </div>
-                <button 
+                <button
                   className="boton-cerrar-modal-reportar"
                   onClick={handleCerrarModalReportar}
                   disabled={cargandoReporte}
@@ -1114,11 +1178,12 @@ const Semestres = () => {
                   <AlertCircle size={20} />
                   <div>
                     <p>
-                      <strong>Estás reportando:</strong> "{recursoAReporter.titulo || 'Recurso'}"
+                      <strong>Estás reportando:</strong> "
+                      {recursoAReporter.titulo || "Recurso"}"
                     </p>
                     <p className="subtitulo-reportar">
-                      Los reportes serán revisados por los administradores. 
-                      Por favor, proporciona información clara y precisa.
+                      Los reportes serán revisados por los administradores. Por
+                      favor, proporciona información clara y precisa.
                     </p>
                   </div>
                 </div>
@@ -1145,8 +1210,9 @@ const Semestres = () => {
                   <div className="informacion-legal-reportar">
                     <p>
                       <small>
-                        Al reportar un recurso, confirmas que la información proporcionada es verídica.
-                        Los reportes falsos o malintencionados pueden tener consecuencias.
+                        Al reportar un recurso, confirmas que la información
+                        proporcionada es verídica. Los reportes falsos o
+                        malintencionados pueden tener consecuencias.
                       </small>
                     </p>
                   </div>
@@ -1190,7 +1256,7 @@ const Semestres = () => {
                   ) : (
                     <>
                       <AlertTriangle size={16} />
-                      <span>{usuarioYaReporto ? 'Ya Reportado' : 'Reportar Recurso'}</span>
+                      <span>{usuarioYaReporto ? "Ya Reportado" : "Reportar Recurso"}</span>
                     </>
                   )}
                 </button>
@@ -1199,37 +1265,37 @@ const Semestres = () => {
           </div>
         )}
 
-        {/* Notificación flotante */}
         {notificacion && (
           <div className={`notificacion ${notificacion.tipo}`}>
             {notificacion.mensaje}
           </div>
         )}
 
-        {/* Listado de recursos */}
         <div className="seccion-materias">
           {recursosMateria.length > 0 ? (
             <>
-              {/* Filtro de favoritos */}
               <div className="filtros-recursos">
                 <div className="contador-filtros">
                   <span>
-                    {mostrarFavoritos 
-                      ? `${recursosMateria.length} ${recursosMateria.length === 1 ? 'favorito' : 'favoritos'}`
-                      : `${recursosMateria.length} ${recursosMateria.length === 1 ? 'recurso' : 'recursos'}`
-                    }
+                    {mostrarFavoritos
+                      ? `${recursosMateria.length} ${
+                          recursosMateria.length === 1 ? "favorito" : "favoritos"
+                        }`
+                      : `${recursosMateria.length} ${
+                          recursosMateria.length === 1 ? "recurso" : "recursos"
+                        }`}
                   </span>
                 </div>
                 <div className="botones-filtros">
-                  <button 
-                    className={`boton-filtro ${!mostrarFavoritos ? 'activo' : ''}`}
+                  <button
+                    className={`boton-filtro ${!mostrarFavoritos ? "activo" : ""}`}
                     onClick={handleVerTodosRecursos}
                   >
                     <FolderOpen size={16} />
                     <span>Todos</span>
                   </button>
-                  <button 
-                    className={`boton-filtro ${mostrarFavoritos ? 'activo' : ''}`}
+                  <button
+                    className={`boton-filtro ${mostrarFavoritos ? "activo" : ""}`}
                     onClick={handleVerFavoritos}
                     disabled={conteoFavoritos === 0}
                   >
@@ -1242,13 +1308,19 @@ const Semestres = () => {
               <div className="grid-recursos">
                 {recursosMateria.map((recurso) => {
                   const esFavoritoRecurso = esFavorito(recurso.id_recurso)
-                  const estaProcesandoFavorito = operacionFavorito?.cargando && operacionFavorito?.idRecurso === recurso.id_recurso
-                  const estaProcesandoReporte = operacionReporte?.cargando && operacionReporte?.idRecurso === recurso.id_recurso
-                  const yaReportado = usuarioYaReporto && recursoAReporter?.id_recurso === recurso.id_recurso
+                  const estaProcesandoFavorito =
+                    operacionFavorito?.cargando &&
+                    operacionFavorito?.idRecurso === recurso.id_recurso
+                  const estaProcesandoReporte =
+                    operacionReporte?.cargando &&
+                    operacionReporte?.idRecurso === recurso.id_recurso
+                  const yaReportado =
+                    usuarioYaReporto &&
+                    recursoAReporter?.id_recurso === recurso.id_recurso
                   const estaDescargando = descargando[recurso.id_recurso] || false
 
                   return (
-                    <RecursoCompleto 
+                    <RecursoCompleto
                       key={recurso.id_recurso}
                       recurso={recurso}
                       esFavoritoRecurso={esFavoritoRecurso}
@@ -1257,7 +1329,9 @@ const Semestres = () => {
                       yaReportado={yaReportado}
                       estaDescargando={estaDescargando}
                       mostrarComentarios={mostrarComentarios[recurso.id_recurso] || false}
-                      toggleMostrarComentarios={() => toggleMostrarComentarios(recurso.id_recurso)}
+                      toggleMostrarComentarios={() =>
+                        toggleMostrarComentarios(recurso.id_recurso)
+                      }
                       getIconoCategoria={getIconoCategoria}
                       getEtiquetaCategoria={getEtiquetaCategoria}
                       handleToggleFavorito={handleToggleFavorito}
@@ -1281,7 +1355,7 @@ const Semestres = () => {
                   <Heart size={64} />
                   <h3>No tienes favoritos</h3>
                   <p>No has marcado ningún recurso como favorito en esta materia.</p>
-                  <button 
+                  <button
                     className="boton-agregar-primer-recurso"
                     onClick={handleVerTodosRecursos}
                   >
@@ -1294,7 +1368,7 @@ const Semestres = () => {
                   <FolderOpen size={64} />
                   <h3>No hay recursos disponibles</h3>
                   <p>Esta materia no tiene recursos registrados en el sistema.</p>
-                  <button 
+                  <button
                     className="boton-agregar-primer-recurso"
                     onClick={handleAbrirFormularioRecurso}
                   >
@@ -1310,11 +1384,9 @@ const Semestres = () => {
     )
   }
 
-  // VISTA DE MATERIAS DEL SEMESTRE
   if (mostrarMaterias && semestreSeleccionado) {
     return (
       <div className="contenedor-recursos">
-        {/* Encabezado de navegación */}
         <div className="navegacion-materias">
           <button className="boton-volver-materias" onClick={handleVolverASemestres}>
             <ArrowLeft size={20} />
@@ -1326,7 +1398,6 @@ const Semestres = () => {
           </div>
         </div>
 
-        {/* Cabecera del semestre */}
         <div className="cabecera-materias-simple">
           <div className="titulo-materias-con-info">
             <div>
@@ -1338,13 +1409,13 @@ const Semestres = () => {
             <div className="badge-contador-materias">
               <Book size={20} />
               <span>
-                {materiasDelSemestre.length} {materiasDelSemestre.length === 1 ? "materia" : "materias"}
+                {materiasDelSemestre.length}{" "}
+                {materiasDelSemestre.length === 1 ? "materia" : "materias"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Listado de materias */}
         <div className="seccion-materias">
           {materiasDelSemestre.length > 0 ? (
             <div className="grid-materias-simple">
@@ -1367,13 +1438,13 @@ const Semestres = () => {
                       </div>
                     </div>
                     <div className="acciones-materia-simple">
-                      <button 
+                      <button
                         className="boton-recursos-simple"
                         onClick={() => handleSeleccionarMateria(materia)}
                         disabled={!tieneRecursos && loadingRecursos}
                       >
                         <FolderOpen size={16} />
-                        <span>{"Ver Recursos"}</span>
+                        <span>Ver Recursos</span>
                       </button>
                     </div>
                   </div>
@@ -1392,10 +1463,8 @@ const Semestres = () => {
     )
   }
 
-  // VISTA PRINCIPAL DE SEMESTRES
   return (
     <div className="contenedor-recursos">
-      {/* Información de la carrera */}
       <div className="cabecera-recursos">
         <div className="info-carrera">
           <h2>Recursos académicos</h2>
@@ -1419,7 +1488,6 @@ const Semestres = () => {
         </div>
       </div>
 
-      {/* Grid de semestres */}
       <div className="grid-semestres">
         {semestres.length > 0 ? (
           semestres.map((semestre) => {
@@ -1428,7 +1496,9 @@ const Semestres = () => {
             return (
               <div
                 key={semestre.id}
-                className={`semestre-card ${materiasCount > 0 ? "con-materias" : "sin-materias"}`}
+                className={`semestre-card ${
+                  materiasCount > 0 ? "con-materias" : "sin-materias"
+                }`}
                 onClick={() => handleSeleccionarSemestre(semestre)}
               >
                 <div className="numero-semestre">{semestre.numero}</div>
@@ -1441,7 +1511,11 @@ const Semestres = () => {
                     <span>{materiasCount} materias</span>
                   </div>
                   <div className="estado-semestre">
-                    <div className={`punto-disponible ${materiasCount > 0 ? "activo" : "inactivo"}`}></div>
+                    <div
+                      className={`punto-disponible ${
+                        materiasCount > 0 ? "activo" : "inactivo"
+                      }`}
+                    ></div>
                     <span>{materiasCount > 0 ? "Disponible" : "Sin materias"}</span>
                   </div>
                 </div>
@@ -1457,7 +1531,6 @@ const Semestres = () => {
         )}
       </div>
 
-      {/* Indicadores de navegación */}
       {semestres.length > 0 && (
         <div className="indicadores-semestres">
           {semestres.map((semestre) => {
@@ -1466,12 +1539,18 @@ const Semestres = () => {
             return (
               <button
                 key={semestre.id}
-                className={`indicador-semestre ${materiasCount > 0 ? "con-materias" : "sin-materias"}`}
+                className={`indicador-semestre ${
+                  materiasCount > 0 ? "con-materias" : "sin-materias"
+                }`}
                 onClick={() => handleSeleccionarSemestre(semestre)}
                 title={`Semestre ${semestre.numero} - ${materiasCount} materias`}
               >
                 <span className="numero-indicador">{semestre.numero}</span>
-                {materiasCount > 0 && <span className="contador-materias-indicador">{materiasCount}</span>}
+                {materiasCount > 0 && (
+                  <span className="contador-materias-indicador">
+                    {materiasCount}
+                  </span>
+                )}
               </button>
             )
           })}
@@ -1481,12 +1560,11 @@ const Semestres = () => {
   )
 }
 
-// Componente separado para el recurso con likes y comentarios
-const RecursoCompleto = ({ 
-  recurso, 
-  esFavoritoRecurso, 
-  estaProcesandoFavorito, 
-  estaProcesandoReporte, 
+const RecursoCompleto = ({
+  recurso,
+  esFavoritoRecurso,
+  estaProcesandoFavorito,
+  estaProcesandoReporte,
   yaReportado,
   estaDescargando,
   mostrarComentarios,
@@ -1496,18 +1574,16 @@ const RecursoCompleto = ({
   handleToggleFavorito,
   handleAbrirModalReportar,
   handleVerRecurso,
-  handleDescargarRecurso
+  handleDescargarRecurso,
 }) => {
-  // Usar el hook de likes para este recurso específico
   const {
     likesData,
     miReaccion,
     cargando: cargandoLikes,
     darLike,
-    darDislike
+    darDislike,
   } = useRecursoLikes(recurso.id_recurso)
 
-  // Usar el hook de comentarios para este recurso
   const {
     comentarios,
     totalComentarios,
@@ -1527,20 +1603,17 @@ const RecursoCompleto = ({
     formatearFecha,
     obtenerAvatar,
     obtenerNombre,
-    estaEditando
+    estaEditando,
   } = useComentarios(recurso.id_recurso)
 
-  // Manejar clic en "Me gusta"
   const handleMeGusta = async () => {
     await darLike(recurso.id_recurso)
   }
 
-  // Manejar clic en "No me gusta"
   const handleNoMeGusta = async () => {
     await darDislike(recurso.id_recurso)
   }
 
-  // Manejar envío de nuevo comentario
   const handleEnviarComentario = async (e) => {
     e.preventDefault()
     if (nuevoComentario.trim()) {
@@ -1548,15 +1621,12 @@ const RecursoCompleto = ({
     }
   }
 
-  // Verificar si el usuario puede editar/eliminar un comentario
   const verificarPermisosComentario = (comentario) => {
-    // En un caso real, esto verificaría con el backend
-    // Por ahora, asumimos que el usuario solo puede editar/eliminar sus propios comentarios
     const token = localStorage.getItem("token")
     if (!token) return false
-    
+
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
+      const payload = JSON.parse(atob(token.split(".")[1]))
       return payload.id_usuario === comentario.id_usuario
     } catch {
       return false
@@ -1566,9 +1636,8 @@ const RecursoCompleto = ({
   return (
     <div className="tarjeta-recurso">
       <div className="cabecera-recurso">
-        <div className="icono-recurso">
-          {getIconoCategoria(recurso.id_categoria)}
-        </div>
+        <div className="icono-recurso">{getIconoCategoria(recurso.id_categoria)}</div>
+
         <div className="info-recurso">
           <h3 className="titulo-recurso">{recurso.titulo}</h3>
           <div className="detalles-recurso">
@@ -1579,14 +1648,16 @@ const RecursoCompleto = ({
             {recurso.contador_reportes > 0 && (
               <span className="contador-reportes-badge">
                 <AlertTriangle size={12} />
-                {recurso.contador_reportes} reporte{recurso.contador_reportes !== 1 ? 's' : ''}
+                {recurso.contador_reportes} reporte
+                {recurso.contador_reportes !== 1 ? "s" : ""}
               </span>
             )}
           </div>
         </div>
+
         <div className="acciones-superiores-recurso">
-          <button 
-            className={`boton-favorito ${esFavoritoRecurso ? 'activo' : ''}`}
+          <button
+            className={`boton-favorito ${esFavoritoRecurso ? "activo" : ""}`}
             onClick={() => handleToggleFavorito(recurso)}
             disabled={estaProcesandoFavorito}
             title={esFavoritoRecurso ? "Quitar de favoritos" : "Agregar a favoritos"}
@@ -1599,9 +1670,9 @@ const RecursoCompleto = ({
               <Heart size={20} />
             )}
           </button>
-          
-          <button 
-            className={`boton-reportar ${yaReportado ? 'ya-reportado' : ''}`}
+
+          <button
+            className={`boton-reportar ${yaReportado ? "ya-reportado" : ""}`}
             onClick={() => handleAbrirModalReportar(recurso)}
             disabled={estaProcesandoReporte || yaReportado}
             title={yaReportado ? "Ya reportaste este recurso" : "Reportar recurso"}
@@ -1613,9 +1684,8 @@ const RecursoCompleto = ({
             )}
           </button>
 
-          {/* Botón para mostrar/ocultar comentarios */}
-          <button 
-            className={`boton-comentarios ${mostrarComentarios ? 'activo' : ''}`}
+          <button
+            className={`boton-comentarios ${mostrarComentarios ? "activo" : ""}`}
             onClick={toggleMostrarComentarios}
             title="Ver comentarios"
           >
@@ -1627,16 +1697,15 @@ const RecursoCompleto = ({
         </div>
       </div>
 
-      {/* Sección de Me gusta / No me gusta */}
       <div className="seccion-likes-recurso">
         <div className="controles-likes">
-          <button 
-            className={`boton-me-gusta ${miReaccion === 'like' ? 'activo' : ''}`}
+          <button
+            className={`boton-me-gusta ${miReaccion === "like" ? "activo" : ""}`}
             onClick={handleMeGusta}
             disabled={cargandoLikes}
             title="Me gusta"
           >
-            {cargandoLikes && miReaccion === 'like' ? (
+            {cargandoLikes && miReaccion === "like" ? (
               <div className="spinner-me-gusta"></div>
             ) : (
               <>
@@ -1645,14 +1714,16 @@ const RecursoCompleto = ({
               </>
             )}
           </button>
-          
-          <button 
-            className={`boton-no-me-gusta ${miReaccion === 'dislike' ? 'activo' : ''}`}
+
+          <button
+            className={`boton-no-me-gusta ${
+              miReaccion === "dislike" ? "activo" : ""
+            }`}
             onClick={handleNoMeGusta}
             disabled={cargandoLikes}
             title="No me gusta"
           >
-            {cargandoLikes && miReaccion === 'dislike' ? (
+            {cargandoLikes && miReaccion === "dislike" ? (
               <div className="spinner-no-me-gusta"></div>
             ) : (
               <>
@@ -1661,14 +1732,13 @@ const RecursoCompleto = ({
               </>
             )}
           </button>
-          
+
           <div className="total-reacciones">
             <span>{likesData.total} reacciones</span>
           </div>
         </div>
       </div>
 
-      {/* Sección de comentarios (colapsable) */}
       {mostrarComentarios && (
         <div className="seccion-comentarios-recurso">
           <div className="cabecera-seccion-comentarios">
@@ -1676,7 +1746,7 @@ const RecursoCompleto = ({
               <MessageCircle size={16} />
               Comentarios ({totalComentarios})
             </h4>
-            <button 
+            <button
               className="btn-cerrar-comentarios"
               onClick={toggleMostrarComentarios}
               title="Cerrar comentarios"
@@ -1685,7 +1755,6 @@ const RecursoCompleto = ({
             </button>
           </div>
 
-          {/* Formulario para nuevo comentario */}
           <form className="formulario-nuevo-comentario" onSubmit={handleEnviarComentario}>
             <textarea
               className="area-comentario"
@@ -1695,11 +1764,10 @@ const RecursoCompleto = ({
               rows="3"
               maxLength="500"
             />
-            <div className="contador-caracteres">
-              {nuevoComentario.length}/500
-            </div>
+            <div className="contador-caracteres">{nuevoComentario.length}/500</div>
+
             <div className="acciones-formulario-comentario">
-              <button 
+              <button
                 type="button"
                 className="btn-cancelar-comentario"
                 onClick={() => setNuevoComentario("")}
@@ -1707,7 +1775,7 @@ const RecursoCompleto = ({
               >
                 Limpiar
               </button>
-              <button 
+              <button
                 type="submit"
                 className="btn-enviar-comentario"
                 disabled={cargandoComentarios || !nuevoComentario.trim()}
@@ -1727,7 +1795,6 @@ const RecursoCompleto = ({
             </div>
           </form>
 
-          {/* Mensajes de error/éxito */}
           {errorComentarios && (
             <div className="mensaje-error-comentario">
               <AlertCircle size={14} />
@@ -1742,7 +1809,6 @@ const RecursoCompleto = ({
             </div>
           )}
 
-          {/* Lista de comentarios */}
           <div className="lista-comentarios">
             {cargandoComentarios ? (
               <div className="cargando-comentarios">
@@ -1753,25 +1819,21 @@ const RecursoCompleto = ({
               comentarios.map((comentario) => (
                 <div key={comentario.id_comentario} className="tarjeta-comentario">
                   <div className="cabecera-comentario">
-                    <div className="avatar-usuario">
-                      {obtenerAvatar(comentario)}
-                    </div>
+                    <div className="avatar-usuario">{obtenerAvatar(comentario)}</div>
+
                     <div className="info-comentario">
-                      <div className="nombre-usuario">
-                        {obtenerNombre(comentario)}
-                      </div>
+                      <div className="nombre-usuario">{obtenerNombre(comentario)}</div>
                       <div className="fecha-comentario">
                         <Clock size={12} />
                         <span>{formatearFecha(comentario.fecha)}</span>
                       </div>
                     </div>
-                    
-                    {/* Menú de acciones (solo para el autor) */}
+
                     {verificarPermisosComentario(comentario) && (
                       <div className="menu-comentario">
                         {editandoComentario === comentario.id_comentario ? (
                           <div className="acciones-edicion">
-                            <button 
+                            <button
                               className="btn-guardar-edicion"
                               onClick={guardarEdicion}
                               disabled={cargandoComentarios}
@@ -1779,7 +1841,7 @@ const RecursoCompleto = ({
                             >
                               <Check size={14} />
                             </button>
-                            <button 
+                            <button
                               className="btn-cancelar-edicion"
                               onClick={cancelarEdicion}
                               disabled={cargandoComentarios}
@@ -1790,17 +1852,21 @@ const RecursoCompleto = ({
                           </div>
                         ) : (
                           <div className="acciones-comunes">
-                            <button 
+                            <button
                               className="btn-editar-comentario"
                               onClick={() => iniciarEdicion(comentario)}
                               title="Editar comentario"
                             >
                               <Edit2 size={14} />
                             </button>
-                            <button 
+                            <button
                               className="btn-eliminar-comentario"
                               onClick={() => {
-                                if (window.confirm("¿Estás seguro de eliminar este comentario?")) {
+                                if (
+                                  window.confirm(
+                                    "¿Estás seguro de eliminar este comentario?"
+                                  )
+                                ) {
                                   eliminarComentario(comentario.id_comentario)
                                 }
                               }}
@@ -1813,7 +1879,7 @@ const RecursoCompleto = ({
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="contenido-comentario">
                     {editandoComentario === comentario.id_comentario ? (
                       <div className="formulario-edicion-comentario">
@@ -1846,7 +1912,7 @@ const RecursoCompleto = ({
       )}
 
       <div className="acciones-recurso">
-        <button 
+        <button
           className="boton-ver-recurso"
           onClick={() => handleVerRecurso(recurso)}
           title="Ver recurso"
@@ -1854,11 +1920,16 @@ const RecursoCompleto = ({
           <Eye size={16} />
           <span>Ver</span>
         </button>
-        <button 
+
+        <button
           className="boton-descargar-recurso"
           onClick={() => handleDescargarRecurso(recurso)}
           disabled={estaDescargando || recurso.id_categoria === 4}
-          title={recurso.id_categoria === 4 ? "Enlace web - No descargable" : "Descargar recurso"}
+          title={
+            recurso.id_categoria === 4
+              ? "Enlace web - No descargable"
+              : "Descargar recurso"
+          }
         >
           {estaDescargando ? (
             <>

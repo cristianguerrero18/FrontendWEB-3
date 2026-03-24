@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import {
   User,
@@ -26,17 +25,15 @@ export default function Registro() {
   const navigate = useNavigate()
   const { validarCorreo } = useUsuarios()
 
-  // Estado inicial - rol se determinará automáticamente
   const [form, setForm] = useState({
     nombres_usuario: "",
     apellidos_usuario: "",
     correo: "",
     contrasena: "",
     id_carrera: "",
-    id_rol: 2, // Valor por defecto (Estudiante)
+    id_rol: 2,
   })
 
-  // ui state
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" })
   const [showTips, setShowTips] = useState({
     nombres: false,
@@ -48,33 +45,29 @@ export default function Registro() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [validandoCorreo, setValidandoCorreo] = useState(false)
   const [correoExistente, setCorreoExistente] = useState(false)
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
 
-  // Estados para tipos de carrera y carreras específicas
   const [tiposCarrera, setTiposCarrera] = useState([])
   const [carreras, setCarreras] = useState([])
   const [cargandoTipos, setCargandoTipos] = useState(true)
   const [cargandoCarreras, setCargandoCarreras] = useState(false)
   const [tipoSeleccionado, setTipoSeleccionado] = useState("")
 
-  // Dominios válidos - Agregar @correo.uts.edu.co para docentes
   const dominiosValidos = ["uts.edu.co", "correo.uts.edu.co", "proton.me"]
 
-  // Función para determinar el rol basado en el dominio del correo
+  useEffect(() => {
+    document.title = "UTS - Registro | Plataforma Educativa"
+  }, [])
+
   const determinarRolPorCorreo = (correo) => {
-    if (!correo) return 2; // Por defecto estudiante
-    
-    const dominio = correo.split('@')[1];
-    
-    // Si es @correo.uts.edu.co -> Docente (rol 3)
-    if (dominio === 'correo.uts.edu.co') {
-      return 3;
+    if (!correo) return 2
+    const dominio = correo.split("@")[1]
+    if (dominio === "correo.uts.edu.co") {
+      return 3
     }
-    
-    // Si es @uts.edu.co o @proton.me -> Estudiante (rol 2)
-    return 2;
+    return 2
   }
 
-  // VALIDACIONES
   const validarNombre = (valor) => /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]{2,}$/.test(valor)
 
   const validarFormatoCorreo = (correo) => {
@@ -91,7 +84,6 @@ export default function Registro() {
     simbolo: /[@$!%*?&._-]/.test(pass),
   })
 
-  // util: estado general de validez por campo
   const fieldValid = {
     nombres: validarNombre(form.nombres_usuario),
     apellidos: validarNombre(form.apellidos_usuario),
@@ -104,21 +96,19 @@ export default function Registro() {
   const correoValido = fieldValid.correoFormato && fieldValid.correoDisponible
   const allFieldsValid = Object.values({
     ...fieldValid,
-    correo: correoValido
+    correo: correoValido,
   }).every(Boolean)
 
-  // Efecto para actualizar automáticamente el rol cuando cambia el correo
   useEffect(() => {
     if (form.correo && validarFormatoCorreo(form.correo)) {
-      const nuevoRol = determinarRolPorCorreo(form.correo);
-      setForm(prev => ({
+      const nuevoRol = determinarRolPorCorreo(form.correo)
+      setForm((prev) => ({
         ...prev,
-        id_rol: nuevoRol
-      }));
+        id_rol: nuevoRol,
+      }))
     }
-  }, [form.correo]);
+  }, [form.correo])
 
-  // Cargar tipos de carrera al montar el componente
   useEffect(() => {
     const cargarTiposCarrera = async () => {
       try {
@@ -143,7 +133,6 @@ export default function Registro() {
     cargarTiposCarrera()
   }, [])
 
-  // Cargar carreras específicas cuando cambia el tipo seleccionado
   useEffect(() => {
     const cargarCarrerasPorTipo = async () => {
       if (!tipoSeleccionado) {
@@ -180,7 +169,6 @@ export default function Registro() {
     cargarCarrerasPorTipo()
   }, [tipoSeleccionado])
 
-  // Validar correo cuando cambia y tiene formato válido
   useEffect(() => {
     const validarCorreoExistente = async () => {
       if (fieldValid.correoFormato) {
@@ -188,7 +176,7 @@ export default function Registro() {
         try {
           const existe = await validarCorreo(form.correo)
           setCorreoExistente(existe)
-          
+
           if (existe) {
             setMensaje({
               texto: "Este correo electrónico ya está registrado. Por favor, usa otro correo.",
@@ -211,11 +199,10 @@ export default function Registro() {
     return () => clearTimeout(timeoutId)
   }, [form.correo, fieldValid.correoFormato])
 
-  // handlers
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((s) => ({ ...s, [name]: value }))
-    
+
     if (name === "correo" && mensaje.texto.includes("correo")) {
       setMensaje({ texto: "", tipo: "" })
     } else if (mensaje.texto) {
@@ -244,7 +231,6 @@ export default function Registro() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Validación final antes de enviar
     if (!allFieldsValid) {
       setMensaje({
         texto: "Por favor corrige los campos marcados antes de continuar.",
@@ -253,7 +239,15 @@ export default function Registro() {
       return
     }
 
-    // Verificar si el correo ya existe (última validación)
+    if (!aceptaTerminos) {
+      setMensaje({
+        texto:
+          "Debes aceptar los términos y el tratamiento de datos personales para continuar con el registro.",
+        tipo: "error",
+      })
+      return
+    }
+
     if (correoExistente) {
       setMensaje({
         texto: "Este correo electrónico ya está registrado. Por favor, usa otro correo.",
@@ -262,45 +256,43 @@ export default function Registro() {
       return
     }
 
-    // Determinar rol final basado en el correo
-    const rolFinal = determinarRolPorCorreo(form.correo);
+    const rolFinal = determinarRolPorCorreo(form.correo)
     const datosEnvio = {
       ...form,
-      id_rol: rolFinal
-    };
+      id_rol: rolFinal,
+    }
 
-    // Mostrar mensaje informativo sobre el rol asignado
-    const mensajeRol = rolFinal === 3 
-      ? "Se ha detectado que eres docente. Tu cuenta será de tipo Docente."
-      : "Tu cuenta será de tipo Estudiante.";
-    
+    const mensajeRol =
+      rolFinal === 3
+        ? "Se ha detectado que eres docente. Tu cuenta será de tipo Docente."
+        : "Tu cuenta será de tipo Estudiante."
+
     setMensaje({
       texto: mensajeRol,
-      tipo: "info"
-    });
+      tipo: "info",
+    })
 
     setIsSubmitting(true)
 
     try {
       const respuesta = await registrarUsuario(datosEnvio)
-      
+
       setMensaje({
         texto: respuesta.mensaje || "¡Registro exitoso! Redirigiendo a verificación...",
         tipo: "success",
       })
 
       localStorage.setItem("correo_verificacion", form.correo)
-      localStorage.setItem("rol_asignado", rolFinal.toString());
-      
+      localStorage.setItem("rol_asignado", rolFinal.toString())
+
       setTimeout(() => {
-        navigate("/verificacion", { 
-          state: { 
+        navigate("/verificacion", {
+          state: {
             correo: form.correo,
-            rol: rolFinal 
-          }
+            rol: rolFinal,
+          },
         })
       }, 2000)
-      
     } catch (err) {
       setMensaje({
         texto: err.response?.data?.error || "Error en el servidor. Intenta de nuevo.",
@@ -311,27 +303,25 @@ export default function Registro() {
     }
   }
 
-  // Obtener información del rol actual para mostrar
   const obtenerInfoRol = () => {
-    if (!form.correo || !validarFormatoCorreo(form.correo)) return null;
-    
-    const rol = determinarRolPorCorreo(form.correo);
+    if (!form.correo || !validarFormatoCorreo(form.correo)) return null
+
+    const rol = determinarRolPorCorreo(form.correo)
     return {
       id: rol,
       nombre: rol === 3 ? "Docente" : "Estudiante",
-      descripcion: rol === 3 
-        ? "Acceso al panel de docentes" 
-        : "Acceso al panel de estudiantes",
-      icono: rol === 3 ? "👨‍🏫" : "👨‍🎓"
-    };
-  };
+      descripcion: rol === 3 ? "Acceso al panel de docentes" : "Acceso al panel de estudiantes",
+      icono: rol === 3 ? "👨‍🏫" : "👨‍🎓",
+    }
+  }
 
-  const infoRol = obtenerInfoRol();
+  const infoRol = obtenerInfoRol()
 
-  // Render helpers
   const ValidationIcon = ({ isValid, loading = false }) => (
     <div
-      className={`flex items-center justify-center w-5 h-5 rounded-full ${isValid ? "bg-green-100" : "bg-gray-100"}`}
+      className={`flex items-center justify-center w-5 h-5 rounded-full ${
+        isValid ? "bg-green-100" : "bg-gray-100"
+      }`}
     >
       {loading ? (
         <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -353,48 +343,64 @@ export default function Registro() {
   const passChecks = validarContrasenaObj(form.contrasena)
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4"
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative"
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
       onClick={closeAllTips}
     >
-      <div className="absolute inset-0 bg-black/20"></div>
-      
-      <div className="w-full max-w-md relative z-10">
+      <div className="absolute inset-0 bg-slate-950/55"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-950/35 via-slate-900/30 to-sky-800/20"></div>
+
+      <div className="w-full max-w-lg relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20"
         >
-          <div className="bg-gradient-to-r from-[#1e3a8a] to-[#4a90e2] py-6 px-6">
-            <h2 className="text-center text-2xl md:text-3xl font-bold text-white mb-2">
-              Crear Cuenta
-            </h2>
-            <p className="text-center text-blue-100 text-sm">
-              Regístrate en la plataforma educativa
+          {/* Encabezado igual estilo login */}
+          <div className="px-6 pt-6 pb-4 text-center bg-gradient-to-b from-[#153e75] to-[#1e4d8f]">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur-sm">
+              <BookOpen size={26} className="text-white" />
+            </div>
+
+            <h1 className="text-2xl font-bold tracking-tight text-white">UTS</h1>
+
+            <p className="mt-1 text-sm text-blue-100 font-medium">
+              Plataforma Web de Recursos Digitales
+            </p>
+
+            <p className="mt-2 text-xs text-blue-200/90 max-w-xs mx-auto leading-relaxed">
+              Regístrate para acceder a los recursos académicos de la plataforma.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
-            {/* Mensaje de estado */}
             {mensaje.texto && (
-              <div className={`rounded-lg p-3 mb-4 border ${
-                mensaje.tipo === "error" ? "bg-red-50 border-red-200" : 
-                mensaje.tipo === "info" ? "bg-blue-50 border-blue-200" :
-                "bg-green-50 border-green-200"
-              }`}>
+              <div
+                className={`rounded-lg p-3 mb-4 border ${
+                  mensaje.tipo === "error"
+                    ? "bg-red-50 border-red-200"
+                    : mensaje.tipo === "info"
+                    ? "bg-blue-50 border-blue-200"
+                    : "bg-green-50 border-green-200"
+                }`}
+              >
                 <div className="flex items-start gap-2">
-                  <div className={`flex-shrink-0 ${
-                    mensaje.tipo === "error" ? "text-red-600" : 
-                    mensaje.tipo === "info" ? "text-blue-600" :
-                    "text-green-600"
-                  }`}>
+                  <div
+                    className={`flex-shrink-0 ${
+                      mensaje.tipo === "error"
+                        ? "text-red-600"
+                        : mensaje.tipo === "info"
+                        ? "text-blue-600"
+                        : "text-green-600"
+                    }`}
+                  >
                     {mensaje.tipo === "error" ? (
                       <AlertCircle className="w-4 h-4" />
                     ) : mensaje.tipo === "info" ? (
@@ -404,19 +410,24 @@ export default function Registro() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className={`text-sm font-medium ${
-                      mensaje.tipo === "error" ? "text-red-800" : 
-                      mensaje.tipo === "info" ? "text-blue-800" :
-                      "text-green-800"
-                    }`}>
+                    <p
+                      className={`text-sm font-medium ${
+                        mensaje.tipo === "error"
+                          ? "text-red-800"
+                          : mensaje.tipo === "info"
+                          ? "text-blue-800"
+                          : "text-green-800"
+                      }`}
+                    >
                       {mensaje.texto}
                     </p>
-                    {mensaje.tipo === "success" && <p className="text-xs text-green-600 mt-0.5">Redirigiendo...</p>}
+                    {mensaje.tipo === "success" && (
+                      <p className="text-xs text-green-600 mt-0.5">Redirigiendo...</p>
+                    )}
                   </div>
                 </div>
               </div>
             )}
-
 
             {/* Resto del formulario permanece igual */}
             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -443,7 +454,11 @@ export default function Registro() {
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
                   >
-                    <Info className={`w-4 h-4 transition-colors ${showTips.nombres ? "text-blue-500" : "text-gray-400 hover:text-gray-600"}`} />
+                    <Info
+                      className={`w-4 h-4 transition-colors ${
+                        showTips.nombres ? "text-blue-500" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                    />
                   </button>
                 </div>
 
@@ -490,7 +505,11 @@ export default function Registro() {
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
                   >
-                    <Info className={`w-4 h-4 transition-colors ${showTips.apellidos ? "text-blue-500" : "text-gray-400 hover:text-gray-600"}`} />
+                    <Info
+                      className={`w-4 h-4 transition-colors ${
+                        showTips.apellidos ? "text-blue-500" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                    />
                   </button>
                 </div>
 
@@ -528,8 +547,8 @@ export default function Registro() {
                   onChange={handleChange}
                   placeholder="ejemplo@uts.edu.co o ejemplo@correo.uts.edu.co"
                   className={`w-full pl-10 pr-8 py-2.5 rounded-lg border text-sm transition-all outline-none bg-white/80 ${
-                    correoExistente 
-                      ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100" 
+                    correoExistente
+                      ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                       : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   }`}
                 />
@@ -542,11 +561,14 @@ export default function Registro() {
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
                 >
-                  <Info className={`w-4 h-4 transition-colors ${showTips.correo ? "text-blue-500" : "text-gray-400 hover:text-gray-600"}`} />
+                  <Info
+                    className={`w-4 h-4 transition-colors ${
+                      showTips.correo ? "text-blue-500" : "text-gray-400 hover:text-gray-600"
+                    }`}
+                  />
                 </button>
               </div>
 
-              {/* Mensaje de estado del correo */}
               {form.correo && !validandoCorreo && (
                 <div className="mt-1">
                   {!fieldValid.correoFormato ? (
@@ -554,14 +576,10 @@ export default function Registro() {
                       Formato de correo inválido. Usa @uts.edu.co, @correo.uts.edu.co o @proton.me
                     </p>
                   ) : correoExistente ? (
-                    <p className="text-xs text-red-600">
-                      Este correo ya está registrado
-                    </p>
+                    <p className="text-xs text-red-600">Este correo ya está registrado</p>
                   ) : (
                     <div>
-                      <p className="text-xs text-green-600">
-                        ✓ Correo disponible
-                      </p>
+                      <p className="text-xs text-green-600">✓ Correo disponible</p>
                     </div>
                   )}
                 </div>
@@ -593,11 +611,14 @@ export default function Registro() {
                       <p className="font-semibold text-gray-800 text-xs mb-1.5">Dominios permitidos:</p>
                       <div className="flex flex-wrap gap-1 mb-2">
                         {dominiosValidos.map((d) => (
-                          <span key={d} className={`px-2 py-0.5 text-[10px] rounded-md font-medium border ${
-                            d === 'correo.uts.edu.co' 
-                              ? 'bg-purple-50 text-purple-700 border-purple-100' 
-                              : 'bg-blue-50 text-blue-700 border-blue-100'
-                          }`}>
+                          <span
+                            key={d}
+                            className={`px-2 py-0.5 text-[10px] rounded-md font-medium border ${
+                              d === "correo.uts.edu.co"
+                                ? "bg-purple-50 text-purple-700 border-purple-100"
+                                : "bg-blue-50 text-blue-700 border-blue-100"
+                            }`}
+                          >
                             @{d}
                           </span>
                         ))}
@@ -606,15 +627,21 @@ export default function Registro() {
                       <ul className="text-xs text-gray-600 space-y-1">
                         <li className="flex items-center gap-1">
                           <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                          <span><strong>@correo.uts.edu.co</strong> → Docente</span>
+                          <span>
+                            <strong>@correo.uts.edu.co</strong> → Docente
+                          </span>
                         </li>
                         <li className="flex items-center gap-1">
                           <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                          <span><strong>@uts.edu.co</strong> → Estudiante</span>
+                          <span>
+                            <strong>@uts.edu.co</strong> → Estudiante
+                          </span>
                         </li>
                         <li className="flex items-center gap-1">
                           <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                          <span><strong>@proton.me</strong> → Estudiante</span>
+                          <span>
+                            <strong>@proton.me</strong> → Estudiante
+                          </span>
                         </li>
                       </ul>
                     </div>
@@ -624,8 +651,8 @@ export default function Registro() {
               )}
             </div>
 
-             {/* TIPO DE CARRERA */}
-             <div className="mb-4">
+            {/* TIPO DE CARRERA */}
+            <div className="mb-4">
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-medium text-gray-700">Tipo de Carrera</label>
                 <ValidationIcon isValid={!!tipoSeleccionado} />
@@ -700,8 +727,9 @@ export default function Registro() {
                 </div>
               </div>
             </div>
+
             {/* CONTRASEÑA */}
-            <div className="mb-6 relative">
+            <div className="mb-4 relative">
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-medium text-gray-700">Contraseña</label>
                 <ValidationIcon isValid={fieldValid.contrasena} />
@@ -738,7 +766,11 @@ export default function Registro() {
                     }}
                     className="z-10"
                   >
-                    <Info className={`w-4 h-4 transition-colors ${showTips.contrasena ? "text-blue-500" : "text-gray-400 hover:text-gray-600"}`} />
+                    <Info
+                      className={`w-4 h-4 transition-colors ${
+                        showTips.contrasena ? "text-blue-500" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                    />
                   </button>
                 </div>
               </div>
@@ -759,7 +791,11 @@ export default function Registro() {
                     }).map(([key, text]) => (
                       <div key={key} className="flex items-center gap-2">
                         <CheckOrX ok={passChecks[key]} />
-                        <span className={`text-xs ${passChecks[key] ? "text-gray-700 font-medium" : "text-gray-500"}`}>
+                        <span
+                          className={`text-xs ${
+                            passChecks[key] ? "text-gray-700 font-medium" : "text-gray-500"
+                          }`}
+                        >
                           {text}
                         </span>
                       </div>
@@ -770,13 +806,41 @@ export default function Registro() {
               )}
             </div>
 
-            {/* Botón de submit */}
+            {/* Rol detectado */}
+            {infoRol && (
+              <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3">
+                <p className="text-xs font-semibold text-blue-800 mb-1">Rol detectado automáticamente</p>
+                <p className="text-sm text-blue-700">
+                  {infoRol.icono} <strong>{infoRol.nombre}</strong> — {infoRol.descripcion}
+                </p>
+              </div>
+            )}
+
+            {/* Aceptación de términos y tratamiento de datos */}
+            <div className="mb-6">
+              <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={aceptaTerminos}
+                  onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-xs text-gray-700 leading-5">
+                  Acepto los <a href="#" className="text-blue-600 font-medium hover:text-blue-800">términos y condiciones</a> y autorizo el
+                  tratamiento de mis datos personales de conformidad con la{" "}
+                  <strong>Ley 1581 de 2012</strong>, para fines de registro, autenticación,
+                  gestión académica y uso de la plataforma.
+                </span>
+              </label>
+            </div>
+
             <motion.button
               whileTap={{ scale: 0.97 }}
               type="submit"
-              disabled={!allFieldsValid || isSubmitting || validandoCorreo}
+              disabled={!allFieldsValid || !aceptaTerminos || isSubmitting || validandoCorreo}
               className={`w-full bg-gradient-to-r from-[#1e3a8a] to-[#4a90e2] hover:from-blue-900 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl ${
-                (!allFieldsValid || isSubmitting || validandoCorreo) && "opacity-50 cursor-not-allowed"
+                (!allFieldsValid || !aceptaTerminos || isSubmitting || validandoCorreo) &&
+                "opacity-50 cursor-not-allowed"
               }`}
             >
               {isSubmitting ? (

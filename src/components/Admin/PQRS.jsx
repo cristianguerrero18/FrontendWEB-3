@@ -319,7 +319,7 @@ const PQRS = () => {
       <div className="cabecera-pqrs">
         <div className="titulo-pqrs-con-boton">
           <div>
-            <h2>Gestión de PQRS</h2>
+
             <p className="subtitulo-pqrs">
               Administra las peticiones, quejas, reclamos y sugerencias
             </p>

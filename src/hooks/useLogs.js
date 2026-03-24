@@ -4,7 +4,10 @@ import {
   getLogsDetallados, 
   getLogsPorUsuario,
   postLog,
-  postLogCompleto
+  postLogCompleto,
+  deleteAllLogs,
+  truncateLogs,
+  deleteLogsByDateRange
 } from "../api/Admin/Log_acceso.js";
 
 export const useLogs = (tipo = "todos", idUsuario = null) => {
@@ -28,9 +31,10 @@ export const useLogs = (tipo = "todos", idUsuario = null) => {
     }
 
     const hoy = new Date().toISOString().split('T')[0];
-    const logsHoy = datos.filter(log => 
-      log.fecha_acceso && log.fecha_acceso.includes(hoy)
-    );
+    const logsHoy = datos.filter(log => {
+      const fechaLog = log.fecha_acceso || log.fecha;
+      return fechaLog && fechaLog.includes(hoy);
+    });
     
     const usuariosUnicos = [...new Set(
       datos
@@ -70,15 +74,23 @@ export const useLogs = (tipo = "todos", idUsuario = null) => {
           resultado = await getLogs();
       }
 
-      if (Array.isArray(resultado)) {
-        // Ordenar por fecha más reciente primero
+      if (resultado && resultado.data && Array.isArray(resultado.data)) {
+        // Si la respuesta tiene estructura { data: [...] }
+        const logsOrdenados = resultado.data.sort((a, b) => 
+          new Date(b.fecha_acceso || b.fecha) - new Date(a.fecha_acceso || a.fecha)
+        );
+        
+        setLogs(logsOrdenados);
+        setEstadisticas(calcularEstadisticas(logsOrdenados));
+      } else if (Array.isArray(resultado)) {
+        // Si la respuesta es directamente un array
         const logsOrdenados = resultado.sort((a, b) => 
           new Date(b.fecha_acceso || b.fecha) - new Date(a.fecha_acceso || a.fecha)
         );
         
         setLogs(logsOrdenados);
         setEstadisticas(calcularEstadisticas(logsOrdenados));
-      } else if (resultado.mensaje) {
+      } else if (resultado?.mensaje) {
         setMensaje(resultado.mensaje);
         setError(resultado.mensaje);
         setLogs([]);
@@ -102,7 +114,7 @@ export const useLogs = (tipo = "todos", idUsuario = null) => {
       setMensaje("");
       const resultado = await postLog(logData);
       
-      if (resultado.error || resultado.mensaje?.includes("Error")) {
+      if (resultado?.error) {
         setMensaje(resultado.mensaje || "Error al registrar log");
         return { error: true, datos: resultado };
       }
@@ -121,7 +133,7 @@ export const useLogs = (tipo = "todos", idUsuario = null) => {
       setMensaje("");
       const resultado = await postLogCompleto(userData);
       
-      if (resultado.error || resultado.mensaje?.includes("Error")) {
+      if (resultado?.error) {
         setMensaje(resultado.mensaje || "Error al registrar log completo");
         return { error: true, datos: resultado };
       }
@@ -132,6 +144,90 @@ export const useLogs = (tipo = "todos", idUsuario = null) => {
     } catch (error) {
       setMensaje("Error al registrar log completo");
       return { error: true, datos: { mensaje: "Error al registrar log completo", error: error.message } };
+    }
+  };
+
+  // Eliminar todos los logs
+  const eliminarTodosLosLogs = async () => {
+    try {
+      setCargando(true);
+      setMensaje("");
+      setError(null);
+      
+      const resultado = await deleteAllLogs();
+      
+      if (resultado?.error) {
+        setMensaje(resultado.mensaje || "Error al eliminar logs");
+        setError(resultado.mensaje);
+        return { error: true, datos: resultado };
+      }
+      
+      setMensaje(resultado?.mensaje || "Logs eliminados exitosamente");
+      await cargarLogs(); // Recargar después de eliminar
+      return { error: false, datos: resultado };
+    } catch (error) {
+      console.error("Error en eliminarTodosLosLogs:", error);
+      setMensaje("Error al eliminar logs");
+      setError(error.message);
+      return { error: true, datos: { mensaje: "Error al eliminar logs", error: error.message } };
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // Truncar tabla de logs
+  const truncarLogs = async () => {
+    try {
+      setCargando(true);
+      setMensaje("");
+      setError(null);
+      
+      const resultado = await truncateLogs();
+      
+      if (resultado?.error) {
+        setMensaje(resultado.mensaje || "Error al truncar logs");
+        setError(resultado.mensaje);
+        return { error: true, datos: resultado };
+      }
+      
+      setMensaje(resultado?.mensaje || "Logs truncados exitosamente");
+      await cargarLogs(); // Recargar después de truncar
+      return { error: false, datos: resultado };
+    } catch (error) {
+      console.error("Error en truncarLogs:", error);
+      setMensaje("Error al truncar logs");
+      setError(error.message);
+      return { error: true, datos: { mensaje: "Error al truncar logs", error: error.message } };
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // Eliminar logs por rango de fechas
+  const eliminarLogsPorFecha = async (fechaInicio, fechaFin) => {
+    try {
+      setCargando(true);
+      setMensaje("");
+      setError(null);
+      
+      const resultado = await deleteLogsByDateRange(fechaInicio, fechaFin);
+      
+      if (resultado?.error) {
+        setMensaje(resultado.mensaje || "Error al eliminar logs por fecha");
+        setError(resultado.mensaje);
+        return { error: true, datos: resultado };
+      }
+      
+      setMensaje(resultado?.mensaje || "Logs eliminados por fecha exitosamente");
+      await cargarLogs(); // Recargar después de eliminar
+      return { error: false, datos: resultado };
+    } catch (error) {
+      console.error("Error en eliminarLogsPorFecha:", error);
+      setMensaje("Error al eliminar logs por fecha");
+      setError(error.message);
+      return { error: true, datos: { mensaje: "Error al eliminar logs por fecha", error: error.message } };
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -157,6 +253,9 @@ export const useLogs = (tipo = "todos", idUsuario = null) => {
     recargarLogs: cargarLogs,
     registrarLog,
     registrarLogCompleto,
+    eliminarTodosLosLogs,
+    truncarLogs,
+    eliminarLogsPorFecha,
     limpiarMensaje,
     limpiarError
   };

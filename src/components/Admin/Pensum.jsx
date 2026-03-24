@@ -234,6 +234,7 @@ const Pensum = () => {
             className="boton-cerrar-mensaje"
             onClick={limpiarMensaje}
           >
+            
             ×
           </button>
         </div>
@@ -241,9 +242,7 @@ const Pensum = () => {
 
       <div className="cabecera-pensum">
         <div className="titulo-pensum-con-boton">
-          <div>
-            <h2>Gestión de Pensum</h2>
-          </div>
+          
           <button 
             className="boton-nuevo-pensum"
             onClick={handleNuevoPensum}

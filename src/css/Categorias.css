@@ -985,3 +985,13 @@
   .modal-contenido-categorias::-webkit-scrollbar-thumb:hover {
     background: var(--categorias-texto);
   }
+  /* Quitar título repetido en cabecera de categorías */
+.sin-titulo-categorias {
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.espacio-cabecera-categorias {
+  display: none;
+}

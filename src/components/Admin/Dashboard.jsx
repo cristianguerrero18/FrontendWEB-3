@@ -1,33 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useDashboard } from "../../hooks/useDashboard.js";
-import { 
-  Users, 
-  GraduationCap, 
-  BookOpen, 
-  FileText, 
-  Folder, 
-  Tag, 
-  List, 
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  FileText,
+  Folder,
+  Tag,
+  List,
   RefreshCw,
   BarChart3,
   TrendingUp,
   Clock,
   Info,
-  Zap
+  Zap,
 } from "lucide-react";
 import "../../css/Dashboard.css";
 
 const Dashboard = () => {
-  const { 
-    totales, 
-    cargando, 
-    recargarDashboard 
-  } = useDashboard();
-  
+  const { totales, cargando, recargarDashboard } = useDashboard();
+
   const [stats, setStats] = useState([]);
   const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
 
-  // Efecto para procesar los totales
   useEffect(() => {
     if (Object.keys(totales).length > 0) {
       procesarEstadisticas();
@@ -35,7 +30,6 @@ const Dashboard = () => {
     }
   }, [totales]);
 
-  // Función para procesar estadísticas
   const procesarEstadisticas = () => {
     const estadisticas = [
       {
@@ -46,7 +40,7 @@ const Dashboard = () => {
         color: "#4a90e2",
         descripcion: "Usuarios registrados",
         ruta: "#usuarios",
-        variacion: "+12%"
+        variacion: "+12%",
       },
       {
         id: 2,
@@ -56,7 +50,7 @@ const Dashboard = () => {
         color: "#50c878",
         descripcion: "Programas académicos",
         ruta: "#carreras",
-        variacion: "+5%"
+        variacion: "+5%",
       },
       {
         id: 3,
@@ -66,7 +60,7 @@ const Dashboard = () => {
         color: "#f39c12",
         descripcion: "Materias del sistema",
         ruta: "#asignaturas",
-        variacion: "+8%"
+        variacion: "+8%",
       },
       {
         id: 4,
@@ -76,7 +70,7 @@ const Dashboard = () => {
         color: "#e74c3c",
         descripcion: "Registros de pensum",
         ruta: "#pensum",
-        variacion: "+3%"
+        variacion: "+3%",
       },
       {
         id: 5,
@@ -86,7 +80,7 @@ const Dashboard = () => {
         color: "#3498db",
         descripcion: "Archivos y documentos",
         ruta: "#recursos",
-        variacion: "+15%"
+        variacion: "+15%",
       },
       {
         id: 6,
@@ -96,7 +90,7 @@ const Dashboard = () => {
         color: "#9b59b6",
         descripcion: "Clasificaciones",
         ruta: "#categorias",
-        variacion: "+7%"
+        variacion: "+7%",
       },
       {
         id: 7,
@@ -106,14 +100,13 @@ const Dashboard = () => {
         color: "#1abc9c",
         descripcion: "Modalidades",
         ruta: "#tipos-carrera",
-        variacion: "+2%"
-      }
+        variacion: "+2%",
+      },
     ];
-    
+
     setStats(estadisticas);
   };
 
-  // Función para formatear números grandes
   const formatearNumero = (num) => {
     if (num >= 1000) {
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -121,28 +114,28 @@ const Dashboard = () => {
     return num.toString();
   };
 
-  // Calcular total general
   const totalGeneral = Object.values(totales).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="contenedor-dashboard">
-      {/* Cabecera */}
-      <div className="cabecera-dashboard">
-        <div className="titulo-dashboard-con-boton">
-          <div>
-            <h1>Dashboard del Sistema</h1>
-            <p className="subtitulo-dashboard">
-              Resumen general de los datos del sistema educativo
-            </p>
+    <div className="contenedor-dashboard dashboard-pro">
+      <div className="cabecera-dashboard dashboard-header-pro">
+        <div className="titulo-dashboard-con-boton dashboard-header-minimal">
+          <div className="dashboard-header-info">
+            <div className="dashboard-badge-superior">
+              <BarChart3 size={14} />
+              <span>Resumen general activo</span>
+            </div>
           </div>
-          <div className="controles-dashboard">
+
+          <div className="controles-dashboard dashboard-controles-pro">
             {ultimaActualizacion && (
               <div className="info-actualizacion-dashboard">
                 <Clock size={14} />
                 <span>Actualizado: {ultimaActualizacion}</span>
               </div>
             )}
-            <button 
+
+            <button
               className="boton-actualizar-dashboard"
               onClick={recargarDashboard}
               disabled={cargando}
@@ -155,15 +148,14 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Total General */}
       <div className="total-general-dashboard">
-        <div className="tarjeta-total-general">
+        <div className="tarjeta-total-general dashboard-total-pro">
           <div className="icono-total-general">
             <BarChart3 size={32} />
           </div>
           <div className="contenido-total-general">
             <div className="valor-total-general">{formatearNumero(totalGeneral)}</div>
-            <div className="titulo-total-general">Registros Totales</div>
+            <div className="titulo-total-general">Registros totales</div>
             <div className="variacion-total-general">
               <TrendingUp size={14} />
               <span>+8% vs mes anterior</span>
@@ -172,35 +164,31 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Grid de estadísticas */}
       <div className="grid-estadisticas-dashboard">
         {stats.map((stat) => (
-          <div 
-            key={stat.id} 
-            className="tarjeta-estadistica"
-            onClick={() => window.location.hash = stat.ruta}
+          <div
+            key={stat.id}
+            className="tarjeta-estadistica dashboard-card-pro"
+            onClick={() => (window.location.hash = stat.ruta)}
           >
             <div className="cabecera-tarjeta-estadistica">
-              <div className="icono-tarjeta-estadistica" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
+              <div
+                className="icono-tarjeta-estadistica"
+                style={{ backgroundColor: `${stat.color}20`, color: stat.color }}
+              >
                 {stat.icono}
               </div>
               <div className="variacion-tarjeta-estadistica">
                 <span style={{ color: stat.color }}>{stat.variacion}</span>
               </div>
             </div>
-            
+
             <div className="cuerpo-tarjeta-estadistica">
-              <div className="valor-tarjeta-estadistica">
-                {formatearNumero(stat.valor)}
-              </div>
-              <div className="titulo-tarjeta-estadistica">
-                {stat.titulo}
-              </div>
-              <div className="descripcion-tarjeta-estadistica">
-                {stat.descripcion}
-              </div>
+              <div className="valor-tarjeta-estadistica">{formatearNumero(stat.valor)}</div>
+              <div className="titulo-tarjeta-estadistica">{stat.titulo}</div>
+              <div className="descripcion-tarjeta-estadistica">{stat.descripcion}</div>
             </div>
-            
+
             <div className="pie-tarjeta-estadistica">
               <div className="indicador-acceso">
                 <span>Ver detalles</span>
@@ -211,29 +199,29 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Información adicional */}
       <div className="informacion-adicional-dashboard">
-        <div className="tarjeta-informacion">
+        <div className="tarjeta-informacion dashboard-info-pro">
           <div className="icono-informacion">
             <Info size={20} />
           </div>
           <div className="contenido-informacion">
-            <h4>Información del Dashboard</h4>
+            <h4>Información del dashboard</h4>
             <p>
-              Este dashboard muestra un resumen de todos los datos registrados en el sistema. 
-              Los números representan el total de registros en cada categoría.
+              Este panel resume los principales registros del sistema y facilita una
+              visualización rápida del estado general de la plataforma.
             </p>
           </div>
         </div>
-        <div className="tarjeta-informacion">
+
+        <div className="tarjeta-informacion dashboard-info-pro">
           <div className="icono-informacion">
             <Zap size={20} />
           </div>
           <div className="contenido-informacion">
-            <h4>Actualizaciones en tiempo real</h4>
+            <h4>Actualización de datos</h4>
             <p>
-              Los datos se actualizan automáticamente. Usa el botón "Actualizar" 
-              para obtener la información más reciente del sistema.
+              Usa el botón de actualización para consultar la información más reciente
+              disponible en el sistema.
             </p>
           </div>
         </div>

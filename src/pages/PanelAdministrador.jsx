@@ -1,43 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
   User,
   GraduationCap,
-  Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Search,
-  Bell,
-  Home,
-  BookOpen,
-  Users,
-  FileText,
-  BarChart,
-  HelpCircle,
   Shield,
   ChevronDown,
   ChevronUp,
   School,
   List,
-  BadgeAlertIcon,
   Backpack,
   Folder,
   Database,
   Tag,
-  FileWarningIcon,
   AlertTriangle,
-  BookLock,
-  BeanOff,
   BellPlus,
   MessageSquare,
   Footprints,
-  FootprintsIcon,
-  FolderOutput,
   LayoutDashboard,
   Video,
-  RotateCw // Agregamos el ícono de recarga
+  RotateCw,
+  BookOpen,
+  Users,
+  Bell,
 } from "lucide-react";
 
 import "../css/Principal.css";
@@ -59,7 +48,6 @@ import Dashboard from "../components/Admin/Dashboard.jsx";
 import VideoTutorial from "../components/Usuarios/VideoTutorial.jsx";
 import { usePerfil } from "../hooks/usePerfil.js";
 
-
 const parseLocalStorage = (key) => {
   try {
     const item = localStorage.getItem(key);
@@ -73,6 +61,42 @@ const parseLocalStorage = (key) => {
   }
 };
 
+const MENU_SECCIONES = [
+  { id: "inicio", icono: LayoutDashboard, label: "Dashboard", descripcion: "Vista general del sistema" },
+  {
+    id: "carreras",
+    icono: GraduationCap,
+    label: "Carreras",
+    descripcion: "Gestión académica por carreras",
+    tieneSubmenu: true,
+    subsecciones: [
+      { id: "carreras-lista", icono: School, label: "Carreras", descripcion: "Listado general de carreras" },
+      { id: "tipos-carrera", icono: List, label: "Tipos de Carrera", descripcion: "Clasificación por tipo de carrera" },
+    ],
+  },
+  { id: "perfil", icono: User, label: "Perfil", descripcion: "Administración del perfil del usuario" },
+  { id: "asignaturas", icono: BookOpen, label: "Asignaturas", descripcion: "Gestión de asignaturas" },
+  { id: "roles", icono: Shield, label: "Roles", descripcion: "Administración de roles del sistema" },
+  { id: "usuarios", icono: Users, label: "Usuarios", descripcion: "Gestión de usuarios" },
+  { id: "pensum", icono: Backpack, label: "Pensum", descripcion: "Organización del pensum académico" },
+  {
+    id: "recursos",
+    icono: Folder,
+    label: "Recursos",
+    descripcion: "Gestión de recursos académicos",
+    tieneSubmenu: true,
+    subsecciones: [
+      { id: "recursos-lista", icono: Database, label: "Recursos", descripcion: "Listado de recursos" },
+      { id: "categorias-recursos", icono: Tag, label: "Categorías", descripcion: "Clasificación de recursos" },
+      { id: "reportes-recursos", icono: AlertTriangle, label: "Reportes", descripcion: "Incidencias y reportes" },
+    ],
+  },
+  { id: "pqrs", icono: MessageSquare, label: "PQRS", descripcion: "Peticiones, quejas y reclamos" },
+  { id: "logs", icono: Footprints, label: "Huella Digital", descripcion: "Actividad de accesos y eventos" },
+  { id: "notificaciones", icono: BellPlus, label: "Notificaciones", descripcion: "Centro de notificaciones" },
+  { id: "tutoriales", icono: Video, label: "Video Tutoriales", descripcion: "Guías de uso del sistema" },
+];
+
 const PanelUniversitario = () => {
   const navigate = useNavigate();
 
@@ -82,17 +106,11 @@ const PanelUniversitario = () => {
   const [carrerasDesplegado, setCarrerasDesplegado] = useState(false);
   const [recursosDesplegado, setRecursosDesplegado] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const [cargando, setCargando] = useState(false);
   const [datos, setDatos] = useState(null);
   const [idRecursoFiltro, setIdRecursoFiltro] = useState(null);
-  
-  // Nuevo estado para el efecto de recarga
   const [recargandoSeccion, setRecargandoSeccion] = useState(false);
-  const [ultimaSeccionClickeada, setUltimaSeccionClickeada] = useState(null);
-  const [ultimaSubseccionClickeada, setUltimaSubseccionClickeada] = useState(null);
   const [tiempoRecarga, setTiempoRecarga] = useState(0);
-  
-  // Ref para controlar si es la primera carga
+
   const esPrimeraCarga = useRef(true);
   const temporizadorRecargaRef = useRef(null);
 
@@ -100,47 +118,43 @@ const PanelUniversitario = () => {
   const carreraStorage = parseLocalStorage("carrera");
   const usuarioId = usuarioStorage.id_usuario || null;
 
-  const { perfil, cargando: cargandoPerfil, mensaje, recargar, guardarPerfil } = usePerfil(
+  const { perfil, cargando: cargandoPerfil, mensaje, guardarPerfil } = usePerfil(
     seccionActiva === "perfil" && usuarioStorage.id_usuario ? usuarioStorage.id_usuario : null
   );
 
-  const secciones = [
-    { id: "inicio", icono: LayoutDashboard, label: "Dashboard", descripcion: "Dashboard principal del sistema" },
-    { 
-      id: "carreras",
-      icono: GraduationCap,
-      label: "Carreras",
-      descripcion: "Gestión de carreras",
-      tieneSubmenu: true,
-      subsecciones: [
-        { id: "carreras-lista", icono: School, label: "Carreras", descripcion: "Lista de carreras" },
-        { id: "tipos-carrera", icono: List, label: "Tipos de Carrera", descripcion: "Tipos de carreras" }
-      ]
-    },
-    { id: "perfil", icono: User, label: "Perfil", descripcion: "Información personal" },
-    { id: "asignaturas", icono: BookOpen, label: "Asignaturas", descripcion: "Administración de Asignaturas" },
-    { id: "roles", icono: Shield, label: "Roles", descripcion: "Roles y permisos" },
-    { id: "usuarios", icono: Users, label: "Usuarios", descripcion: "Gestión de usuarios" },
-    { id: "pensum", icono: Backpack, label: "Pensum", descripcion: "Plan de estudios" },
-    { 
-      id: "recursos",
-      icono: Folder,
-      label: "Recursos",
-      descripcion: "Recursos educativos",
-      tieneSubmenu: true,
-      subsecciones: [
-        { id: "recursos-lista", icono: Database, label: "Recursos", descripcion: "Gestión de recursos" },
-        { id: "categorias-recursos", icono: Tag, label: "Categorías", descripcion: "Categorías de recursos" },
-        { id: "reportes-recursos", icono: AlertTriangle, label: "Reportes", descripcion: "Reportes de recursos" }
-      ]
-    },
-    { id: "pqrs", icono: MessageSquare, label: "PQRS", descripcion: "Peticiones, Quejas, Reclamos y Sugerencias" },
-    { id: "logs", icono: Footprints, label: "Huella Digital", descripcion: "Registro de accesos y actividad del sistema" },
-    { id: "notificaciones", icono: BellPlus, label: "Notificaciones", descripcion: "Gestión de notificaciones del sistema" },
-    { id: "tutoriales", icono: Video, label: "Video Tutoriales", descripcion: "Aprende a usar el sistema con video tutoriales" }
-  ];
+  const seccionesFiltradas = useMemo(() => {
+    if (!busqueda.trim()) return MENU_SECCIONES;
 
-  const seccionActivaInfo = secciones.find((s) => s.id === seccionActiva) || secciones[0];
+    const texto = busqueda.toLowerCase();
+
+    return MENU_SECCIONES.filter((seccion) => {
+      const coincideSeccion =
+        seccion.label.toLowerCase().includes(texto) ||
+        seccion.descripcion.toLowerCase().includes(texto);
+
+      const coincideSubseccion = seccion.subsecciones?.some(
+        (sub) =>
+          sub.label.toLowerCase().includes(texto) ||
+          sub.descripcion.toLowerCase().includes(texto)
+      );
+
+      return coincideSeccion || coincideSubseccion;
+    }).map((seccion) => {
+      if (!seccion.subsecciones) return seccion;
+
+      return {
+        ...seccion,
+        subsecciones: seccion.subsecciones.filter(
+          (sub) =>
+            sub.label.toLowerCase().includes(texto) ||
+            sub.descripcion.toLowerCase().includes(texto)
+        ),
+      };
+    });
+  }, [busqueda]);
+
+  const seccionActivaInfo =
+    MENU_SECCIONES.find((s) => s.id === seccionActiva) || MENU_SECCIONES[0];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -158,22 +172,15 @@ const PanelUniversitario = () => {
     }
   }, [navigate]);
 
-  // Efecto para manejar la recarga automática cuando se cambia de sección
   useEffect(() => {
-    // No aplicar recarga en la primera carga
     if (esPrimeraCarga.current) {
       esPrimeraCarga.current = false;
       return;
     }
 
-    // Solo recargar si la sección o subsección ha cambiado
-    if ((ultimaSeccionClickeada && ultimaSeccionClickeada === seccionActiva) ||
-        (ultimaSubseccionClickeada && ultimaSubseccionClickeada === subseccionActiva)) {
-      iniciarRecargaSutil();
-    }
-  }, [seccionActiva, subseccionActiva, ultimaSeccionClickeada, ultimaSubseccionClickeada]);
+    iniciarRecargaSutil();
+  }, [seccionActiva, subseccionActiva]);
 
-  // Limpiar temporizador al desmontar
   useEffect(() => {
     return () => {
       if (temporizadorRecargaRef.current) {
@@ -183,183 +190,106 @@ const PanelUniversitario = () => {
   }, []);
 
   const iniciarRecargaSutil = () => {
-    // Limpiar temporizador anterior si existe
     if (temporizadorRecargaRef.current) {
       clearTimeout(temporizadorRecargaRef.current);
     }
 
-    // Iniciar recarga
     setRecargandoSeccion(true);
     setTiempoRecarga(0);
-    
-    // Temporizador para el contador visual
+
     const startTime = Date.now();
+
     const updateTimer = () => {
       const elapsed = Date.now() - startTime;
       setTiempoRecarga(elapsed);
-      
-      if (elapsed < 800) {
-        temporizadorRecargaRef.current = setTimeout(updateTimer, 50);
+
+      if (elapsed < 700) {
+        temporizadorRecargaRef.current = setTimeout(updateTimer, 40);
       }
     };
-    
+
     updateTimer();
 
-    // Finalizar recarga después de un tiempo corto
-    setTimeout(() => {
+    temporizadorRecargaRef.current = setTimeout(() => {
       setRecargandoSeccion(false);
       setTiempoRecarga(0);
-    }, 800); // 0.8 segundos
+    }, 700);
   };
 
   const handleVerTodasNotificaciones = () => {
-    // Cierra cualquier submenu abierto
     setCarrerasDesplegado(false);
     setRecursosDesplegado(false);
-    
-    // Navega a la sección de notificaciones
     cargarDatosSeccion("notificaciones");
-  }; 
+  };
 
   const cargarDatosSeccion = (seccionId, subseccionId = null) => {
-    // Guardar la sección clickeada para comparar después
-    setUltimaSeccionClickeada(seccionId);
-    if (subseccionId) {
-      setUltimaSubseccionClickeada(subseccionId);
-    }
-    
-    // Cambiar inmediatamente la sección activa
     setSeccionActiva(seccionId);
-    if (subseccionId) {
-      setSubseccionActiva(subseccionId);
-    }
+    setSubseccionActiva(subseccionId);
     setDatos(null);
     setIdRecursoFiltro(null);
 
-    if (seccionId !== "carreras") {
-      setCarrerasDesplegado(false);
-    }
-    if (seccionId !== "recursos") {
-      setRecursosDesplegado(false);
-    }
+    if (seccionId !== "carreras") setCarrerasDesplegado(false);
+    if (seccionId !== "recursos") setRecursosDesplegado(false);
 
     const seccionesConComponente = [
-      "perfil", "carreras", "asignaturas", "roles", "usuarios", "pensum", "recursos",
-      "categorias-recursos", "reportes-recursos", "pqrs", "logs", "notificaciones",
-      "inicio", "tutoriales"
+      "perfil",
+      "carreras",
+      "asignaturas",
+      "roles",
+      "usuarios",
+      "pensum",
+      "recursos",
+      "categorias-recursos",
+      "reportes-recursos",
+      "pqrs",
+      "logs",
+      "notificaciones",
+      "inicio",
+      "tutoriales",
     ];
-    
-    if (!seccionesConComponente.includes(seccionId) && 
-        !seccionesConComponente.includes(subseccionId)) {
+
+    if (!seccionesConComponente.includes(seccionId) && !seccionesConComponente.includes(subseccionId)) {
       setTimeout(() => {
         setDatos({
           seccion: subseccionId || seccionId,
           timestamp: new Date().toISOString(),
           totalRegistros: Math.floor(Math.random() * 100) + 1,
-          mensaje: `Datos cargados para ${subseccionId || seccionId}`
+          mensaje: `Datos cargados para ${subseccionId || seccionId}`,
         });
-      }, 600);
+      }, 500);
     }
   };
 
   const manejarClickMenuConSubmenu = (seccionId) => {
-    if (panelAbierto) {
-      switch(seccionId) {
-        case "carreras":
-          const nuevoEstadoCarreras = !carrerasDesplegado;
-          setCarrerasDesplegado(nuevoEstadoCarreras);
-          setRecursosDesplegado(false);
-          
-          if (nuevoEstadoCarreras && (!subseccionActiva || !subseccionActiva.startsWith("carreras-"))) {
-            setSubseccionActiva("carreras-lista");
-            if (seccionActiva !== "carreras") {
-              cargarDatosSeccion("carreras", "carreras-lista");
-            }
-          }
-          break;
-          
-        case "recursos":
-          const nuevoEstadoRecursos = !recursosDesplegado;
-          setRecursosDesplegado(nuevoEstadoRecursos);
-          setCarrerasDesplegado(false);
-          
-          if (nuevoEstadoRecursos && (!subseccionActiva || !subseccionActiva.startsWith("recursos-"))) {
-            setSubseccionActiva("recursos-lista");
-            if (seccionActiva !== "recursos") {
-              cargarDatosSeccion("recursos", "recursos-lista");
-            }
-          }
-          break;
-          
-        default:
-          break;
-      }
-    } else {
-      setUltimaSeccionClickeada(seccionId);
+    if (!panelAbierto) {
       setSeccionActiva(seccionId);
-      cargarDatosSeccion(seccionId);
+      return;
     }
-  };
 
-  const obtenerEtiquetaActual = () => {
-    if (seccionActiva === "inicio") return "Dashboard";
-    if (seccionActiva === "tutoriales") return "Video Tutoriales";
-    
-    if (seccionActiva === "carreras" && subseccionActiva) {
-      const seccionCarreras = secciones.find(s => s.id === "carreras");
-      const subseccion = seccionCarreras?.subsecciones?.find(s => s.id === subseccionActiva);
-      return subseccion?.label || "Carreras";
-    }
-    
-    if (seccionActiva === "recursos" && subseccionActiva) {
-      const seccionRecursos = secciones.find(s => s.id === "recursos");
-      const subseccion = seccionRecursos?.subsecciones?.find(s => s.id === subseccionActiva);
-      
-      if (subseccionActiva === "reportes-recursos" && idRecursoFiltro) {
-        return `Reportes del Recurso #${idRecursoFiltro}`;
-      }
-      
-      return subseccion?.label || "Recursos";
-    }
-    
-    if (seccionActiva === "logs") {
-      return "Huella Digital";
-    }
-    
-    return seccionActivaInfo.label;
-  };
+    if (seccionId === "carreras") {
+      const nuevo = !carrerasDesplegado;
+      setCarrerasDesplegado(nuevo);
+      setRecursosDesplegado(false);
 
-  const obtenerDescripcionActual = () => {
-    if (seccionActiva === "tutoriales") return "Aprende a usar el Sistema Académico con nuestros tutoriales paso a paso";
-    
-    if (seccionActiva === "carreras" && subseccionActiva) {
-      const seccionCarreras = secciones.find(s => s.id === "carreras");
-      const subseccion = seccionCarreras?.subsecciones?.find(sub => sub.id === subseccionActiva);
-      return subseccion?.descripcion || seccionActivaInfo.descripcion;
-    }
-    
-    if (seccionActiva === "recursos" && subseccionActiva) {
-      const seccionRecursos = secciones.find(s => s.id === "recursos");
-      const subseccion = seccionRecursos?.subsecciones?.find(sub => sub.id === subseccionActiva);
-      
-      if (subseccionActiva === "reportes-recursos" && idRecursoFiltro) {
-        return `Viendo reportes específicos del recurso #${idRecursoFiltro}`;
+      if (nuevo && seccionActiva !== "carreras") {
+        cargarDatosSeccion("carreras", "carreras-lista");
       }
-      
-      return subseccion?.descripcion || seccionActivaInfo.descripcion;
+      return;
     }
-    
-    if (seccionActiva === "logs") {
-      return "Registro detallado de accesos al sistema y actividad de usuarios";
+
+    if (seccionId === "recursos") {
+      const nuevo = !recursosDesplegado;
+      setRecursosDesplegado(nuevo);
+      setCarrerasDesplegado(false);
+
+      if (nuevo && seccionActiva !== "recursos") {
+        cargarDatosSeccion("recursos", "recursos-lista");
+      }
     }
-    
-    return seccionActivaInfo.descripcion;
   };
 
   const navegarAReportesConFiltro = (idRecurso) => {
     setIdRecursoFiltro(idRecurso);
-    setUltimaSeccionClickeada("recursos");
-    setUltimaSubseccionClickeada("reportes-recursos");
     setSeccionActiva("recursos");
     setSubseccionActiva("reportes-recursos");
     setRecursosDesplegado(true);
@@ -371,45 +301,72 @@ const PanelUniversitario = () => {
     navigate("/Login", { replace: true });
   };
 
-  const renderContenido = () => {
-    // Mostrar el efecto de recarga sutil si está activo
-    if (recargandoSeccion) {
-      return (
-        <div className="contenedor-recarga-sutil">
-          <div className="animacion-recarga">
-            <div className="icono-recarga-girando">
-              <RotateCw size={40} />
-            </div>
-            <div className="progreso-recarga">
-              <div 
-                className="barra-progreso-recarga" 
-                style={{ width: `${Math.min(100, (tiempoRecarga / 800) * 100)}%` }}
-              ></div>
-            </div>
-            <p className="texto-recarga">Actualizando contenido...</p>
-            <p className="texto-ayuda-recarga">Esto tomará solo un momento</p>
-          </div>
-        </div>
-      );
+  const obtenerEtiquetaActual = () => {
+    if (seccionActiva === "inicio") return "Dashboard";
+    if (seccionActiva === "tutoriales") return "Video Tutoriales";
+
+    if (seccionActiva === "carreras" && subseccionActiva) {
+      const seccion = MENU_SECCIONES.find((s) => s.id === "carreras");
+      const sub = seccion?.subsecciones?.find((s) => s.id === subseccionActiva);
+      return sub?.label || "Carreras";
     }
 
-    const seccionesConCargaPropia = [
-      "perfil", "roles", "asignaturas", "usuarios", "pensum", "recursos",
-      "carreras-lista", "tipos-carrera", "recursos-lista", "categorias-recursos",
-      "reportes-recursos", "pqrs", "logs", "notificaciones", "inicio", "tutoriales",
-      "tipos-archivo"
-    ];
-    
-    const mostrarCargaGeneral = cargando && 
-      !seccionesConCargaPropia.includes(seccionActiva) &&
-      !(seccionActiva === "carreras" && seccionesConCargaPropia.includes(subseccionActiva)) &&
-      !(seccionActiva === "recursos" && seccionesConCargaPropia.includes(subseccionActiva));
+    if (seccionActiva === "recursos" && subseccionActiva) {
+      const seccion = MENU_SECCIONES.find((s) => s.id === "recursos");
+      const sub = seccion?.subsecciones?.find((s) => s.id === subseccionActiva);
 
-    if (mostrarCargaGeneral) {
+      if (subseccionActiva === "reportes-recursos" && idRecursoFiltro) {
+        return `Reportes del recurso #${idRecursoFiltro}`;
+      }
+
+      return sub?.label || "Recursos";
+    }
+
+    return seccionActivaInfo.label;
+  };
+
+  const obtenerDescripcionActual = () => {
+    if (seccionActiva === "tutoriales") {
+      return "Aprende a usar la plataforma con nuestros tutoriales paso a paso.";
+    }
+
+    if (seccionActiva === "carreras" && subseccionActiva) {
+      const seccion = MENU_SECCIONES.find((s) => s.id === "carreras");
+      const sub = seccion?.subsecciones?.find((s) => s.id === subseccionActiva);
+      return sub?.descripcion || seccionActivaInfo.descripcion;
+    }
+
+    if (seccionActiva === "recursos" && subseccionActiva) {
+      const seccion = MENU_SECCIONES.find((s) => s.id === "recursos");
+      const sub = seccion?.subsecciones?.find((s) => s.id === subseccionActiva);
+
+      if (subseccionActiva === "reportes-recursos" && idRecursoFiltro) {
+        return `Consulta detallada de incidencias asociadas al recurso seleccionado.`;
+      }
+
+      return sub?.descripcion || seccionActivaInfo.descripcion;
+    }
+
+    return seccionActivaInfo.descripcion;
+  };
+
+  const renderContenido = () => {
+    if (recargandoSeccion) {
       return (
-        <div className="estado-carga">
-          <div className="spinner-grande"></div>
-          <p>Cargando datos de {obtenerEtiquetaActual()}...</p>
+        <div className="panel-pro-recarga">
+          <div className="panel-pro-recarga-card">
+            <div className="panel-pro-recarga-icon">
+              <RotateCw size={34} />
+            </div>
+            <div className="panel-pro-recarga-barra">
+              <div
+                className="panel-pro-recarga-barra-fill"
+                style={{ width: `${Math.min(100, (tiempoRecarga / 700) * 100)}%` }}
+              />
+            </div>
+            <p className="panel-pro-recarga-texto">Actualizando contenido...</p>
+            <span className="panel-pro-recarga-subtexto">Cargando la vista seleccionada</span>
+          </div>
         </div>
       );
     }
@@ -417,8 +374,10 @@ const PanelUniversitario = () => {
     switch (seccionActiva) {
       case "inicio":
         return <Dashboard />;
+
       case "tutoriales":
         return <VideoTutorial />;
+
       case "perfil":
         return (
           <Perfil
@@ -429,96 +388,65 @@ const PanelUniversitario = () => {
             guardarPerfil={guardarPerfil}
           />
         );
+
       case "carreras":
-        switch (subseccionActiva) {
-          case "carreras-lista":
-            return <Carreras />;
-          case "tipos-carrera":
-            return <TiposCarrera />;
-          default:
-            return <Carreras />;
-        }
+        if (subseccionActiva === "tipos-carrera") return <TiposCarrera />;
+        return <Carreras />;
+
       case "roles":
         return <Roles />;
+
       case "asignaturas":
         return <Asignaturas />;
+
       case "usuarios":
         return <Usuarios />;
+
       case "pensum":
         return <Pensum />;
+
       case "recursos":
-        switch (subseccionActiva) {
-          case "recursos-lista":
-            return <Recursos onVerReportes={navegarAReportesConFiltro} />;
-          case "categorias-recursos":
-            return <Categorias />;
-          case "reportes-recursos":
-            return <Reportes idRecursoFiltro={idRecursoFiltro} />;
-          default:
-            return <Recursos onVerReportes={navegarAReportesConFiltro} />;
+        if (subseccionActiva === "categorias-recursos") return <Categorias />;
+        if (subseccionActiva === "reportes-recursos") {
+          return <Reportes idRecursoFiltro={idRecursoFiltro} />;
         }
+        return <Recursos onVerReportes={navegarAReportesConFiltro} />;
+
       case "pqrs":
         return <PQRS />;
+
       case "logs":
         return <Logs />;
+
       case "notificaciones":
         return <Notificaciones />;
+
       default:
-        if (datos) {
-          return (
-            <div className="contenedor-datos-api">
-              <div className="cabecera-tarjeta-api">
-                <h2>Vista: {datos.seccion}</h2>
-                <div className="badge-cantidad">{datos.totalRegistros} registros</div>
-              </div>
-              <div className="cuerpo-tarjeta-api">
-                <div className="mensaje-api">
-                  <p>{datos.mensaje}</p>
-                  <p className="texto-ayuda">Timestamp: {new Date(datos.timestamp).toLocaleString()}</p>
-                </div>
-              </div>
-              <div className="pie-tarjeta-api">
-                <div className="texto-ayuda">Mostrando vista simulada para desarrollo</div>
-                <button className="boton-refrescar" onClick={() => cargarDatosSeccion(seccionActiva, subseccionActiva)}>
-                  Refrescar Datos
-                </button>
-              </div>
+        return (
+          <div className="panel-pro-empty">
+            <div className="panel-pro-empty-icon">
+              <LayoutDashboard size={42} />
             </div>
-          );
-        } else {
-          return (
-            <div className="estado-inicial">
-              <div className="icono-estado-inicial">
-                {seccionActiva === "carreras" ? <GraduationCap size={48} /> : 
-                 seccionActiva === "usuarios" ? <Users size={48} /> : 
-                 seccionActiva === "pensum" ? <Backpack size={48} /> :
-                 seccionActiva === "recursos" ? <Folder size={48} /> :
-                 seccionActiva === "categorias-recursos" ? <Tag size={48} /> :
-                 seccionActiva === "reportes-recursos" ? <AlertTriangle size={48} /> :
-                 seccionActiva === "pqrs" ? <MessageSquare size={48} /> :
-                 seccionActiva === "logs" ? <Footprints size={48} /> :
-                 seccionActiva === "notificaciones" ? <BellPlus size={48} /> :
-                 seccionActiva === "tutoriales" ? <Video size={48} /> :
-                 <FileText size={48} />}
+            <h3>Módulo en preparación</h3>
+            <p>Esta vista aún no tiene un componente asociado.</p>
+            {datos && (
+              <div className="panel-pro-empty-meta">
+                <span>{datos.totalRegistros} registros simulados</span>
               </div>
-              <h2>Bienvenido al módulo {obtenerEtiquetaActual()}</h2>
-              <p>Seleccione una acción o utilice el botón inferior para cargar datos de ejemplo.</p>
-              <button className="boton-cargar-datos" onClick={() => cargarDatosSeccion(seccionActiva, subseccionActiva)}>
-                Cargar Datos de Prueba
-              </button>
-            </div>
-          );
-        }
+            )}
+          </div>
+        );
     }
   };
 
   return (
-    <div className="app-universitario">
-      {/* PANEL LATERAL */}
-      <div className={`panel-lateral ${panelAbierto ? "abierto" : "cerrado"}`}>
-        <div className="logo-panel">
+    <div className="app-universitario panel-pro-app">
+      <aside className={`panel-lateral panel-pro-sidebar ${panelAbierto ? "abierto" : "cerrado"}`}>
+        <div className="logo-panel panel-pro-sidebar-header">
           <div className="logo-contenido">
-            <div className="logo-icono"><GraduationCap size={24} /></div>
+            <div className="logo-icono">
+              <GraduationCap size={24} />
+            </div>
             {panelAbierto && (
               <div>
                 <div className="logo-texto">Sistema Académico</div>
@@ -526,23 +454,26 @@ const PanelUniversitario = () => {
               </div>
             )}
           </div>
+
           <button
             className="boton-toggle"
             onClick={() => setPanelAbierto(!panelAbierto)}
             aria-label={panelAbierto ? "Contraer panel" : "Expandir panel"}
             disabled={recargandoSeccion}
           >
-            {panelAbierto ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {panelAbierto ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </button>
         </div>
 
         {panelAbierto && (
-          <div className="buscador-panel">
-            <div className="icono-busqueda"><Search size={16} /></div>
+          <div className="buscador-panel panel-pro-search">
+            <div className="icono-busqueda">
+              <Search size={16} />
+            </div>
             <input
               type="text"
               className="input-busqueda"
-              placeholder="Buscar módulo..."
+              placeholder="Buscar módulo o sección..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               disabled={recargandoSeccion}
@@ -551,57 +482,46 @@ const PanelUniversitario = () => {
         )}
 
         <nav className="navegacion-panel">
-          {secciones.map((s) => {
+          {seccionesFiltradas.map((s) => {
             const Icono = s.icono;
-            
+
             if (s.tieneSubmenu && panelAbierto) {
               const estaActiva = seccionActiva === s.id;
-              const tieneSubmenuDesplegado = 
+              const desplegado =
                 (s.id === "carreras" && carrerasDesplegado) ||
                 (s.id === "recursos" && recursosDesplegado);
-              
+
               return (
                 <div key={s.id} className="item-submenu-contenedor">
                   <button
-                    className={`item-navegacion ${estaActiva ? "activo" : ""} ${tieneSubmenuDesplegado ? "con-submenu-abierto" : ""} ${recargandoSeccion && estaActiva ? 'recargando' : ''}`}
+                    className={`item-navegacion ${estaActiva ? "activo" : ""}`}
                     onClick={() => manejarClickMenuConSubmenu(s.id)}
                     title={s.descripcion}
                     disabled={recargandoSeccion}
                   >
                     <Icono size={18} />
-                    {panelAbierto && <span>{s.label}</span>}
-                    {panelAbierto && (
-                      <div className="icono-desplegable">
-                        {tieneSubmenuDesplegado ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </div>
-                    )}
-                    {recargandoSeccion && estaActiva && (
-                      <div className="indicador-recarga">
-                        <RotateCw size={12} />
-                      </div>
-                    )}
+                    <span>{s.label}</span>
+                    <div className="icono-desplegable">
+                      {desplegado ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
                   </button>
-                  
-                  {tieneSubmenuDesplegado && panelAbierto && (
+
+                  {desplegado && (
                     <div className="submenu-contenido">
                       {s.subsecciones.map((sub) => {
                         const SubIcono = sub.icono;
-                        const subEstaActiva = subseccionActiva === sub.id;
+                        const activa = subseccionActiva === sub.id;
+
                         return (
                           <button
                             key={sub.id}
-                            className={`item-submenu ${subEstaActiva ? "activo-sub" : ""} ${recargandoSeccion && subEstaActiva ? 'recargando-sub' : ''}`}
+                            className={`item-submenu ${activa ? "activo-sub" : ""}`}
                             onClick={() => cargarDatosSeccion(s.id, sub.id)}
                             title={sub.descripcion}
                             disabled={recargandoSeccion}
                           >
-                            <SubIcono size={16} />
+                            <SubIcono size={15} />
                             <span>{sub.label}</span>
-                            {recargandoSeccion && subEstaActiva && (
-                              <div className="indicador-recarga-sub">
-                                <RotateCw size={10} />
-                              </div>
-                            )}
                           </button>
                         );
                       })}
@@ -612,121 +532,113 @@ const PanelUniversitario = () => {
             }
 
             const estaActiva = seccionActiva === s.id;
+
             return (
               <button
                 key={s.id}
-                className={`item-navegacion ${estaActiva ? "activo" : ""} ${recargandoSeccion && estaActiva ? 'recargando' : ''}`}
+                className={`item-navegacion ${estaActiva ? "activo" : ""}`}
                 onClick={() => cargarDatosSeccion(s.id)}
                 title={s.descripcion}
                 disabled={recargandoSeccion}
               >
                 <Icono size={18} />
                 {panelAbierto && <span>{s.label}</span>}
-                {recargandoSeccion && estaActiva && (
-                  <div className="indicador-recarga">
-                    <RotateCw size={12} />
-                  </div>
-                )}
               </button>
             );
           })}
+
           <div className="separador-navegacion" />
-          <button 
-            className="item-navegacion cerrar-sesion" 
-            onClick={handleCerrarSesion}
-            disabled={recargandoSeccion}
-          >
+
+          <button className="item-navegacion cerrar-sesion" onClick={handleCerrarSesion}>
             <LogOut size={18} />
-            {panelAbierto && <span>Cerrar Sesión</span>}
+            {panelAbierto && <span>Cerrar sesión</span>}
           </button>
         </nav>
 
         {panelAbierto && (
-          <div className="info-usuario-panel">
+          <div className="info-usuario-panel panel-pro-user-card">
             <div className="avatar-usuario">
               {usuarioStorage.nombres_usuario?.charAt(0) || "A"}
               {usuarioStorage.apellidos_usuario?.charAt(0) || "D"}
             </div>
             <div className="detalles-usuario">
-              <div className="nombre-usuario">Admin</div>
-              <div className="rol-usuario">Administrador Principal</div>
+              <div className="nombre-usuario">
+                {usuarioStorage.nombres_usuario || "Administrador"}
+              </div>
+              <div className="rol-usuario">Administrador principal</div>
             </div>
           </div>
         )}
-      </div>
+      </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className={`contenido-principal ${panelAbierto ? "abierto" : "cerrado"}`}>
-        <header className="barra-superior">
-          <div className="ruta-actual">
-            <span>Sistema Académico</span>
-            <span className="separador-ruta">/</span>
-            <span className="ruta-actual-item">{obtenerEtiquetaActual()}</span>
-            {recargandoSeccion && (
-              <span className="badge-recarga-activa">
-                <RotateCw size={12} />
-                <span>Actualizando...</span>
-              </span>
-            )}
+      <div className={`contenido-principal panel-pro-main ${panelAbierto ? "abierto" : "cerrado"}`}>
+        <header className="barra-superior panel-pro-topbar">
+          <div className="panel-pro-title-wrap">
+            <div className="ruta-actual">
+              <span>Sistema Académico</span>
+              <span className="separador-ruta">/</span>
+              <span className="ruta-actual-item">{obtenerEtiquetaActual()}</span>
+            </div>
+
+            <div className="panel-pro-heading">
+              <h1>{obtenerEtiquetaActual()}</h1>
+              <p>{obtenerDescripcionActual()}</p>
+            </div>
           </div>
+
           <div className="acciones-superior">
-            <button 
-              className="boton-ayuda" 
+            <button
+              className="boton-ayuda"
               onClick={() => cargarDatosSeccion("tutoriales")}
               title="Video Tutoriales"
               disabled={recargandoSeccion}
             >
-              <Video size={20} />
+              <Video size={18} />
             </button>
-            <NotificacionesSuperior 
-              usuarioId={usuarioId} 
-              onVerTodas={handleVerTodasNotificaciones} 
-            />
+
+            <button
+              className="boton-ayuda"
+              onClick={() => cargarDatosSeccion("notificaciones")}
+              title="Notificaciones"
+              disabled={recargandoSeccion}
+            >
+              <Bell size={18} />
+            </button>
+
+            <NotificacionesSuperior usuarioId={usuarioId} onVerTodas={handleVerTodasNotificaciones} />
           </div>
         </header>
 
-        <main className="contenido-dinamico">
+        <main className="contenido-dinamico panel-pro-content">
           <div className="contenido-seccion">
-            {/* CABECERA SIMPLIFICADA - SIN TÍTULO DUPLICADO */}
-            <div className="cabecera-seccion">
-              <div>
-                {/* SOLO DESCRIPCIÓN, SIN TÍTULO <h1> */}
-                <p className="texto-subtitulo">{obtenerDescripcionActual()}</p>
-                {recargandoSeccion && (
-                  <div className="badge-recarga-titulo">
-                    <RotateCw size={14} />
-                    <span>Actualizando contenido</span>
-                  </div>
-                )}
+            <div className="panel-pro-summary-row">
+              <div className="panel-pro-summary-card">
+                <span className="panel-pro-summary-label">Estado del sistema</span>
+                <div className="panel-pro-summary-value ok">
+                  <span className="panel-pro-dot" />
+                  Sistema conectado
+                </div>
               </div>
-              <div className={`badge-estado-api ${recargandoSeccion ? 'recargando' : cargando ? 'cargando' : 'conectado'}`}>
-                {recargandoSeccion ? (
-                  <>
-                    <div className="spinner-recarga"></div>
-                    <span>Actualizando contenido...</span>
-                  </>
-                ) : cargando ? (
-                  <>
-                    <div className="spinner-api"></div>
-                    <span>Sincronizando...</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="punto-conectado"></div>
-                    <span>Sistema Conectado</span>
-                  </>
-                )}
+
+              <div className="panel-pro-summary-card">
+                <span className="panel-pro-summary-label">Módulo actual</span>
+                <div className="panel-pro-summary-value">{obtenerEtiquetaActual()}</div>
+              </div>
+
+              <div className="panel-pro-summary-card">
+                <span className="panel-pro-summary-label">Estado de vista</span>
+                <div className="panel-pro-summary-value">
+                  {recargandoSeccion ? "Actualizando..." : "Operativa"}
+                </div>
               </div>
             </div>
 
-            {/* Contenido dinámico */}
-            {renderContenido()}
+            <section className="panel-pro-body-card">{renderContenido()}</section>
           </div>
         </main>
-        
 
-        <footer className="pie-pagina">
-          <p>© {new Date().getFullYear()} Sistema Académico Universitario - Panel de Administración</p>
+        <footer className="pie-pagina panel-pro-footer">
+          <p>© {new Date().getFullYear()} Sistema Académico Universitario</p>
           <div className="enlaces-pie">
             <a href="/politica">Política de Privacidad</a>
             <a href="/terminos">Términos de Uso</a>

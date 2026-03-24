@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
   User,
   Folder,
-  AlertTriangle,
   BellPlus,
   MessageSquare,
   Video,
@@ -14,16 +13,12 @@ import {
   Search,
   LayoutDashboard,
   GraduationCap,
-  Star,
-  Settings,
-  FileText,
   Heart,
   FolderArchive,
   BookCheck,
   Bell,
   RotateCw,
   Database,
-  Tag
 } from "lucide-react";
 
 import "../css/Principal.css";
@@ -36,7 +31,6 @@ import PQRSStudent from "../components/Usuarios/PQRSStudent.jsx";
 import Notificaciones from "../components/Usuarios/NotificacionesStudent.jsx";
 import NotificacionesSuperior from "../components/Admin/NotificacionesSuperior.jsx";
 import DashboardEstudiante from "../components/Usuarios/Dashboards.jsx";
-// Importaciones para la administración de recursos
 import RecursosAdmin from "../components/Admin/Recursos.jsx";
 import Categorias from "../components/Admin/Categorias.jsx";
 import Reportes from "../components/Admin/Reportes.jsx";
@@ -56,6 +50,84 @@ const parseLocalStorage = (key) => {
   }
 };
 
+const MENU_SECCIONES_DOCENTE = [
+  {
+    id: "inicio",
+    icono: LayoutDashboard,
+    label: "Dashboard",
+    descripcion: "Vista general del panel del docente",
+  },
+  {
+    id: "perfil",
+    icono: User,
+    label: "Perfil",
+    descripcion: "Administración del perfil del docente",
+  },
+  {
+    id: "recursos",
+    icono: BookCheck,
+    label: "Recursos",
+    descripcion: "Consulta de recursos académicos disponibles",
+  },
+  {
+    id: "adminrecursos",
+    icono: Folder,
+    label: "Administrar Recursos",
+    descripcion: "Administración completa de recursos",
+    tieneSubmenu: true,
+    subsecciones: [
+      {
+        id: "recursos-lista",
+        icono: Database,
+        label: "Recursos",
+        descripcion: "Gestión de recursos",
+      },
+      {
+        id: "categorias-recursos",
+        icono: Database,
+        label: "Categorías",
+        descripcion: "Gestión de categorías",
+      },
+      {
+        id: "reportes-recursos",
+        icono: Database,
+        label: "Reportes",
+        descripcion: "Gestión de reportes",
+      },
+    ],
+  },
+  {
+    id: "misrecursos",
+    icono: FolderArchive,
+    label: "Mis Recursos",
+    descripcion: "Administración de mis recursos subidos",
+  },
+  {
+    id: "favoritos",
+    icono: Heart,
+    label: "Mis Favoritos",
+    descripcion: "Recursos marcados como favoritos",
+  },
+  {
+    id: "pqrs",
+    icono: MessageSquare,
+    label: "PQRS",
+    descripcion: "Peticiones, quejas, reclamos y sugerencias",
+  },
+  {
+    id: "notificaciones",
+    icono: BellPlus,
+    label: "Notificaciones",
+    descripcion: "Centro de notificaciones del docente",
+  },
+  {
+    id: "tutoriales",
+    icono: Video,
+    label: "Video Tutoriales",
+    descripcion: "Guías de uso de la plataforma",
+  },
+];
+
 const PanelDocente = () => {
   const navigate = useNavigate();
 
@@ -68,19 +140,18 @@ const PanelDocente = () => {
   const [datos, setDatos] = useState(null);
   const [mostrarVistaFavoritos, setMostrarVistaFavoritos] = useState(false);
   const [idRecursoFiltro, setIdRecursoFiltro] = useState(null);
-  
-  // Nuevo estado para el efecto de recarga
+
   const [recargandoSeccion, setRecargandoSeccion] = useState(false);
   const [ultimaSeccionClickeada, setUltimaSeccionClickeada] = useState(null);
   const [ultimaSubseccionClickeada, setUltimaSubseccionClickeada] = useState(null);
   const [tiempoRecarga, setTiempoRecarga] = useState(0);
-  
-  // Ref para controlar si es la primera carga
+
   const esPrimeraCarga = useRef(true);
   const temporizadorRecargaRef = useRef(null);
 
   const usuarioStorage = parseLocalStorage("usuario");
   const carreraStorage = parseLocalStorage("carrera");
+  const usuarioId = usuarioStorage.id_usuario || null;
 
   const { userData, loadUserData } = useUser();
 
@@ -88,31 +159,29 @@ const PanelDocente = () => {
     seccionActiva === "perfil" && usuarioStorage.id_usuario ? usuarioStorage.id_usuario : null
   );
 
-  // SECCIONES PARA DOCENTE - Actualizada con Dashboard y menú de recursos administrativos
-  const secciones = [
-    { id: "inicio", icono: LayoutDashboard, label: "Dashboard", descripcion: "Panel principal del Docente" },
-    { id: "perfil", icono: User, label: "Perfil", descripcion: "Información personal y académica" },
-    { id: "recursos", icono: BookCheck, label: "Recursos", descripcion: "Recursos educativos disponibles" },
-    { 
-      id: "adminrecursos",
-      icono: Folder,
-      label: "Administrar Recursos",
-      descripcion: "Administración completa de recursos",
-      tieneSubmenu: true,
-      subsecciones: [
-        { id: "recursos-lista", icono: Database, label: "Recursos", descripcion: "Gestión de recursos" },
-        { id: "categorias-recursos", icono: Tag, label: "Categorías", descripcion: "Categorías de recursos" },
-        { id: "reportes-recursos", icono: AlertTriangle, label: "Reportes", descripcion: "Reportes de recursos" }
-      ]
-    },
-    { id: "misrecursos", icono: FolderArchive, label: "Mis Recursos", descripcion: "Administración de mis recursos subidos" },
-    { id: "favoritos", icono: Heart, label: "Mis Favoritos", descripcion: "Recursos que has marcado como favoritos" },
-    { id: "pqrs", icono: MessageSquare, label: "PQRS", descripcion: "Peticiones, Quejas, Reclamos y Sugerencias" },
-    { id: "notificaciones", icono: BellPlus, label: "Notificaciones", descripcion: "Notificaciones del sistema" },
-    { id: "tutoriales", icono: Video, label: "Video Tutoriales", descripcion: "Aprende a usar el sistema" }
-  ];
+  const seccionesFiltradas = useMemo(() => {
+    if (!busqueda.trim()) return MENU_SECCIONES_DOCENTE;
 
-  const seccionActivaInfo = secciones.find((s) => s.id === seccionActiva) || secciones[0];
+    const texto = busqueda.toLowerCase();
+
+    return MENU_SECCIONES_DOCENTE.filter((seccion) => {
+      const coincidePrincipal =
+        seccion.label.toLowerCase().includes(texto) ||
+        seccion.descripcion.toLowerCase().includes(texto);
+
+      const coincideSub =
+        seccion.subsecciones?.some(
+          (sub) =>
+            sub.label.toLowerCase().includes(texto) ||
+            sub.descripcion.toLowerCase().includes(texto)
+        ) || false;
+
+      return coincidePrincipal || coincideSub;
+    });
+  }, [busqueda]);
+
+  const seccionActivaInfo =
+    MENU_SECCIONES_DOCENTE.find((s) => s.id === seccionActiva) || MENU_SECCIONES_DOCENTE[0];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -130,29 +199,26 @@ const PanelDocente = () => {
     }
   }, [navigate]);
 
-  // Cargar datos del usuario
   useEffect(() => {
     if (usuarioStorage?.id_usuario && !userData) {
       loadUserData(usuarioStorage.id_usuario);
     }
   }, [usuarioStorage?.id_usuario, userData, loadUserData]);
 
-  // Efecto para manejar la recarga automática cuando se cambia de sección
   useEffect(() => {
-    // No aplicar recarga en la primera carga
     if (esPrimeraCarga.current) {
       esPrimeraCarga.current = false;
       return;
     }
 
-    // Solo recargar si la sección o subsección ha cambiado
-    if ((ultimaSeccionClickeada && ultimaSeccionClickeada === seccionActiva) ||
-        (ultimaSubseccionClickeada && ultimaSubseccionClickeada === subseccionActiva)) {
+    if (
+      (ultimaSeccionClickeada && ultimaSeccionClickeada === seccionActiva) ||
+      (ultimaSubseccionClickeada && ultimaSubseccionClickeada === subseccionActiva)
+    ) {
       iniciarRecargaSutil();
     }
   }, [seccionActiva, subseccionActiva, ultimaSeccionClickeada, ultimaSubseccionClickeada]);
 
-  // Limpiar temporizador al desmontar
   useEffect(() => {
     return () => {
       if (temporizadorRecargaRef.current) {
@@ -162,30 +228,27 @@ const PanelDocente = () => {
   }, []);
 
   const iniciarRecargaSutil = () => {
-    // Limpiar temporizador anterior si existe
     if (temporizadorRecargaRef.current) {
       clearTimeout(temporizadorRecargaRef.current);
     }
 
-    // Iniciar recarga
     setRecargandoSeccion(true);
     setTiempoRecarga(0);
-    
-    // Temporizador para el contador visual
+
     const startTime = Date.now();
+
     const updateTimer = () => {
       const elapsed = Date.now() - startTime;
       setTiempoRecarga(elapsed);
-      
+
       if (elapsed < 800) {
         temporizadorRecargaRef.current = setTimeout(updateTimer, 50);
       }
     };
-    
+
     updateTimer();
 
-    // Finalizar recarga después de un tiempo corto
-    setTimeout(() => {
+    temporizadorRecargaRef.current = setTimeout(() => {
       setRecargandoSeccion(false);
       setTiempoRecarga(0);
     }, 800);
@@ -196,17 +259,18 @@ const PanelDocente = () => {
   };
 
   const cargarDatosSeccion = (seccionId, subseccionId = null) => {
-    // Guardar la sección clickeada para comparar después
     setUltimaSeccionClickeada(seccionId);
     if (subseccionId) {
       setUltimaSubseccionClickeada(subseccionId);
     }
-    
-    // Cambiar inmediatamente la sección activa
+
     setSeccionActiva(seccionId);
     if (subseccionId) {
       setSubseccionActiva(subseccionId);
+    } else if (seccionId !== "adminrecursos") {
+      setSubseccionActiva(null);
     }
+
     setDatos(null);
     setMostrarVistaFavoritos(false);
     setIdRecursoFiltro(null);
@@ -216,19 +280,30 @@ const PanelDocente = () => {
     }
 
     const seccionesConComponente = [
-      "perfil", "recursos", "adminrecursos", "misrecursos", "favoritos", "pqrs", 
-      "notificaciones", "inicio", "tutoriales", "recursos-lista", 
-      "categorias-recursos", "reportes-recursos"
+      "perfil",
+      "recursos",
+      "adminrecursos",
+      "misrecursos",
+      "favoritos",
+      "pqrs",
+      "notificaciones",
+      "inicio",
+      "tutoriales",
+      "recursos-lista",
+      "categorias-recursos",
+      "reportes-recursos",
     ];
-    
-    if (!seccionesConComponente.includes(seccionId) && 
-        !seccionesConComponente.includes(subseccionId)) {
+
+    if (
+      !seccionesConComponente.includes(seccionId) &&
+      !seccionesConComponente.includes(subseccionId)
+    ) {
       setTimeout(() => {
         setDatos({
           seccion: subseccionId || seccionId,
           timestamp: new Date().toISOString(),
           totalRegistros: Math.floor(Math.random() * 100) + 1,
-          mensaje: `Datos cargados para ${subseccionId || seccionId}`
+          mensaje: `Datos cargados para ${subseccionId || seccionId}`,
         });
       }, 600);
     }
@@ -236,18 +311,22 @@ const PanelDocente = () => {
 
   const manejarClickMenuConSubmenu = (seccionId) => {
     if (panelAbierto) {
-      switch(seccionId) {
-        case "adminrecursos":
+      switch (seccionId) {
+        case "adminrecursos": {
           const nuevoEstadoRecursos = !recursosDesplegado;
           setRecursosDesplegado(nuevoEstadoRecursos);
-          
-          if (nuevoEstadoRecursos && (!subseccionActiva || !subseccionActiva.startsWith("recursos-"))) {
+
+          if (
+            nuevoEstadoRecursos &&
+            (!subseccionActiva || !subseccionActiva.startsWith("recursos-"))
+          ) {
             setSubseccionActiva("recursos-lista");
             if (seccionActiva !== "adminrecursos") {
               cargarDatosSeccion("adminrecursos", "recursos-lista");
             }
           }
           break;
+        }
         default:
           break;
       }
@@ -261,38 +340,40 @@ const PanelDocente = () => {
   const obtenerEtiquetaActual = () => {
     if (seccionActiva === "inicio") return "Dashboard";
     if (seccionActiva === "tutoriales") return "Video Tutoriales";
-    
+
     if (seccionActiva === "adminrecursos" && subseccionActiva) {
-      const seccionAdmin = secciones.find(s => s.id === "adminrecursos");
-      const subseccion = seccionAdmin?.subsecciones?.find(s => s.id === subseccionActiva);
-      
+      const seccionAdmin = MENU_SECCIONES_DOCENTE.find((s) => s.id === "adminrecursos");
+      const subseccion = seccionAdmin?.subsecciones?.find((s) => s.id === subseccionActiva);
+
       if (subseccionActiva === "reportes-recursos" && idRecursoFiltro) {
         return `Reportes del Recurso #${idRecursoFiltro}`;
       }
-      
+
       return subseccion?.label || "Administrar Recursos";
     }
-    
+
     if (seccionActiva === "misrecursos") return "Mis Recursos";
     if (seccionActiva === "favoritos") return "Mis Favoritos";
-    
+
     return seccionActivaInfo.label;
   };
 
   const obtenerDescripcionActual = () => {
-    if (seccionActiva === "tutoriales") return "Aprende a usar el Sistema Académico con nuestros tutoriales paso a paso";
-    
+    if (seccionActiva === "tutoriales") {
+      return "Aprende a usar el Sistema Académico con tutoriales paso a paso";
+    }
+
     if (seccionActiva === "adminrecursos" && subseccionActiva) {
-      const seccionAdmin = secciones.find(s => s.id === "adminrecursos");
-      const subseccion = seccionAdmin?.subsecciones?.find(sub => sub.id === subseccionActiva);
-      
+      const seccionAdmin = MENU_SECCIONES_DOCENTE.find((s) => s.id === "adminrecursos");
+      const subseccion = seccionAdmin?.subsecciones?.find((sub) => sub.id === subseccionActiva);
+
       if (subseccionActiva === "reportes-recursos" && idRecursoFiltro) {
         return `Viendo reportes específicos del recurso #${idRecursoFiltro}`;
       }
-      
+
       return subseccion?.descripcion || "Administración completa de recursos educativos";
     }
-    
+
     return seccionActivaInfo.descripcion;
   };
 
@@ -306,18 +387,24 @@ const PanelDocente = () => {
   };
 
   const obtenerEstadisticasRecursos = () => {
-    if (!userData || (seccionActiva !== "misrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && seccionActiva !== "notificaciones")) return null;
+    if (
+      !userData ||
+      (seccionActiva !== "misrecursos" &&
+        seccionActiva !== "favoritos" &&
+        seccionActiva !== "pqrs" &&
+        seccionActiva !== "notificaciones")
+    ) {
+      return null;
+    }
 
-    const estadisticas = {
+    return {
       total: userData.totalRecursos || 0,
       activos: userData.recursosActivos || 0,
       reportados: userData.recursosReportados || 0,
       categorias: userData.categoriasDistintas || 0,
       favoritos: userData.totalFavoritos || 0,
-      notificaciones: userData.notificacionesNoLeidas || 0
+      notificaciones: userData.notificacionesNoLeidas || 0,
     };
-
-    return estadisticas;
   };
 
   const handleVolverDeFavoritos = () => {
@@ -330,23 +417,42 @@ const PanelDocente = () => {
     navigate("/Login", { replace: true });
   };
 
+  const obtenerResumenRapido = () => {
+    const stats = obtenerEstadisticasRecursos();
+
+    if (!stats) {
+      return {
+        recursos: userData?.totalRecursos || 0,
+        favoritos: userData?.totalFavoritos || 0,
+        noLeidas: userData?.notificacionesNoLeidas || 0,
+      };
+    }
+
+    return {
+      recursos: stats.total || 0,
+      favoritos: stats.favoritos || 0,
+      noLeidas: stats.notificaciones || 0,
+    };
+  };
+
   const renderContenido = () => {
-    // Mostrar el efecto de recarga sutil si está activo
     if (recargandoSeccion) {
       return (
-        <div className="contenedor-recarga-sutil">
-          <div className="animacion-recarga">
-            <div className="icono-recarga-girando">
-              <RotateCw size={40} />
+        <div className="panel-pro-recarga">
+          <div className="panel-pro-recarga-card">
+            <div className="panel-pro-recarga-icon">
+              <RotateCw size={34} />
             </div>
-            <div className="progreso-recarga">
-              <div 
-                className="barra-progreso-recarga" 
+            <div className="panel-pro-recarga-barra">
+              <div
+                className="panel-pro-recarga-barra-fill"
                 style={{ width: `${Math.min(100, (tiempoRecarga / 800) * 100)}%` }}
-              ></div>
+              />
             </div>
-            <p className="texto-recarga">Actualizando contenido...</p>
-            <p className="texto-ayuda-recarga">Esto tomará solo un momento</p>
+            <p className="panel-pro-recarga-texto">Actualizando contenido...</p>
+            <span className="panel-pro-recarga-subtexto">
+              Cargando la vista seleccionada
+            </span>
           </div>
         </div>
       );
@@ -368,6 +474,7 @@ const PanelDocente = () => {
     switch (seccionActiva) {
       case "inicio":
         return <DashboardEstudiante />;
+
       case "perfil":
         return (
           <Perfil
@@ -376,12 +483,16 @@ const PanelDocente = () => {
             mensaje={mensaje}
             carreraStorage={carreraStorage}
             guardarPerfil={guardarPerfil}
+            recargar={recargar}
           />
         );
+
       case "recursos":
         return <Recursos />;
+
       case "misrecursos":
         return <MisRecursos />;
+
       case "adminrecursos":
         switch (subseccionActiva) {
           case "recursos-lista":
@@ -393,10 +504,24 @@ const PanelDocente = () => {
           default:
             return <RecursosAdmin onVerReportes={navegarAReportesConFiltro} />;
         }
+
       case "pqrs":
         return <PQRSStudent />;
+
       case "notificaciones":
         return <Notificaciones />;
+
+      case "tutoriales":
+        return (
+          <div className="panel-pro-empty">
+            <div className="panel-pro-empty-icon">
+              <Video size={42} />
+            </div>
+            <h3>Video Tutoriales</h3>
+            <p>Accede a las guías de uso de la plataforma.</p>
+          </div>
+        );
+
       default:
         if (datos && datos.seccion === seccionActiva) {
           return (
@@ -408,143 +533,50 @@ const PanelDocente = () => {
               <div className="cuerpo-tarjeta-api">
                 <div className="mensaje-api">
                   <p>{datos.mensaje}</p>
-                  <p className="texto-ayuda">Timestamp: {new Date(datos.timestamp).toLocaleString()}</p>
+                  <p className="texto-ayuda">
+                    Timestamp: {new Date(datos.timestamp).toLocaleString()}
+                  </p>
                 </div>
               </div>
               <div className="pie-tarjeta-api">
                 <div className="texto-ayuda">Esta funcionalidad está en desarrollo</div>
-                <button className="boton-refrescar" onClick={() => cargarDatosSeccion(seccionActiva)}>
+                <button
+                  className="boton-refrescar"
+                  onClick={() => cargarDatosSeccion(seccionActiva)}
+                >
                   Refrescar Datos
                 </button>
               </div>
             </div>
           );
-        } else {
-          return (
-            <div className="estado-inicial">
-              <div className="icono-estado-inicial">
-                {seccionActiva === "recursos" ? <BookCheck size={48} /> : 
-                 seccionActiva === "adminrecursos" ? <Folder size={48} /> :
-                 seccionActiva === "misrecursos" ? <FolderArchive size={48} /> :
-                 seccionActiva === "favoritos" ? <Heart size={48} /> :
-                 seccionActiva === "pqrs" ? <MessageSquare size={48} /> :
-                 seccionActiva === "notificaciones" ? <BellPlus size={48} /> :
-                 seccionActiva === "tutoriales" ? <Video size={48} /> :
-                 seccionActiva === "inicio" ? <LayoutDashboard size={48} /> :
-                 <User size={48} />}
-              </div>
-              <h2>{seccionActivaInfo.label}</h2>
-              <p>{seccionActivaInfo.descripcion}</p>
-              {seccionActiva === "adminrecursos" ? (
-                <p className="texto-ayuda">Administración completa de recursos educativos del sistema</p>
-              ) : seccionActiva === "favoritos" ? (
-                <p className="texto-ayuda">Aquí podrás ver todos los recursos que has marcado como favoritos</p>
-              ) : seccionActiva === "pqrs" ? (
-                <p className="texto-ayuda">Aquí podrás gestionar tus peticiones, quejas, reclamos y sugerencias</p>
-              ) : seccionActiva === "notificaciones" ? (
-                <p className="texto-ayuda">Aquí podrás ver y gestionar todas tus notificaciones del sistema</p>
-              ) : seccionActiva === "inicio" ? (
-                <p className="texto-ayuda">Bienvenido al panel principal del docente</p>
-              ) : (
-                <p className="texto-ayuda">Esta funcionalidad estará disponible próximamente</p>
-              )}
-              {seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && 
-               seccionActiva !== "notificaciones" && seccionActiva !== "inicio" &&
-               seccionActiva !== "adminrecursos" && seccionActiva !== "misrecursos" && (
-                <button className="boton-cargar-datos" onClick={() => cargarDatosSeccion(seccionActiva)}>
-                  Ver Vista de Desarrollo
-                </button>
-              )}
-            </div>
-          );
         }
+
+        return (
+          <div className="panel-pro-empty">
+            <div className="panel-pro-empty-icon">
+              <LayoutDashboard size={42} />
+            </div>
+            <h3>Módulo en preparación</h3>
+            <p>Esta vista aún no tiene un componente asociado.</p>
+          </div>
+        );
     }
   };
 
-  const renderEstadisticasPanel = () => {
-    if (!panelAbierto || (seccionActiva !== "misrecursos" && seccionActiva !== "favoritos" && seccionActiva !== "pqrs" && seccionActiva !== "notificaciones")) return null;
-
-    const stats = obtenerEstadisticasRecursos();
-    if (!stats || (stats.total === 0 && stats.favoritos === 0 && stats.notificaciones === 0)) return null;
-
-    return (
-      <div className="panel-estadisticas-recursos">
-        <div className="cabecera-estadisticas">
-          {seccionActiva === "favoritos" ? <Heart size={16} /> : 
-           seccionActiva === "pqrs" ? <MessageSquare size={16} /> :
-           seccionActiva === "notificaciones" ? <BellPlus size={16} /> :
-           <FileText size={16} />}
-          <span>
-            {seccionActiva === "favoritos" ? "Estadísticas de Favoritos" : 
-             seccionActiva === "pqrs" ? "Estadísticas de PQRS" :
-             seccionActiva === "notificaciones" ? "Estadísticas de Notificaciones" :
-             "Estadísticas de Recursos"}
-          </span>
-        </div>
-        <div className="estadisticas-contenido">
-          {seccionActiva === "favoritos" ? (
-            <>
-              <div className="estadistica-item destacado">
-                <span className="estadistica-label">Total Favoritos:</span>
-                <span className="estadistica-valor">{stats.favoritos || 0}</span>
-              </div>
-            </>
-          ) : seccionActiva === "pqrs" ? (
-            <>
-              <div className="estadistica-item">
-                <span className="estadistica-label">PQRS Activos:</span>
-                <span className="estadistica-valor">{stats.activos || 0}</span>
-              </div>
-              <div className="estadistica-item">
-                <span className="estadistica-label">PQRS Resueltos:</span>
-                <span className="estadistica-valor">{stats.total || 0}</span>
-              </div>
-            </>
-          ) : seccionActiva === "notificaciones" ? (
-            <>
-              <div className="estadistica-item destacado">
-                <span className="estadistica-label">No leídas:</span>
-                <span className="estadistica-valor">{stats.notificaciones || 0}</span>
-              </div>
-              <div className="estadistica-item">
-                <span className="estadistica-label">Total:</span>
-                <span className="estadistica-valor">{stats.total || 0}</span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="estadistica-item">
-                <span className="estadistica-label">Total:</span>
-                <span className="estadistica-valor">{stats.total}</span>
-              </div>
-              <div className="estadistica-item">
-                <span className="estadistica-label">Activos:</span>
-                <span className="estadistica-valor">{stats.activos}</span>
-              </div>
-              <div className="estadistica-item">
-                <span className="estadistica-label">Categorías:</span>
-                <span className="estadistica-valor">{stats.categorias}</span>
-              </div>
-              {stats.reportados > 0 && (
-                <div className="estadistica-item alerta">
-                  <span className="estadistica-label">Reportados:</span>
-                  <span className="estadistica-valor">{stats.reportados}</span>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
+  const stats = obtenerResumenRapido();
 
   return (
-    <div className="app-universitario">
-      {/* PANEL LATERAL */}
-      <div className={`panel-lateral ${panelAbierto ? "abierto" : "cerrado"}`}>
-        <div className="logo-panel">
+    <div className="app-universitario panel-pro-app">
+      <aside
+        className={`panel-lateral panel-pro-sidebar ${
+          panelAbierto ? "abierto" : "cerrado"
+        }`}
+      >
+        <div className="logo-panel panel-pro-sidebar-header">
           <div className="logo-contenido">
-            <div className="logo-icono"><GraduationCap size={24} /></div>
+            <div className="logo-icono">
+              <GraduationCap size={24} />
+            </div>
             {panelAbierto && (
               <div>
                 <div className="logo-texto">Sistema Académico</div>
@@ -552,23 +584,26 @@ const PanelDocente = () => {
               </div>
             )}
           </div>
+
           <button
             className="boton-toggle"
             onClick={() => setPanelAbierto(!panelAbierto)}
             aria-label={panelAbierto ? "Contraer panel" : "Expandir panel"}
             disabled={recargandoSeccion}
           >
-            {panelAbierto ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {panelAbierto ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </button>
         </div>
 
         {panelAbierto && (
-          <div className="buscador-panel">
-            <div className="icono-busqueda"><Search size={16} /></div>
+          <div className="buscador-panel panel-pro-search">
+            <div className="icono-busqueda">
+              <Search size={16} />
+            </div>
             <input
               type="text"
               className="input-busqueda"
-              placeholder="Buscar módulo..."
+              placeholder="Buscar módulo o sección..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               disabled={recargandoSeccion}
@@ -577,51 +612,43 @@ const PanelDocente = () => {
         )}
 
         <nav className="navegacion-panel">
-          {secciones.map((s) => {
+          {seccionesFiltradas.map((s) => {
             const Icono = s.icono;
-            
+            const estaActiva = seccionActiva === s.id;
+
             if (s.tieneSubmenu && panelAbierto) {
-              const estaActiva = seccionActiva === s.id;
-              const tieneSubmenuDesplegado = 
-                (s.id === "adminrecursos" && recursosDesplegado);
-              
+              const submenuAbierto = s.id === "adminrecursos" && recursosDesplegado;
+
               return (
                 <div key={s.id} className="item-submenu-contenedor">
                   <button
-                    className={`item-navegacion ${estaActiva ? "activo" : ""} ${tieneSubmenuDesplegado ? "con-submenu-abierto" : ""} ${recargandoSeccion && estaActiva ? 'recargando' : ''}`}
+                    className={`item-navegacion ${estaActiva ? "activo" : ""} ${
+                      submenuAbierto ? "con-submenu-abierto" : ""
+                    }`}
                     onClick={() => manejarClickMenuConSubmenu(s.id)}
                     title={s.descripcion}
                     disabled={recargandoSeccion}
                   >
                     <Icono size={18} />
                     {panelAbierto && <span>{s.label}</span>}
-                    {recargandoSeccion && estaActiva && (
-                      <div className="indicador-recarga">
-                        <RotateCw size={12} />
-                      </div>
-                    )}
                   </button>
-                  
-                  {tieneSubmenuDesplegado && panelAbierto && (
+
+                  {submenuAbierto && (
                     <div className="submenu-contenido">
                       {s.subsecciones.map((sub) => {
                         const SubIcono = sub.icono;
                         const subEstaActiva = subseccionActiva === sub.id;
+
                         return (
                           <button
                             key={sub.id}
-                            className={`item-submenu ${subEstaActiva ? "activo-sub" : ""} ${recargandoSeccion && subEstaActiva ? 'recargando-sub' : ''}`}
+                            className={`item-submenu ${subEstaActiva ? "activo-sub" : ""}`}
                             onClick={() => cargarDatosSeccion(s.id, sub.id)}
                             title={sub.descripcion}
                             disabled={recargandoSeccion}
                           >
                             <SubIcono size={16} />
                             <span>{sub.label}</span>
-                            {recargandoSeccion && subEstaActiva && (
-                              <div className="indicador-recarga-sub">
-                                <RotateCw size={10} />
-                              </div>
-                            )}
                           </button>
                         );
                       })}
@@ -631,38 +658,34 @@ const PanelDocente = () => {
               );
             }
 
-            const estaActiva = seccionActiva === s.id;
             return (
               <button
                 key={s.id}
-                className={`item-navegacion ${estaActiva ? "activo" : ""} ${recargandoSeccion && estaActiva ? 'recargando' : ''}`}
+                className={`item-navegacion ${estaActiva ? "activo" : ""}`}
                 onClick={() => cargarDatosSeccion(s.id)}
                 title={s.descripcion}
                 disabled={recargandoSeccion}
               >
                 <Icono size={18} />
                 {panelAbierto && <span>{s.label}</span>}
-                {recargandoSeccion && estaActiva && (
-                  <div className="indicador-recarga">
-                    <RotateCw size={12} />
-                  </div>
-                )}
               </button>
             );
           })}
+
           <div className="separador-navegacion" />
-          <button 
-            className="item-navegacion cerrar-sesion" 
+
+          <button
+            className="item-navegacion cerrar-sesion"
             onClick={handleCerrarSesion}
             disabled={recargandoSeccion}
           >
             <LogOut size={18} />
-            {panelAbierto && <span>Cerrar Sesión</span>}
+            {panelAbierto && <span>Cerrar sesión</span>}
           </button>
         </nav>
 
         {panelAbierto && (
-          <div className="info-usuario-panel">
+          <div className="info-usuario-panel panel-pro-user-card">
             <div className="avatar-usuario">
               {usuarioStorage.nombres_usuario?.charAt(0) || "D"}
               {usuarioStorage.apellidos_usuario?.charAt(0) || "O"}
@@ -671,108 +694,93 @@ const PanelDocente = () => {
               <div className="nombre-usuario">
                 {usuarioStorage.nombres_usuario || "Docente"}
               </div>
-              <div className="rol-usuario">{carreraStorage?.nombre_carrera || "No asignada"}</div>
+              <div className="rol-usuario">
+                {carreraStorage?.nombre_carrera || "Carrera no asignada"}
+              </div>
             </div>
           </div>
         )}
+      </aside>
 
-        {renderEstadisticasPanel()}
-      </div>
+      <div
+        className={`contenido-principal panel-pro-main ${
+          panelAbierto ? "abierto" : "cerrado"
+        }`}
+      >
+        <header className="barra-superior panel-pro-topbar">
+          <div className="panel-pro-title-wrap">
+            <div className="ruta-actual">
+              <span>Sistema Académico</span>
+              <span className="separador-ruta">/</span>
+              <span className="ruta-actual-item">{obtenerEtiquetaActual()}</span>
+            </div>
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className={`contenido-principal ${panelAbierto ? "abierto" : "cerrado"}`}>
-        <header className="barra-superior">
-          <div className="ruta-actual">
-            <span>Sistema Académico</span>
-            <span className="separador-ruta">/</span>
-            <span className="ruta-actual-item">{obtenerEtiquetaActual()}</span>
-            {recargandoSeccion && (
-              <span className="badge-recarga-activa">
-                <RotateCw size={12} />
-                <span>Actualizando...</span>
-              </span>
-            )}
+            <div className="panel-pro-heading">
+              <h1>{obtenerEtiquetaActual()}</h1>
+              <p>{obtenerDescripcionActual()}</p>
+            </div>
           </div>
+
           <div className="acciones-superior">
-            {seccionActiva === "adminrecursos" && (
-              <div className="badge-accion-admin">
-                <Folder size={16} />
-                <span>Administrador de Recursos</span>
-              </div>
-            )}
-            {seccionActiva === "misrecursos" && (
-              <div className="badge-accion-admin">
-                <FolderArchive size={16} />
-                <span>Mis Recursos</span>
-              </div>
-            )}
-            {seccionActiva === "pqrs" && (
-              <div className="badge-accion-admin">
-                <MessageSquare size={16} />
-                <span>Gestión de PQRS</span>
-              </div>
-            )}
-            {seccionActiva === "notificaciones" && (
-              <div className="badge-accion-admin">
-                <BellPlus size={16} />
-                <span>Mis Notificaciones</span>
-              </div>
-            )}
-            <button 
-              className="boton-ayuda" 
+            <button
+              className="boton-ayuda"
               onClick={() => cargarDatosSeccion("tutoriales")}
               title="Video Tutoriales"
               disabled={recargandoSeccion}
             >
-              <Video size={20} />
+              <Video size={18} />
             </button>
-            <NotificacionesSuperior 
-              onVerTodas={handleVerTodasNotificaciones} 
+
+            <button
+              className="boton-ayuda"
+              onClick={() => cargarDatosSeccion("notificaciones")}
+              title="Notificaciones"
+              disabled={recargandoSeccion}
+            >
+              <Bell size={18} />
+            </button>
+
+            <NotificacionesSuperior
+              usuarioId={usuarioId}
+              onVerTodas={handleVerTodasNotificaciones}
             />
           </div>
         </header>
 
-        <main className="contenido-dinamico">
+        <main className="contenido-dinamico panel-pro-content">
           <div className="contenido-seccion">
-            <div className="cabecera-seccion">
-              <div>
-                <h1>
-                  {obtenerEtiquetaActual()}
-                  {recargandoSeccion && (
-                    <span className="badge-recarga-titulo">
-                      <RotateCw size={14} />
-                      <span>Actualizando</span>
-                    </span>
-                  )}
-                </h1>
-                <p className="texto-subtitulo">{obtenerDescripcionActual()}</p>
+            <div className="panel-pro-summary-row">
+              <div className="panel-pro-summary-card">
+                <span className="panel-pro-summary-label">Estado del sistema</span>
+                <div className="panel-pro-summary-value ok">
+                  <span className="panel-pro-dot" />
+                  Sistema conectado
+                </div>
               </div>
-              <div className={`badge-estado-api ${recargandoSeccion ? 'recargando' : cargando ? 'cargando' : 'conectado'}`}>
-                {recargandoSeccion ? (
-                  <>
-                    <div className="spinner-recarga"></div>
-                    <span>Actualizando contenido...</span>
-                  </>
-                ) : cargando ? (
-                  <>
-                    <div className="spinner-api"></div>
-                    <span>Sincronizando...</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="punto-conectado"></div>
-                    <span>Sistema Conectado</span>
-                  </>
-                )}
+
+              <div className="panel-pro-summary-card">
+                <span className="panel-pro-summary-label">Módulo actual</span>
+                <div className="panel-pro-summary-value">{obtenerEtiquetaActual()}</div>
+              </div>
+
+              <div className="panel-pro-summary-card">
+                <span className="panel-pro-summary-label">Resumen rápido</span>
+                <div className="panel-pro-summary-value">
+                  {seccionActiva === "favoritos"
+                    ? `${stats.favoritos} favoritos`
+                    : seccionActiva === "notificaciones"
+                    ? `${stats.noLeidas} sin leer`
+                    : `${stats.recursos} recursos`}
+                </div>
               </div>
             </div>
 
-            {renderContenido()}
+            <section className="panel-pro-body-card">{renderContenido()}</section>
           </div>
         </main>
 
-        <footer className="pie-pagina">
-          <p>© {new Date().getFullYear()} Sistema Académico Universitario - Panel de Docente</p>
+        <footer className="pie-pagina panel-pro-footer">
+          <p>© {new Date().getFullYear()} Sistema Académico Universitario</p>
           <div className="enlaces-pie">
             <a href="/politica">Política de Privacidad</a>
             <a href="/terminos">Términos de Uso</a>

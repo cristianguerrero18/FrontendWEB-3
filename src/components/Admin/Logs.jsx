@@ -9,6 +9,9 @@ const Logs = () => {
     mensaje,
     estadisticas,
     recargarLogs,
+    eliminarTodosLosLogs,
+    truncarLogs,
+    eliminarLogsPorFecha,
     limpiarMensaje
   } = useLogs("detallados");
 
@@ -18,6 +21,9 @@ const Logs = () => {
   const [filtroUsuario, setFiltroUsuario] = useState("");
   const [ordenarPor, setOrdenarPor] = useState("fecha_desc");
   const [mostrarDetalles, setMostrarDetalles] = useState(null);
+  const [mostrarPanelFecha, setMostrarPanelFecha] = useState(false);
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
 
   // Obtener lista única de usuarios para filtro
   const usuariosUnicos = useMemo(() => {
@@ -36,7 +42,8 @@ const Logs = () => {
           (log.nombres_usuario?.toLowerCase() || '').includes(textoBusqueda) ||
           (log.apellidos_usuario?.toLowerCase() || '').includes(textoBusqueda) ||
           (log.descripcion?.toLowerCase() || '').includes(textoBusqueda) ||
-          (log.correo?.toLowerCase() || '').includes(textoBusqueda);
+          (log.correo?.toLowerCase() || '').includes(textoBusqueda) ||
+          (log.ip?.toLowerCase() || '').includes(textoBusqueda);
 
         const coincideUsuario = filtroUsuario === "" || 
           log.id_usuario?.toString() === filtroUsuario;
@@ -171,18 +178,125 @@ const Logs = () => {
         </div>
       </div>
 
+      {/* Acciones de Administrador */}
+      <div className="acciones-admin-logs">
+        <h3>⚙️ Acciones de Administrador</h3>
+        <div className="grupo-acciones-peligrosas">
+          <button 
+            className="boton-eliminar-todos"
+            onClick={async () => {
+              if (window.confirm('⚠️ ¿Estás seguro de eliminar TODOS los logs?\n\nEsta acción eliminará permanentemente todos los registros de acceso y no se puede deshacer.')) {
+                await eliminarTodosLosLogs();
+              }
+            }}
+            disabled={cargando}
+            title="Eliminar todos los logs permanentemente"
+          >
+            <span className="icono-boton">🗑️</span>
+            Eliminar Todos los Logs
+          </button>
+          
+          <button 
+            className="boton-truncar-logs"
+            onClick={async () => {
+              if (window.confirm('⚠️ ¿Estás seguro de TRUNCAR la tabla?\n\nEsto eliminará TODOS los registros y reiniciará el contador de IDs a 1. Esta acción es más rápida pero irreversible.')) {
+                await truncarLogs();
+              }
+            }}
+            disabled={cargando}
+            title="Truncar tabla (reinicia IDs)"
+          >
+            <span className="icono-boton">🔄</span>
+            Truncar Tabla
+          </button>
+
+          <button 
+            className="boton-fecha-logs"
+            onClick={() => setMostrarPanelFecha(!mostrarPanelFecha)}
+            disabled={cargando}
+            title="Eliminar logs por rango de fechas"
+          >
+            <span className="icono-boton">📅</span>
+            {mostrarPanelFecha ? 'Ocultar Panel' : 'Eliminar por Fechas'}
+          </button>
+        </div>
+
+        {/* Panel de eliminación por fecha */}
+        {mostrarPanelFecha && (
+          <div className="panel-fecha-logs">
+            <h4>Eliminar logs por rango de fechas</h4>
+            <p className="descripcion-panel">
+              Selecciona un rango de fechas para eliminar todos los logs dentro de ese período.
+            </p>
+            <div className="fechas-input">
+              <div className="campo-fecha">
+                <label htmlFor="fechaInicio">Fecha inicio:</label>
+                <input
+                  id="fechaInicio"
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  max={fechaFin || new Date().toISOString().split('T')[0]}
+                  className="input-fecha"
+                />
+              </div>
+              <div className="campo-fecha">
+                <label htmlFor="fechaFin">Fecha fin:</label>
+                <input
+                  id="fechaFin"
+                  type="date"
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  min={fechaInicio}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="input-fecha"
+                />
+              </div>
+              <button
+                className="boton-eliminar-rango"
+                onClick={async () => {
+                  if (!fechaInicio || !fechaFin) {
+                    alert('Por favor selecciona ambas fechas');
+                    return;
+                  }
+                  
+                  const fechaInicioObj = new Date(fechaInicio);
+                  const fechaFinObj = new Date(fechaFin);
+                  
+                  if (fechaFinObj < fechaInicioObj) {
+                    alert('La fecha fin no puede ser menor a la fecha inicio');
+                    return;
+                  }
+                  
+                  if (window.confirm(`⚠️ ¿Eliminar logs desde ${fechaInicio} hasta ${fechaFin}?\n\nEsta acción eliminará todos los registros en ese rango de fechas.`)) {
+                    await eliminarLogsPorFecha(fechaInicio, fechaFin);
+                    setMostrarPanelFecha(false);
+                    setFechaInicio("");
+                    setFechaFin("");
+                  }
+                }}
+                disabled={cargando || !fechaInicio || !fechaFin}
+              >
+                {cargando ? 'Eliminando...' : 'Eliminar Rango'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="cabecera-logs">
         <div className="titulo-logs-con-boton">
           <div>
-            <h2>Logs de Acceso</h2>
             <p className="subtitulo-logs">Registro detallado de accesos al sistema</p>
           </div>
           <button 
             className="boton-recargar"
             onClick={recargarLogs}
             disabled={cargando}
+            title="Recargar logs"
           >
-            ↻ {cargando ? 'Cargando...' : 'Recargar Logs'}
+            <span className="icono-boton">↻</span>
+            {cargando ? 'Cargando...' : 'Recargar Logs'}
           </button>
         </div>
         
@@ -190,12 +304,21 @@ const Logs = () => {
           <div className="buscador-logs">
             <input
               type="text"
-              placeholder="Buscar por usuario, correo o descripción..."
+              placeholder="Buscar por usuario, correo, IP o descripción..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="input-busqueda-logs"
               aria-label="Buscar logs"
             />
+            {busqueda && (
+              <button 
+                className="boton-limpiar-busqueda"
+                onClick={() => setBusqueda("")}
+                title="Limpiar búsqueda"
+              >
+                ×
+              </button>
+            )}
           </div>
           
           <div className="filtros-logs">
@@ -245,6 +368,7 @@ const Logs = () => {
                 <option value="10">10</option>
                 <option value="20">20</option>
                 <option value="50">50</option>
+                <option value="100">100</option>
               </select>
             </div>
             
@@ -275,8 +399,8 @@ const Logs = () => {
                   <th className="columna-id-log">ID</th>
                   <th className="columna-usuario-log">Usuario</th>
                   <th className="columna-fecha-log">Fecha y Hora</th>
-                  <th className="columna-descripcion-log">Descripción</th>
-                  <th className="columna-acciones-log">Detalles</th>
+                  <th className="columna-ip-log">IP</th>
+                  <th className="columna-acciones-log">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -290,7 +414,7 @@ const Logs = () => {
                     <td className="celda-usuario-log">
                       <div className="usuario-info">
                         <div className="nombre-usuario">
-                          {log.nombres_usuario || 'Nombre'} {log.apellidos_usuario || 'No disponible'}
+                          {log.nombres_usuario || 'Usuario'} {log.apellidos_usuario || ''}
                         </div>
                         <div className="correo-usuario">
                           {log.correo_usuario || log.correo || 'Sin correo'}
@@ -302,9 +426,9 @@ const Logs = () => {
                         {formatearFecha(log.fecha_acceso || log.fecha)}
                       </div>
                     </td>
-                    <td className="celda-descripcion-log">
-                      <div className="descripcion-log">
-                        {log.descripcion || "Acceso al sistema"}
+                    <td className="celda-ip-log">
+                      <div className="ip-info">
+                        {log.ip || 'No registrada'}
                       </div>
                     </td>
                     <td className="celda-acciones-log">
@@ -317,7 +441,8 @@ const Logs = () => {
                           title="Ver detalles"
                           aria-label={`Ver detalles del log ${log.id_log || log.id}`}
                         >
-                          {mostrarDetalles === (log.id_log || log.id) ? "Ocultar" : "Ver"} detalles
+                          {mostrarDetalles === (log.id_log || log.id) ? '▼' : '▶'} 
+                          {mostrarDetalles === (log.id_log || log.id) ? 'Ocultar' : 'Ver'} detalles
                         </button>
                       </div>
                     </td>
@@ -351,10 +476,13 @@ const Logs = () => {
                   return (
                     <div className="detalles-contenido">
                       <div className="detalle-item">
-                        <strong>Usuario ID:</strong> {logDetallado.id_usuario || 'No disponible'}
+                        <strong>ID del Log:</strong> {logDetallado.id_log || logDetallado.id || 'N/A'}
                       </div>
                       <div className="detalle-item">
-                        <strong>Nombre completo:</strong> {logDetallado.nombres_usuario || 'Nombre'} {logDetallado.apellidos_usuario || 'No disponible'}
+                        <strong>ID Usuario:</strong> {logDetallado.id_usuario || 'No disponible'}
+                      </div>
+                      <div className="detalle-item">
+                        <strong>Nombre completo:</strong> {logDetallado.nombres_usuario || ''} {logDetallado.apellidos_usuario || ''}
                       </div>
                       <div className="detalle-item">
                         <strong>Correo:</strong> {logDetallado.correo_usuario || logDetallado.correo || 'Sin correo'}
@@ -363,14 +491,8 @@ const Logs = () => {
                         <strong>Fecha exacta:</strong> {formatearFecha(logDetallado.fecha_acceso || logDetallado.fecha)}
                       </div>
                       <div className="detalle-item">
-                        <strong>Descripción completa:</strong>
-                        <p>{logDetallado.descripcion || "Sin descripción adicional"}</p>
+                        <strong>IP:</strong> {logDetallado.ip || 'No registrada'}
                       </div>
-                      {logDetallado.ip && (
-                        <div className="detalle-item">
-                          <strong>IP:</strong> {logDetallado.ip}
-                        </div>
-                      )}
                       {logDetallado.user_agent && (
                         <div className="detalle-item">
                           <strong>User Agent:</strong> 

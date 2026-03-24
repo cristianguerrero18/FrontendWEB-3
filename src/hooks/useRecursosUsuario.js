@@ -8,7 +8,8 @@ import {
   postRecurso,
   putRecurso,
   deleteRecurso,
-  cambiarEstadoRecurso
+  cambiarEstadoRecurso,
+  getRecursoDetalle // Necesitamos agregar esta función
 } from "../api/Admin/Recursos.js";
 
 export const useRecursosUsuario = () => {
@@ -19,8 +20,10 @@ export const useRecursosUsuario = () => {
   const [categorias, setCategorias] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(false);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [archivo, setArchivo] = useState(null);
+  const [recursoDetalle, setRecursoDetalle] = useState(null);
   const [filtros, setFiltros] = useState({
     asignatura: "",
     categoria: "",
@@ -68,6 +71,39 @@ export const useRecursosUsuario = () => {
     } finally {
       setCargando(false);
     }
+  };
+
+  // Nueva función para cargar detalle del recurso
+  const cargarRecursoDetalle = async (idRecurso) => {
+    setCargandoDetalle(true);
+    try {
+      const resultado = await getRecursoDetalle(idRecurso);
+      if (resultado.error) {
+        setMensaje(resultado.mensaje || "Error al cargar el detalle del recurso");
+        return { error: true };
+      } else {
+        // Enriquecer los datos del recurso con nombres
+        const recursoEnriquecido = {
+          ...resultado,
+          asignatura: asignaturas.find(a => a.id_asignatura === resultado.id_asignatura)?.nombre_asignatura || "Sin asignatura",
+          categoria: categorias.find(c => c.id_categoria === resultado.id_categoria)?.nombre_categoria || "Sin categoría",
+          usuario: usuarios.find(u => u.id_usuario === resultado.id_usuario)?.nombres_usuario || "Usuario desconocido"
+        };
+        
+        setRecursoDetalle(recursoEnriquecido);
+        return { error: false };
+      }
+    } catch (error) {
+      console.error("Error cargando detalle del recurso:", error);
+      setMensaje("Error al cargar el detalle del recurso");
+      return { error: true };
+    } finally {
+      setCargandoDetalle(false);
+    }
+  };
+
+  const limpiarDetalle = () => {
+    setRecursoDetalle(null);
   };
 
   const aplicarFiltros = () => {
@@ -240,12 +276,16 @@ export const useRecursosUsuario = () => {
     categorias,
     usuarios,
     cargando,
+    cargandoDetalle,
     mensaje,
     archivo,
+    recursoDetalle,
     filtros,
     idUsuario,
     userData,
     recargarRecursos: cargarRecursosUsuario,
+    cargarRecursoDetalle,
+    limpiarDetalle,
     crearRecurso,
     actualizarRecurso,
     eliminarRecurso,

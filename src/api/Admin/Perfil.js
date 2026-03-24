@@ -49,3 +49,27 @@ export const actualizarUsuario = async (datos) => {
   }
 };
 
+
+// Perfil.js - Agrega esta función
+
+// Eliminar usuario por ID
+export const eliminarUsuario = async (idUsuario) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) throw new Error("No hay token disponible");
+
+    const response = await fetch(`${API_URL}/api/usuarios/${idUsuario}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error eliminando usuario:", error);
+    return { error: true, mensaje: "Error al eliminar usuario" };
+  }
+};

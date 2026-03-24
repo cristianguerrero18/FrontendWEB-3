@@ -169,10 +169,7 @@ const Favoritos = ({ onVolver }) => {
       <div className="cabecera-materias-simple">
         <div className="titulo-materias-con-info">
           <div>
-            <h2>Mis Recursos Favoritos</h2>
-            <p className="subtitulo-materias">
-              Todos los recursos que has marcado como favoritos
-            </p>
+            
           </div>
           <div className="badge-contador-materias">
             <Heart size={20} fill="currentColor" />

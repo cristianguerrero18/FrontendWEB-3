@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { recuperarClave } from "../api/auth/Auth.js";
@@ -10,6 +10,11 @@ function RecuperarContrasena() {
   const [correo, setCorreo] = useState("");
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+   useEffect(() => {
+        document.title = "UTS - Recuperar Contraseña | Plataforma Educativa";
+      }, []);
+    
 
   const handleSubmit = async (e) => {
     e.preventDefault();
