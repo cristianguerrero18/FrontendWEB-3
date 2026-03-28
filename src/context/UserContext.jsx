@@ -166,7 +166,10 @@ const UserProvider = ({ children }) => {
         nombres_usuario: user.nombres_usuario,
         apellidos_usuario: user.apellidos_usuario,
         correo: user.correo,
-        id_rol: user.id_rol
+        id_rol: user.id_rol,
+        id_carrera: user.id_carrera,
+        nombre_carrera: user.carrera_nombre || user.nombre_carrera || "",
+        id_tipo_carrera: user.id_tipo_carrera,
       }));
       
       return user;

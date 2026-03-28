@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef } from "react";
-import { 
-  getNotificaciones,
-  updateNotificacionVisto
+import { useState, useCallback, useRef, useMemo } from "react";
+import {
+  getNotificacionesPorUsuario,
+  updateNotificacionVisto,
+  marcarTodasComoVistas,
 } from "../api/Admin/Notificaciones.js";
 import { useUser } from "../context/UserContext.jsx";
 
@@ -9,149 +10,149 @@ export const useNotificacionesSuperior = () => {
   const [notificaciones, setNotificaciones] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
-  
+
   const { getUserId, userData, isAuthenticated } = useUser();
-  
-  // Ref para controlar si ya se cargaron las notificaciones
   const notificacionesCargadasRef = useRef(false);
 
-  // Obtener ID del usuario actual
-  const obtenerIdUsuario = useCallback(() => {
+  const idUsuario = useMemo(() => {
     if (!isAuthenticated) return null;
-    
-    // Priorizar userData.id_usuario
-    const id = userData?.id_usuario || getUserId?.();
-    return id || null;
+    return userData?.id_usuario || getUserId?.() || null;
   }, [isAuthenticated, userData?.id_usuario, getUserId]);
 
-  // Cargar notificaciones (SOLO cuando se llama explícitamente)
-  const cargarNotificaciones = useCallback(async () => {
-    if (!isAuthenticated) {
-      setNotificaciones([]);
-      return;
+  const normalizarEstado = useCallback((estado) => {
+    const valor = String(estado || "").toLowerCase().trim();
+    if (valor === "no visto" || valor === "no_visto" || valor === "pendiente") {
+      return "no_visto";
     }
+    return "visto";
+  }, []);
 
-    const idUsuario = obtenerIdUsuario();
-    if (!idUsuario) {
+  const normalizarTipo = useCallback((tipo) => {
+    return String(tipo || "info").toLowerCase().trim();
+  }, []);
+
+  const cargarNotificaciones = useCallback(async () => {
+    if (!isAuthenticated || !idUsuario) {
       setNotificaciones([]);
       return;
     }
 
     setCargando(true);
-    
+
     try {
-      const resultado = await getNotificaciones();
-      
-      if (!resultado?.error) {
-        const notificacionesArray = Array.isArray(resultado) ? resultado : [];
-        
-        // Filtrar por usuario actual
-        const notificacionesUsuario = notificacionesArray.filter(notif => {
-          const notifUserId = notif.id_usuario || notif.userId || notif.usuario_id;
-          return notifUserId == idUsuario;
-        });
-        
-        // Formatear y ordenar notificaciones
-        const formateadas = notificacionesUsuario
-          .map(notif => ({
-            id_notificacion: notif.id_notificacion || notif.id,
-            mensaje: notif.mensaje || notif.message || 'Sin mensaje',
-            estado: notif.estado || notif.status || 'no visto',
-            tipo: notif.tipo || notif.type || 'info',
-            fecha: notif.fecha || notif.fecha_creacion || notif.created_at || new Date().toISOString(),
-            id_usuario: notif.id_usuario || null
-          }))
-          .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-          .slice(0, 10); // Limitar a 10 notificaciones
-        
-        setNotificaciones(formateadas);
-        notificacionesCargadasRef.current = true;
-      } else {
+      const resultado = await getNotificacionesPorUsuario(idUsuario);
+
+      if (resultado?.error) {
         setNotificaciones([]);
+        return;
       }
+
+      const lista = Array.isArray(resultado?.data) ? resultado.data : [];
+
+      const formateadas = lista
+        .map((notif) => ({
+          id_notificacion: notif.id_notificacion || notif.id,
+          mensaje: notif.mensaje || "Sin mensaje",
+          estado: normalizarEstado(notif.estado),
+          tipo: normalizarTipo(notif.tipo),
+          fecha:
+            notif.fecha ||
+            notif.fecha_creacion ||
+            notif.created_at ||
+            new Date().toISOString(),
+          id_usuario: notif.id_usuario || idUsuario,
+        }))
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .slice(0, 8);
+
+      setNotificaciones(formateadas);
+      notificacionesCargadasRef.current = true;
     } catch (error) {
-      console.error("Error al cargar notificaciones:", error);
+      console.error("Error al cargar notificaciones superiores:", error);
       setNotificaciones([]);
     } finally {
       setCargando(false);
     }
-  }, [isAuthenticated, obtenerIdUsuario]);
+  }, [isAuthenticated, idUsuario, normalizarEstado, normalizarTipo]);
 
-  // Marcar una notificación como vista
   const marcarComoVista = useCallback(async (idNotificacion) => {
     try {
       const resultado = await updateNotificacionVisto(idNotificacion);
-      if (!resultado?.error) {
-        setNotificaciones(prev => prev.map(notif => 
-          notif.id_notificacion === idNotificacion 
-            ? { ...notif, estado: 'visto' } 
+
+      if (resultado?.error) return false;
+
+      setNotificaciones((prev) =>
+        prev.map((notif) =>
+          notif.id_notificacion === idNotificacion
+            ? { ...notif, estado: "visto" }
             : notif
-        ));
-        return true;
-      }
-      return false;
+        )
+      );
+
+      return true;
     } catch (error) {
-      console.error("Error al marcar como vista:", error);
+      console.error("Error al marcar notificación como vista:", error);
       return false;
     }
   }, []);
 
-  // Marcar todas como leídas
   const marcarTodasComoLeidas = useCallback(async () => {
+    if (!idUsuario) return false;
+
+    const existenPendientes = notificaciones.some(
+      (notif) => normalizarEstado(notif.estado) === "no_visto"
+    );
+
+    if (!existenPendientes) return true;
+
     setCargando(true);
+
     try {
-      const noVistas = notificaciones.filter(notif => 
-        notif.estado?.toLowerCase() === 'no visto'
+      const resultado = await marcarTodasComoVistas(idUsuario);
+
+      if (resultado?.error) return false;
+
+      setNotificaciones((prev) =>
+        prev.map((notif) => ({ ...notif, estado: "visto" }))
       );
-      
-      if (noVistas.length === 0) {
-        setCargando(false);
-        return;
-      }
-      
-      // Marcar todas como vistas
-      for (const notificacion of noVistas) {
-        await updateNotificacionVisto(notificacion.id_notificacion);
-      }
-      
-      // Actualizar estado local
-      setNotificaciones(prev => prev.map(notif => ({
-        ...notif,
-        estado: 'visto'
-      })));
-      
+
+      return true;
     } catch (error) {
       console.error("Error al marcar todas como leídas:", error);
+      return false;
     } finally {
       setCargando(false);
     }
-  }, [notificaciones]);
+  }, [idUsuario, notificaciones, normalizarEstado]);
 
-  // Contar notificaciones no leídas
   const contarNoLeidas = useCallback(() => {
-    return notificaciones.filter(notif => 
-      notif.estado?.toLowerCase() === 'no visto'
+    return notificaciones.filter(
+      (notif) => normalizarEstado(notif.estado) === "no_visto"
     ).length;
-  }, [notificaciones]);
+  }, [notificaciones, normalizarEstado]);
 
-  // Alternar visibilidad del dropdown
   const toggleDropdown = useCallback(async () => {
     const nuevoEstado = !mostrarDropdown;
     setMostrarDropdown(nuevoEstado);
-    
-    // Solo cargar notificaciones cuando se ABRE el dropdown
+
     if (nuevoEstado && !notificacionesCargadasRef.current) {
       await cargarNotificaciones();
     }
   }, [mostrarDropdown, cargarNotificaciones]);
 
-  // Marcar como leída
-  const marcarComoLeida = useCallback(async (idNotificacion) => {
-    return await marcarComoVista(idNotificacion);
-  }, [marcarComoVista]);
+  const cerrarDropdown = useCallback(() => {
+    setMostrarDropdown(false);
+  }, []);
 
-  // Recargar notificaciones manualmente
+  const marcarComoLeida = useCallback(
+    async (idNotificacion) => {
+      return await marcarComoVista(idNotificacion);
+    },
+    [marcarComoVista]
+  );
+
   const recargarNotificaciones = useCallback(async () => {
+    notificacionesCargadasRef.current = false;
     await cargarNotificaciones();
   }, [cargarNotificaciones]);
 
@@ -160,9 +161,10 @@ export const useNotificacionesSuperior = () => {
     cargando,
     mostrarDropdown,
     toggleDropdown,
+    cerrarDropdown,
     marcarTodasComoLeidas,
     marcarComoLeida,
     contarNoLeidas,
-    recargarNotificaciones
+    recargarNotificaciones,
   };
 };

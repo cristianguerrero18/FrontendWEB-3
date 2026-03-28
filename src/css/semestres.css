@@ -3148,3 +3148,202 @@
     min-width: 48px;
   }
 }
+.descripcion-recursos {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #5f6f82;
+  max-width: 700px;
+}
+/* ========================================
+   Mejora visual de cabecera principal
+   ======================================== */
+
+   .cabecera-recursos-mejorada {
+    align-items: stretch;
+    gap: 1.5rem;
+    padding: 1.75rem 1.9rem;
+    border: 1px solid rgba(225, 232, 237, 0.9);
+    background:
+      radial-gradient(circle at top right, rgba(74, 144, 226, 0.08), transparent 30%),
+      linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  }
+  
+  .encabezado-carrera-texto {
+    margin-bottom: 1rem;
+  }
+  
+  .descripcion-recursos {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--semestre-texto-secundario);
+    max-width: 760px;
+  }
+  
+  .detalles-carrera-mejorados {
+    gap: 0.85rem;
+  }
+  
+  .detalles-carrera-mejorados .badge-info {
+    min-height: 66px;
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 6px 16px rgba(20, 38, 63, 0.05);
+    border: 1px solid #e5edf5;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .detalles-carrera-mejorados .badge-info:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+    border-color: #d9e6f2;
+  }
+  
+  .badge-destacado {
+    background: linear-gradient(135deg, #f8fbff, #eef5fd) !important;
+    border-color: #d6e4f2 !important;
+  }
+  
+  .badge-icono {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.14), rgba(30, 58, 138, 0.12));
+    color: var(--semestre-primario);
+  }
+  
+  .badge-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    line-height: 1.2;
+  }
+  
+  .badge-contenido small {
+    font-size: 0.72rem;
+    color: var(--semestre-texto-secundario);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .badge-contenido span {
+    font-size: 0.95rem;
+    color: var(--semestre-texto);
+    font-weight: 700;
+  }
+  
+  .contador-semestres-card {
+    min-width: 240px;
+    border-radius: 20px;
+    padding: 1rem 1.15rem;
+    background: linear-gradient(135deg, #1e3a8a 0%, #4a90e2 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 14px 28px rgba(30, 58, 138, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.9rem;
+  }
+  
+  .contador-semestres-icono {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    backdrop-filter: blur(2px);
+  }
+  
+  .contador-semestres-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-align: left;
+  }
+  
+  .contador-semestres-contenido small {
+    font-size: 0.76rem;
+    font-weight: 600;
+    opacity: 0.88;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .contador-semestres-contenido span {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .cabecera-recursos-mejorada {
+      padding: 1.25rem;
+      gap: 1.25rem;
+    }
+  
+    .encabezado-carrera-texto {
+      margin-bottom: 0.9rem;
+    }
+  
+    .descripcion-recursos {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+  
+    .detalles-carrera-mejorados {
+      justify-content: center;
+    }
+  
+    .detalles-carrera-mejorados .badge-info {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  
+    .contador-semestres-card {
+      width: 100%;
+      min-width: unset;
+      max-width: 100%;
+      justify-content: center;
+    }
+  
+    .contador-semestres-contenido {
+      text-align: left;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .detalles-carrera-mejorados .badge-info {
+      padding: 0.7rem 0.85rem;
+      border-radius: 14px;
+    }
+  
+    .badge-icono {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+    }
+  
+    .badge-contenido span {
+      font-size: 0.9rem;
+    }
+  
+    .contador-semestres-contenido span {
+      font-size: 1rem;
+    }
+  }
+  

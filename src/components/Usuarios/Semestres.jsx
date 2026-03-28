@@ -1,13 +1,13 @@
-import { useSemestres } from "../../hooks/useSemestres.js"
-import { useMaterias } from "../../hooks/useMaterias.js"
-import { useRecursosMateria } from "../../hooks/useRecursosMateria.js"
-import { useAsignaturasEstudiante } from "../../hooks/useAsignaturasEstudiante.js"
-import { useAgregarRecurso } from "../../hooks/useAgregarRecurso.js"
-import { useFavoritos } from "../../hooks/useFavoritos.js"
-import { useReportes } from "../../hooks/useReportes.js"
-import { useRecursoLikes } from "../../hooks/useRecursoLikes.js"
-import { useComentarios } from "../../hooks/useComentarios.js"
-import { useUser } from "../../context/UserContext.jsx"
+import { useSemestres } from "../../hooks/useSemestres.js";
+import { useMaterias } from "../../hooks/useMaterias.js";
+import { useRecursosMateria } from "../../hooks/useRecursosMateria.js";
+import { useAsignaturasEstudiante } from "../../hooks/useAsignaturasEstudiante.js";
+import { useAgregarRecurso } from "../../hooks/useAgregarRecurso.js";
+import { useFavoritos } from "../../hooks/useFavoritos.js";
+import { useReportes } from "../../hooks/useReportes.js";
+import { useRecursoLikes } from "../../hooks/useRecursoLikes.js";
+import { useComentarios } from "../../hooks/useComentarios.js";
+import { useUser } from "../../context/UserContext.jsx";
 import {
   BookOpen,
   GraduationCap,
@@ -39,9 +39,9 @@ import {
   Trash2,
   Smile,
   Clock,
-} from "lucide-react"
-import "../../css/semestres.css"
-import { useState, useEffect, useCallback, useRef } from "react"
+} from "lucide-react";
+import "../../css/semestres.css";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const Semestres = () => {
   const {
@@ -51,7 +51,7 @@ const Semestres = () => {
     tipoCarrera,
     idCarrera,
     nombreCarrera,
-  } = useSemestres()
+  } = useSemestres();
 
   const {
     materiasPorSemestre,
@@ -59,7 +59,7 @@ const Semestres = () => {
     error: errorMaterias,
     getMateriasPorSemestre,
     cargarMaterias,
-  } = useMaterias()
+  } = useMaterias();
 
   const {
     recursos,
@@ -70,7 +70,7 @@ const Semestres = () => {
     materiaTieneRecursos,
     contarRecursosPorTipo,
     recargarRecursosMateria,
-  } = useRecursosMateria()
+  } = useRecursosMateria();
 
   const {
     asignaturas,
@@ -78,7 +78,7 @@ const Semestres = () => {
     error: errorAsignaturas,
     getAsignaturasPorSemestre,
     cargarAsignaturas,
-  } = useAsignaturasEstudiante()
+  } = useAsignaturasEstudiante();
 
   const {
     cargando: cargandoRecurso,
@@ -88,7 +88,7 @@ const Semestres = () => {
     cargarCategorias,
     agregarRecurso,
     limpiarMensajes,
-  } = useAgregarRecurso()
+  } = useAgregarRecurso();
 
   const {
     favoritosPorUsuario,
@@ -98,7 +98,7 @@ const Semestres = () => {
     alternarFavorito,
     operacion: operacionFavorito,
     cargarFavoritosUsuario,
-  } = useFavoritos()
+  } = useFavoritos();
 
   const {
     cargando: cargandoReporte,
@@ -108,28 +108,29 @@ const Semestres = () => {
     reportarRecurso,
     usuarioReportoRecurso,
     limpiarMensajesReporte,
-  } = useReportes()
+  } = useReportes();
 
-  const { getUserId } = useUser()
+  const { getUserId } = useUser();
 
-  const [semestreSeleccionado, setSemestreSeleccionado] = useState(null)
-  const [materiaSeleccionada, setMateriaSeleccionada] = useState(null)
-  const [mostrarMaterias, setMostrarMaterias] = useState(false)
-  const [mostrarRecursos, setMostrarRecursos] = useState(false)
-  const [mostrarFormularioRecurso, setMostrarFormularioRecurso] = useState(false)
-  const [mostrarModalDerechos, setMostrarModalDerechos] = useState(false)
-  const [mostrarModalReportar, setMostrarModalReportar] = useState(false)
-  const [materiasDelSemestre, setMateriasDelSemestre] = useState([])
-  const [recursosMateria, setRecursosMateria] = useState([])
-  const [mostrarFavoritos, setMostrarFavoritos] = useState(false)
-  const [recursoAReporter, setRecursoAReporter] = useState(null)
-  const [usuarioYaReporto, setUsuarioYaReporto] = useState(false)
-  const [motivoReporte, setMotivoReporte] = useState("")
-  const [descargando, setDescargando] = useState({})
-  const [notificacion, setNotificacion] = useState(null)
-  const [mostrarComentarios, setMostrarComentarios] = useState({})
+  const [semestreSeleccionado, setSemestreSeleccionado] = useState(null);
+  const [materiaSeleccionada, setMateriaSeleccionada] = useState(null);
+  const [mostrarMaterias, setMostrarMaterias] = useState(false);
+  const [mostrarRecursos, setMostrarRecursos] = useState(false);
+  const [mostrarFormularioRecurso, setMostrarFormularioRecurso] =
+    useState(false);
+  const [mostrarModalDerechos, setMostrarModalDerechos] = useState(false);
+  const [mostrarModalReportar, setMostrarModalReportar] = useState(false);
+  const [materiasDelSemestre, setMateriasDelSemestre] = useState([]);
+  const [recursosMateria, setRecursosMateria] = useState([]);
+  const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
+  const [recursoAReporter, setRecursoAReporter] = useState(null);
+  const [usuarioYaReporto, setUsuarioYaReporto] = useState(false);
+  const [motivoReporte, setMotivoReporte] = useState("");
+  const [descargando, setDescargando] = useState({});
+  const [notificacion, setNotificacion] = useState(null);
+  const [mostrarComentarios, setMostrarComentarios] = useState({});
 
-  const descargaRef = useRef(null)
+  const descargaRef = useRef(null);
 
   const [formularioRecurso, setFormularioRecurso] = useState({
     titulo: "",
@@ -138,9 +139,9 @@ const Semestres = () => {
     id_asignatura: null,
     id_categoria: null,
     id_usuario: null,
-  })
+  });
 
-  const [archivoRecurso, setArchivoRecurso] = useState(null)
+  const [archivoRecurso, setArchivoRecurso] = useState(null);
 
   const [formularioDerechos, setFormularioDerechos] = useState({
     tipo_autoria: "propio",
@@ -151,21 +152,21 @@ const Semestres = () => {
     referencia_bibliografica: "",
     tipo_licencia: "",
     observaciones_licencia: "",
-  })
+  });
 
   const mostrarNotificacion = (tipo, mensaje) => {
-    setNotificacion({ tipo, mensaje })
+    setNotificacion({ tipo, mensaje });
     setTimeout(() => {
-      setNotificacion(null)
-    }, 3000)
-  }
+      setNotificacion(null);
+    }, 3000);
+  };
 
   const toggleMostrarComentarios = (idRecurso) => {
     setMostrarComentarios((prev) => ({
       ...prev,
       [idRecurso]: !prev[idRecurso],
-    }))
-  }
+    }));
+  };
 
   const resetFormularioDerechos = () => {
     setFormularioDerechos({
@@ -177,112 +178,114 @@ const Semestres = () => {
       referencia_bibliografica: "",
       tipo_licencia: "",
       observaciones_licencia: "",
-    })
-  }
+    });
+  };
 
   useEffect(() => {
-    cargarCategorias()
-  }, [cargarCategorias])
+    cargarCategorias();
+  }, [cargarCategorias]);
 
   useEffect(() => {
-    cargarFavoritosUsuario()
-  }, [cargarFavoritosUsuario])
+    cargarFavoritosUsuario();
+  }, [cargarFavoritosUsuario]);
 
   useEffect(() => {
-    const userId = getUserId()
+    const userId = getUserId();
     if (userId) {
       setFormularioRecurso((prev) => ({
         ...prev,
         id_usuario: userId,
-      }))
+      }));
     }
-  }, [getUserId])
+  }, [getUserId]);
 
   const cargarMateriasDelSemestre = useCallback(() => {
     if (semestreSeleccionado) {
-      const materias = getMateriasPorSemestre(semestreSeleccionado.numero)
-      setMateriasDelSemestre(materias)
+      const materias = getMateriasPorSemestre(semestreSeleccionado.numero);
+      setMateriasDelSemestre(materias);
     }
-  }, [semestreSeleccionado, getMateriasPorSemestre])
+  }, [semestreSeleccionado, getMateriasPorSemestre]);
 
   const cargarRecursosDeMateria = useCallback(async () => {
     if (materiaSeleccionada) {
-      await cargarRecursosMateria(materiaSeleccionada.id)
-      const recursosAsignatura = getRecursosPorIdAsignatura(materiaSeleccionada.id)
-      setRecursosMateria(recursosAsignatura)
+      await cargarRecursosMateria(materiaSeleccionada.id);
+      const recursosAsignatura = getRecursosPorIdAsignatura(
+        materiaSeleccionada.id
+      );
+      setRecursosMateria(recursosAsignatura);
 
       setFormularioRecurso((prev) => ({
         ...prev,
         id_asignatura: materiaSeleccionada.id,
-      }))
+      }));
     }
-  }, [materiaSeleccionada, cargarRecursosMateria, getRecursosPorIdAsignatura])
+  }, [materiaSeleccionada, cargarRecursosMateria, getRecursosPorIdAsignatura]);
 
   useEffect(() => {
-    cargarMateriasDelSemestre()
-  }, [cargarMateriasDelSemestre])
+    cargarMateriasDelSemestre();
+  }, [cargarMateriasDelSemestre]);
 
   useEffect(() => {
-    cargarRecursosDeMateria()
-    setMostrarFavoritos(false)
-  }, [cargarRecursosDeMateria])
+    cargarRecursosDeMateria();
+    setMostrarFavoritos(false);
+  }, [cargarRecursosDeMateria]);
 
   useEffect(() => {
     if (!mostrarFormularioRecurso) {
-      limpiarMensajes()
+      limpiarMensajes();
     }
-  }, [mostrarFormularioRecurso, limpiarMensajes])
+  }, [mostrarFormularioRecurso, limpiarMensajes]);
 
   useEffect(() => {
     if (!mostrarModalReportar) {
-      limpiarMensajesReporte()
+      limpiarMensajesReporte();
     }
-  }, [mostrarModalReportar, limpiarMensajesReporte])
+  }, [mostrarModalReportar, limpiarMensajesReporte]);
 
   const handleSeleccionarSemestre = (semestre) => {
-    setSemestreSeleccionado(semestre)
-    setMostrarMaterias(true)
-    setMostrarRecursos(false)
-    setMostrarFormularioRecurso(false)
-    setMateriaSeleccionada(null)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    setSemestreSeleccionado(semestre);
+    setMostrarMaterias(true);
+    setMostrarRecursos(false);
+    setMostrarFormularioRecurso(false);
+    setMateriaSeleccionada(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleSeleccionarMateria = (materia) => {
-    setMateriaSeleccionada(materia)
-    setMostrarRecursos(true)
-    setMostrarFormularioRecurso(false)
-    setMostrarFavoritos(false)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    setMateriaSeleccionada(materia);
+    setMostrarRecursos(true);
+    setMostrarFormularioRecurso(false);
+    setMostrarFavoritos(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleVolverAMaterias = () => {
-    setMostrarRecursos(false)
-    setMostrarFormularioRecurso(false)
-    setMostrarModalReportar(false)
-    setMateriaSeleccionada(null)
-  }
+    setMostrarRecursos(false);
+    setMostrarFormularioRecurso(false);
+    setMostrarModalReportar(false);
+    setMateriaSeleccionada(null);
+  };
 
   const handleVolverASemestres = () => {
-    setMostrarMaterias(false)
-    setMostrarRecursos(false)
-    setMostrarFormularioRecurso(false)
-    setMostrarModalReportar(false)
-    setSemestreSeleccionado(null)
-    setMateriaSeleccionada(null)
-  }
+    setMostrarMaterias(false);
+    setMostrarRecursos(false);
+    setMostrarFormularioRecurso(false);
+    setMostrarModalReportar(false);
+    setSemestreSeleccionado(null);
+    setMateriaSeleccionada(null);
+  };
 
   const handleRefrescarMaterias = () => {
-    cargarMaterias()
-  }
+    cargarMaterias();
+  };
 
   const handleAbrirFormularioRecurso = () => {
-    setMostrarFormularioRecurso(true)
-    resetFormularioDerechos()
-  }
+    setMostrarFormularioRecurso(true);
+    resetFormularioDerechos();
+  };
 
   const handleCerrarFormularioRecurso = () => {
-    setMostrarFormularioRecurso(false)
+    setMostrarFormularioRecurso(false);
     setFormularioRecurso({
       titulo: "",
       tema: "",
@@ -290,45 +293,46 @@ const Semestres = () => {
       id_asignatura: materiaSeleccionada?.id || null,
       id_categoria: null,
       id_usuario: getUserId(),
-    })
-    setArchivoRecurso(null)
-    resetFormularioDerechos()
-  }
+    });
+    setArchivoRecurso(null);
+    resetFormularioDerechos();
+  };
 
   const handleChangeFormulario = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormularioRecurso((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleArchivoChange = (e) => {
-    const file = e.target.files[0]
-    setArchivoRecurso(file)
-  }
+    const file = e.target.files[0];
+    setArchivoRecurso(file);
+  };
 
   const handleChangeDerechos = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormularioDerechos((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-    }))
-  }
+    }));
+  };
 
   const validarDerechos = () => {
     if (!formularioDerechos.declara_autoria) {
       return {
         valido: false,
-        error: "Debes declarar la titularidad o legitimidad del recurso antes de continuar.",
-      }
+        error:
+          "Debes declarar la titularidad o legitimidad del recurso antes de continuar.",
+      };
     }
 
     if (!formularioDerechos.acepta_terminos) {
       return {
         valido: false,
         error: "Debes aceptar los términos y condiciones de publicación.",
-      }
+      };
     }
 
     if (
@@ -340,21 +344,22 @@ const Semestres = () => {
         return {
           valido: false,
           error: "Debes indicar el nombre del autor original del recurso.",
-        }
+        };
       }
 
       if (!formularioDerechos.fuente_original.trim()) {
         return {
           valido: false,
           error: "Debes indicar la fuente, enlace o procedencia del recurso.",
-        }
+        };
       }
 
       if (!formularioDerechos.referencia_bibliografica.trim()) {
         return {
           valido: false,
-          error: "Debes registrar una referencia o citación básica del recurso.",
-        }
+          error:
+            "Debes registrar una referencia o citación básica del recurso.",
+        };
       }
     }
 
@@ -365,64 +370,64 @@ const Semestres = () => {
       return {
         valido: false,
         error: "Debes indicar el tipo de licencia o permiso de uso.",
-      }
+      };
     }
 
-    return { valido: true }
-  }
+    return { valido: true };
+  };
 
   const handleAbrirModalDerechos = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!formularioRecurso.id_categoria) {
-      mostrarNotificacion("error", "Por favor selecciona una categoría")
-      return
+      mostrarNotificacion("error", "Por favor selecciona una categoría");
+      return;
     }
 
     if (!formularioRecurso.id_asignatura) {
-      mostrarNotificacion("error", "Por favor selecciona una asignatura")
-      return
+      mostrarNotificacion("error", "Por favor selecciona una asignatura");
+      return;
     }
 
     if (!formularioRecurso.id_usuario) {
       mostrarNotificacion(
         "error",
         "No se pudo identificar al usuario. Por favor, inicia sesión nuevamente."
-      )
-      return
+      );
+      return;
     }
 
     if (!categoriaEsLink() && !archivoRecurso) {
-      mostrarNotificacion("error", "Debes seleccionar un archivo para subir")
-      return
+      mostrarNotificacion("error", "Debes seleccionar un archivo para subir");
+      return;
     }
 
     if (categoriaEsLink() && !formularioRecurso.URL.trim()) {
-      mostrarNotificacion("error", "Debes ingresar la URL del enlace")
-      return
+      mostrarNotificacion("error", "Debes ingresar la URL del enlace");
+      return;
     }
 
-    setMostrarModalDerechos(true)
-  }
+    setMostrarModalDerechos(true);
+  };
 
   const handleCerrarModalDerechos = () => {
-    setMostrarModalDerechos(false)
-  }
+    setMostrarModalDerechos(false);
+  };
 
   const handleEnviarConDerechos = async () => {
-    const validacion = validarDerechos()
+    const validacion = validarDerechos();
 
     if (!validacion.valido) {
-      mostrarNotificacion("error", validacion.error)
-      return
+      mostrarNotificacion("error", validacion.error);
+      return;
     }
 
     console.log("Datos de derechos de autor:", {
       ...formularioDerechos,
       fecha_declaracion: new Date().toISOString(),
-    })
+    });
 
-    setMostrarModalDerechos(false)
+    setMostrarModalDerechos(false);
 
     try {
       const datosRecursoFinal = {
@@ -431,102 +436,104 @@ const Semestres = () => {
           ...formularioDerechos,
           fecha_declaracion: new Date().toISOString(),
         },
-      }
+      };
 
-      const resultado = await agregarRecurso(datosRecursoFinal, archivoRecurso)
+      const resultado = await agregarRecurso(datosRecursoFinal, archivoRecurso);
 
       if (resultado.exito) {
         mostrarNotificacion(
           "success",
           "Recurso agregado exitosamente. La declaración de derechos se registró correctamente."
-        )
+        );
 
         if (materiaSeleccionada) {
-          await recargarRecursosMateria(materiaSeleccionada.id)
-          const nuevosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
-          setRecursosMateria(nuevosRecursos)
+          await recargarRecursosMateria(materiaSeleccionada.id);
+          const nuevosRecursos = getRecursosPorIdAsignatura(
+            materiaSeleccionada.id
+          );
+          setRecursosMateria(nuevosRecursos);
         }
 
         setTimeout(() => {
-          handleCerrarFormularioRecurso()
-        }, 2000)
+          handleCerrarFormularioRecurso();
+        }, 2000);
       }
     } catch (error) {
-      console.error("Error al agregar recurso:", error)
-      mostrarNotificacion("error", "Error al agregar recurso")
+      console.error("Error al agregar recurso:", error);
+      mostrarNotificacion("error", "Error al agregar recurso");
     }
-  }
+  };
 
   const getIconoCategoria = (idCategoria) => {
     switch (idCategoria) {
       case 1:
-        return <Image size={20} />
+        return <Image size={20} />;
       case 2:
-        return <FileText size={20} />
+        return <FileText size={20} />;
       case 3:
-        return <File size={20} />
+        return <File size={20} />;
       case 4:
-        return <Link size={20} />
+        return <Link size={20} />;
       default:
-        return <File size={20} />
+        return <File size={20} />;
     }
-  }
+  };
 
   const getEtiquetaCategoria = (idCategoria) => {
     switch (idCategoria) {
       case 1:
-        return "Imagen"
+        return "Imagen";
       case 2:
-        return "PDF"
+        return "PDF";
       case 3:
-        return "Archivo"
+        return "Archivo";
       case 4:
-        return "Enlace"
+        return "Enlace";
       default:
-        return "Recurso"
+        return "Recurso";
     }
-  }
+  };
 
   const obtenerExtension = (recurso) => {
     if (recurso.id_categoria === 4) {
-      return "html"
+      return "html";
     }
 
-    const url = recurso.URL || ""
-    const match = url.match(/\.([a-z0-9]+)(?:[\?#]|$)/i)
+    const url = recurso.URL || "";
+    const match = url.match(/\.([a-z0-9]+)(?:[\?#]|$)/i);
     if (match) {
-      return match[1].toLowerCase()
+      return match[1].toLowerCase();
     }
 
     switch (recurso.id_categoria) {
       case 1:
-        return "jpg"
+        return "jpg";
       case 2:
-        return "pdf"
+        return "pdf";
       case 3:
-        return "bin"
+        return "bin";
       default:
-        return "file"
+        return "file";
     }
-  }
+  };
 
   const generarNombreArchivo = (recurso) => {
     const tituloLimpio = recurso.titulo
       .replace(/[^a-z0-9]/gi, "_")
       .toLowerCase()
-      .substring(0, 50)
+      .substring(0, 50);
 
-    const extension = obtenerExtension(recurso)
-    return `${tituloLimpio}.${extension}`
-  }
+    const extension = obtenerExtension(recurso);
+    return `${tituloLimpio}.${extension}`;
+  };
 
   const forzarDescargaCloudinary = (url) => {
     if (url.includes("/fl_attachment/")) {
-      return url
+      return url;
     }
 
-    return url.replace("/upload/", "/upload/fl_attachment/")
-  }
+    return url.replace("/upload/", "/upload/fl_attachment/");
+  };
 
   const handleDescargarRecurso = (recurso) => {
     if (
@@ -536,136 +543,146 @@ const Semestres = () => {
         recurso.id_categoria !== 2 &&
         recurso.id_categoria !== 3)
     ) {
-      window.open(recurso.URL, "_blank")
-      return
+      window.open(recurso.URL, "_blank");
+      return;
     }
 
     if (!recurso.URL) {
-      mostrarNotificacion("error", "No se puede descargar este recurso")
-      return
+      mostrarNotificacion("error", "No se puede descargar este recurso");
+      return;
     }
 
-    setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: true }))
+    setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: true }));
 
     try {
-      const nombreArchivo = generarNombreArchivo(recurso)
-      let urlDescarga = recurso.URL
+      const nombreArchivo = generarNombreArchivo(recurso);
+      let urlDescarga = recurso.URL;
 
       if (urlDescarga.includes("cloudinary.com")) {
-        urlDescarga = forzarDescargaCloudinary(urlDescarga)
+        urlDescarga = forzarDescargaCloudinary(urlDescarga);
       }
 
-      const enlace = document.createElement("a")
-      enlace.href = urlDescarga
-      enlace.download = nombreArchivo
-      enlace.target = "_blank"
-      enlace.rel = "noopener noreferrer"
-      enlace.style.display = "none"
+      const enlace = document.createElement("a");
+      enlace.href = urlDescarga;
+      enlace.download = nombreArchivo;
+      enlace.target = "_blank";
+      enlace.rel = "noopener noreferrer";
+      enlace.style.display = "none";
 
-      document.body.appendChild(enlace)
-      enlace.click()
+      document.body.appendChild(enlace);
+      enlace.click();
 
       setTimeout(() => {
-        document.body.removeChild(enlace)
-        setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: false }))
-        mostrarNotificacion("success", `Descargando: ${recurso.titulo}`)
-      }, 100)
+        document.body.removeChild(enlace);
+        setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: false }));
+        mostrarNotificacion("success", `Descargando: ${recurso.titulo}`);
+      }, 100);
     } catch (error) {
-      console.error("Error al descargar:", error)
-      setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: false }))
-      mostrarNotificacion("error", "Error al descargar el archivo")
+      console.error("Error al descargar:", error);
+      setDescargando((prev) => ({ ...prev, [recurso.id_recurso]: false }));
+      mostrarNotificacion("error", "Error al descargar el archivo");
     }
-  }
+  };
 
   const handleVerRecurso = (recurso) => {
     if (recurso.id_categoria === 4) {
-      window.open(recurso.URL, "_blank")
+      window.open(recurso.URL, "_blank");
     } else if (recurso.URL) {
-      const ventana = window.open(recurso.URL, "_blank")
+      const ventana = window.open(recurso.URL, "_blank");
       if (!ventana || ventana.closed || typeof ventana.closed === "undefined") {
-        handleDescargarRecurso(recurso)
+        handleDescargarRecurso(recurso);
       }
     }
-  }
+  };
 
   const categoriaEsLink = () => {
     const categoriaSeleccionada = categorias.find(
       (c) => c.id_categoria == formularioRecurso.id_categoria
-    )
+    );
     return (
       categoriaSeleccionada?.nombre_categoria === "Links" ||
       formularioRecurso.id_categoria == 4
-    )
-  }
+    );
+  };
 
   const handleToggleFavorito = async (recurso) => {
-    await alternarFavorito(recurso.id_recurso)
+    await alternarFavorito(recurso.id_recurso);
 
     if (mostrarFavoritos && materiaSeleccionada) {
-      await recargarRecursosMateria(materiaSeleccionada.id)
-      const nuevosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
-      setRecursosMateria(nuevosRecursos)
+      await recargarRecursosMateria(materiaSeleccionada.id);
+      const nuevosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id);
+      setRecursosMateria(nuevosRecursos);
     }
-  }
+  };
 
   const handleVerFavoritos = () => {
-    setMostrarFavoritos(true)
+    setMostrarFavoritos(true);
     const recursosFavoritos = recursosMateria.filter((recurso) =>
       esFavorito(recurso.id_recurso)
-    )
-    setRecursosMateria(recursosFavoritos)
-  }
+    );
+    setRecursosMateria(recursosFavoritos);
+  };
 
   const handleVerTodosRecursos = async () => {
-    setMostrarFavoritos(false)
+    setMostrarFavoritos(false);
     if (materiaSeleccionada) {
-      await cargarRecursosMateria(materiaSeleccionada.id)
-      const todosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id)
-      setRecursosMateria(todosRecursos)
+      await cargarRecursosMateria(materiaSeleccionada.id);
+      const todosRecursos = getRecursosPorIdAsignatura(materiaSeleccionada.id);
+      setRecursosMateria(todosRecursos);
     }
-  }
+  };
 
   const handleAbrirModalReportar = async (recurso) => {
-    setRecursoAReporter(recurso)
-    const yaReporto = await usuarioReportoRecurso(recurso.id_recurso)
-    setUsuarioYaReporto(yaReporto)
-    setMostrarModalReportar(true)
-  }
+    setRecursoAReporter(recurso);
+    const yaReporto = await usuarioReportoRecurso(recurso.id_recurso);
+    setUsuarioYaReporto(yaReporto);
+    setMostrarModalReportar(true);
+  };
 
   const handleCerrarModalReportar = () => {
-    setMostrarModalReportar(false)
-    setRecursoAReporter(null)
-    setUsuarioYaReporto(false)
-    setMotivoReporte("")
-    limpiarMensajesReporte()
-  }
+    setMostrarModalReportar(false);
+    setRecursoAReporter(null);
+    setUsuarioYaReporto(false);
+    setMotivoReporte("");
+    limpiarMensajesReporte();
+  };
 
   const handleReportarRecurso = async () => {
     if (!recursoAReporter || !motivoReporte.trim()) {
-      mostrarNotificacion("error", "Por favor, proporciona un motivo para reportar")
-      return
+      mostrarNotificacion(
+        "error",
+        "Por favor, proporciona un motivo para reportar"
+      );
+      return;
     }
 
     const resultado = await reportarRecurso(
       recursoAReporter.id_recurso,
       motivoReporte
-    )
+    );
 
     if (resultado.exito) {
-      setUsuarioYaReporto(true)
+      setUsuarioYaReporto(true);
 
       setTimeout(() => {
         if (materiaSeleccionada) {
-          recargarRecursosMateria(materiaSeleccionada.id)
+          recargarRecursosMateria(materiaSeleccionada.id);
         }
-      }, 2000)
+      }, 2000);
     }
-  }
+  };
 
   const loading =
-    loadingSemestres || loadingMaterias || loadingAsignaturas || loadingFavoritos
+    loadingSemestres ||
+    loadingMaterias ||
+    loadingAsignaturas ||
+    loadingFavoritos;
   const error =
-    errorSemestres || errorMaterias || errorRecursos || errorAsignaturas || errorFavoritos
+    errorSemestres ||
+    errorMaterias ||
+    errorRecursos ||
+    errorAsignaturas ||
+    errorFavoritos;
 
   if (loading) {
     return (
@@ -673,7 +690,7 @@ const Semestres = () => {
         <div className="spinner-grande"></div>
         <p>Cargando recursos académicos...</p>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -688,31 +705,35 @@ const Semestres = () => {
           Reintentar
         </button>
       </div>
-    )
+    );
   }
 
   const totalMaterias = Object.values(materiasPorSemestre).reduce(
     (total, materias) => total + materias.length,
     0
-  )
+  );
 
   if (mostrarRecursos && materiaSeleccionada) {
-    const conteoRecursos = contarRecursosPorTipo(materiaSeleccionada.id)
+    const conteoRecursos = contarRecursosPorTipo(materiaSeleccionada.id);
     const conteoFavoritos = recursosMateria.filter((recurso) =>
       esFavorito(recurso.id_recurso)
-    ).length
+    ).length;
 
     return (
       <div className="contenedor-recursos">
         <div className="navegacion-materias">
-          <button className="boton-volver-materias" onClick={handleVolverAMaterias}>
+          <button
+            className="boton-volver-materias"
+            onClick={handleVolverAMaterias}
+          >
             <ArrowLeft size={20} />
             Volver a Materias
           </button>
           <div className="info-navegacion">
             <Home size={18} />
             <span>
-              Semestre {semestreSeleccionado?.numero} / {materiaSeleccionada.nombre}
+              Semestre {semestreSeleccionado?.numero} /{" "}
+              {materiaSeleccionada.nombre}
             </span>
           </div>
         </div>
@@ -768,7 +789,9 @@ const Semestres = () => {
                   <Image size={24} />
                 </div>
                 <div className="contenido-estadistica">
-                  <div className="numero-estadistica">{conteoRecursos.imagenes}</div>
+                  <div className="numero-estadistica">
+                    {conteoRecursos.imagenes}
+                  </div>
                   <div className="label-estadistica">Imágenes</div>
                 </div>
               </div>
@@ -792,7 +815,9 @@ const Semestres = () => {
                   <Link size={24} />
                 </div>
                 <div className="contenido-estadistica">
-                  <div className="numero-estadistica">{conteoRecursos.links}</div>
+                  <div className="numero-estadistica">
+                    {conteoRecursos.links}
+                  </div>
                   <div className="label-estadistica">Enlaces</div>
                 </div>
               </div>
@@ -1090,9 +1115,10 @@ const Semestres = () => {
                         onChange={handleChangeDerechos}
                       />
                       <span>
-                        Declaro bajo gravedad de juramento que este recurso es propio
-                        o que cuento con la debida autorización, cita, licencia o
-                        fundamento legal para compartirlo con fines académicos.
+                        Declaro bajo gravedad de juramento que este recurso es
+                        propio o que cuento con la debida autorización, cita,
+                        licencia o fundamento legal para compartirlo con fines
+                        académicos.
                       </span>
                     </label>
 
@@ -1104,9 +1130,10 @@ const Semestres = () => {
                         onChange={handleChangeDerechos}
                       />
                       <span>
-                        Acepto los términos y condiciones de publicación, y asumo
-                        la responsabilidad por la veracidad de esta declaración y
-                        por el uso legítimo del contenido compartido.
+                        Acepto los términos y condiciones de publicación, y
+                        asumo la responsabilidad por la veracidad de esta
+                        declaración y por el uso legítimo del contenido
+                        compartido.
                       </span>
                     </label>
                   </div>
@@ -1114,11 +1141,11 @@ const Semestres = () => {
                   <div className="informacion-legal informacion-legal-uniforme">
                     <p className="texto-legal">
                       <small>
-                        Esta declaración se registra como evidencia de responsabilidad
-                        del usuario frente a la publicación del recurso. El uso
-                        inadecuado de material protegido por derechos de autor puede
-                        dar lugar al retiro del contenido y a las acciones
-                        correspondientes.
+                        Esta declaración se registra como evidencia de
+                        responsabilidad del usuario frente a la publicación del
+                        recurso. El uso inadecuado de material protegido por
+                        derechos de autor puede dar lugar al retiro del
+                        contenido y a las acciones correspondientes.
                       </small>
                     </p>
                   </div>
@@ -1137,7 +1164,9 @@ const Semestres = () => {
                   type="button"
                   className="boton-confirmar-derechos"
                   onClick={handleEnviarConDerechos}
-                  disabled={cargandoRecurso || !formularioDerechos.acepta_terminos}
+                  disabled={
+                    cargandoRecurso || !formularioDerechos.acepta_terminos
+                  }
                 >
                   {cargandoRecurso ? (
                     <>
@@ -1202,7 +1231,9 @@ const Semestres = () => {
                     {usuarioYaReporto && (
                       <div className="mensaje-ya-reportado">
                         <AlertCircle size={16} />
-                        <span>Ya has reportado este recurso anteriormente.</span>
+                        <span>
+                          Ya has reportado este recurso anteriormente.
+                        </span>
                       </div>
                     )}
                   </div>
@@ -1246,7 +1277,9 @@ const Semestres = () => {
                   type="button"
                   className="boton-confirmar-reportar"
                   onClick={handleReportarRecurso}
-                  disabled={usuarioYaReporto || cargandoReporte || !motivoReporte.trim()}
+                  disabled={
+                    usuarioYaReporto || cargandoReporte || !motivoReporte.trim()
+                  }
                 >
                   {cargandoReporte ? (
                     <>
@@ -1256,7 +1289,9 @@ const Semestres = () => {
                   ) : (
                     <>
                       <AlertTriangle size={16} />
-                      <span>{usuarioYaReporto ? "Ya Reportado" : "Reportar Recurso"}</span>
+                      <span>
+                        {usuarioYaReporto ? "Ya Reportado" : "Reportar Recurso"}
+                      </span>
                     </>
                   )}
                 </button>
@@ -1279,7 +1314,9 @@ const Semestres = () => {
                   <span>
                     {mostrarFavoritos
                       ? `${recursosMateria.length} ${
-                          recursosMateria.length === 1 ? "favorito" : "favoritos"
+                          recursosMateria.length === 1
+                            ? "favorito"
+                            : "favoritos"
                         }`
                       : `${recursosMateria.length} ${
                           recursosMateria.length === 1 ? "recurso" : "recursos"
@@ -1288,14 +1325,18 @@ const Semestres = () => {
                 </div>
                 <div className="botones-filtros">
                   <button
-                    className={`boton-filtro ${!mostrarFavoritos ? "activo" : ""}`}
+                    className={`boton-filtro ${
+                      !mostrarFavoritos ? "activo" : ""
+                    }`}
                     onClick={handleVerTodosRecursos}
                   >
                     <FolderOpen size={16} />
                     <span>Todos</span>
                   </button>
                   <button
-                    className={`boton-filtro ${mostrarFavoritos ? "activo" : ""}`}
+                    className={`boton-filtro ${
+                      mostrarFavoritos ? "activo" : ""
+                    }`}
                     onClick={handleVerFavoritos}
                     disabled={conteoFavoritos === 0}
                   >
@@ -1307,17 +1348,18 @@ const Semestres = () => {
 
               <div className="grid-recursos">
                 {recursosMateria.map((recurso) => {
-                  const esFavoritoRecurso = esFavorito(recurso.id_recurso)
+                  const esFavoritoRecurso = esFavorito(recurso.id_recurso);
                   const estaProcesandoFavorito =
                     operacionFavorito?.cargando &&
-                    operacionFavorito?.idRecurso === recurso.id_recurso
+                    operacionFavorito?.idRecurso === recurso.id_recurso;
                   const estaProcesandoReporte =
                     operacionReporte?.cargando &&
-                    operacionReporte?.idRecurso === recurso.id_recurso
+                    operacionReporte?.idRecurso === recurso.id_recurso;
                   const yaReportado =
                     usuarioYaReporto &&
-                    recursoAReporter?.id_recurso === recurso.id_recurso
-                  const estaDescargando = descargando[recurso.id_recurso] || false
+                    recursoAReporter?.id_recurso === recurso.id_recurso;
+                  const estaDescargando =
+                    descargando[recurso.id_recurso] || false;
 
                   return (
                     <RecursoCompleto
@@ -1328,7 +1370,9 @@ const Semestres = () => {
                       estaProcesandoReporte={estaProcesandoReporte}
                       yaReportado={yaReportado}
                       estaDescargando={estaDescargando}
-                      mostrarComentarios={mostrarComentarios[recurso.id_recurso] || false}
+                      mostrarComentarios={
+                        mostrarComentarios[recurso.id_recurso] || false
+                      }
                       toggleMostrarComentarios={() =>
                         toggleMostrarComentarios(recurso.id_recurso)
                       }
@@ -1339,7 +1383,7 @@ const Semestres = () => {
                       handleVerRecurso={handleVerRecurso}
                       handleDescargarRecurso={handleDescargarRecurso}
                     />
-                  )
+                  );
                 })}
               </div>
             </>
@@ -1354,7 +1398,9 @@ const Semestres = () => {
                 <>
                   <Heart size={64} />
                   <h3>No tienes favoritos</h3>
-                  <p>No has marcado ningún recurso como favorito en esta materia.</p>
+                  <p>
+                    No has marcado ningún recurso como favorito en esta materia.
+                  </p>
                   <button
                     className="boton-agregar-primer-recurso"
                     onClick={handleVerTodosRecursos}
@@ -1367,7 +1413,9 @@ const Semestres = () => {
                 <>
                   <FolderOpen size={64} />
                   <h3>No hay recursos disponibles</h3>
-                  <p>Esta materia no tiene recursos registrados en el sistema.</p>
+                  <p>
+                    Esta materia no tiene recursos registrados en el sistema.
+                  </p>
                   <button
                     className="boton-agregar-primer-recurso"
                     onClick={handleAbrirFormularioRecurso}
@@ -1381,14 +1429,17 @@ const Semestres = () => {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   if (mostrarMaterias && semestreSeleccionado) {
     return (
       <div className="contenedor-recursos">
         <div className="navegacion-materias">
-          <button className="boton-volver-materias" onClick={handleVolverASemestres}>
+          <button
+            className="boton-volver-materias"
+            onClick={handleVolverASemestres}
+          >
             <ArrowLeft size={20} />
             Volver a Semestres
           </button>
@@ -1402,9 +1453,7 @@ const Semestres = () => {
           <div className="titulo-materias-con-info">
             <div>
               <h2>Materias del Semestre {semestreSeleccionado.numero}</h2>
-              <p className="subtitulo-materias">
-                {semestreSeleccionado.descripcion} - {nombreCarrera}
-              </p>
+            
             </div>
             <div className="badge-contador-materias">
               <Book size={20} />
@@ -1420,8 +1469,8 @@ const Semestres = () => {
           {materiasDelSemestre.length > 0 ? (
             <div className="grid-materias-simple">
               {materiasDelSemestre.map((materia, index) => {
-                const tieneRecursos = materiaTieneRecursos(materia.id)
-                const recursosCount = recursos[materia.id]?.length || 0
+                const tieneRecursos = materiaTieneRecursos(materia.id);
+                const recursosCount = recursos[materia.id]?.length || 0;
 
                 return (
                   <div key={materia.id} className="tarjeta-materia-simple">
@@ -1434,7 +1483,9 @@ const Semestres = () => {
                           <Hash size={12} />
                           <span>{index + 1}</span>
                         </div>
-                        <h3 className="nombre-materia-simple">{materia.nombre}</h3>
+                        <h3 className="nombre-materia-simple">
+                          {materia.nombre}
+                        </h3>
                       </div>
                     </div>
                     <div className="acciones-materia-simple">
@@ -1448,7 +1499,7 @@ const Semestres = () => {
                       </button>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           ) : (
@@ -1460,38 +1511,64 @@ const Semestres = () => {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="contenedor-recursos">
-      <div className="cabecera-recursos">
-        <div className="info-carrera">
-          <h2>Recursos académicos</h2>
-          <div className="detalles-carrera">
-            <div className="badge-info">
-              <GraduationCap size={16} />
-              <span>{nombreCarrera}</span>
-            </div>
-            <div className="badge-info">
-              <BookOpen size={16} />
-              <span>{totalMaterias} materias</span>
-            </div>
-            <div className="badge-info">
-              <span>Tipo: {tipoCarrera === 1 ? "Tecnología" : "Profesional"}</span>
-            </div>
+  <div className="cabecera-recursos cabecera-recursos-mejorada">
+    <div className="info-carrera">
+     
+
+      <div className="detalles-carrera detalles-carrera-mejorados">
+        <div className="badge-info badge-destacado">
+          <div className="badge-icono">
+            <GraduationCap size={16} />
+          </div>
+          <div className="badge-contenido">
+            <small>Carrera</small>
+            <span>{nombreCarrera}</span>
           </div>
         </div>
-        <div className="contador-semestres">
-          <Book size={20} />
-          <span>{semestres.length} semestres</span>
+
+        <div className="badge-info">
+          <div className="badge-icono">
+            <BookOpen size={16} />
+          </div>
+          <div className="badge-contenido">
+            <small>Materias</small>
+            <span>{totalMaterias}</span>
+          </div>
+        </div>
+
+        <div className="badge-info">
+          <div className="badge-icono">
+            <Hash size={16} />
+          </div>
+          <div className="badge-contenido">
+            <small>Tipo</small>
+            <span>{tipoCarrera === 1 ? "Tecnología" : "Profesional"}</span>
+          </div>
         </div>
       </div>
+    </div>
+
+    <div className="contador-semestres contador-semestres-card">
+      <div className="contador-semestres-icono">
+        <Book size={22} />
+      </div>
+      <div className="contador-semestres-contenido">
+        <small>Organización académica</small>
+        <span>{semestres.length} semestres</span>
+      </div>
+    </div>
+  </div>
 
       <div className="grid-semestres">
         {semestres.length > 0 ? (
           semestres.map((semestre) => {
-            const materiasCount = materiasPorSemestre[semestre.numero]?.length || 0
+            const materiasCount =
+              materiasPorSemestre[semestre.numero]?.length || 0;
 
             return (
               <div
@@ -1503,7 +1580,7 @@ const Semestres = () => {
               >
                 <div className="numero-semestre">{semestre.numero}</div>
                 <h3>Semestre {semestre.numero}</h3>
-                <p>{semestre.descripcion}</p>
+                
 
                 <div className="info-materias-card">
                   <div className="contador-materias">
@@ -1516,11 +1593,13 @@ const Semestres = () => {
                         materiasCount > 0 ? "activo" : "inactivo"
                       }`}
                     ></div>
-                    <span>{materiasCount > 0 ? "Disponible" : "Sin materias"}</span>
+                    <span>
+                      {materiasCount > 0 ? "Disponible" : "Sin materias"}
+                    </span>
                   </div>
                 </div>
               </div>
-            )
+            );
           })
         ) : (
           <div className="sin-semestres">
@@ -1534,7 +1613,8 @@ const Semestres = () => {
       {semestres.length > 0 && (
         <div className="indicadores-semestres">
           {semestres.map((semestre) => {
-            const materiasCount = materiasPorSemestre[semestre.numero]?.length || 0
+            const materiasCount =
+              materiasPorSemestre[semestre.numero]?.length || 0;
 
             return (
               <button
@@ -1552,13 +1632,13 @@ const Semestres = () => {
                   </span>
                 )}
               </button>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 const RecursoCompleto = ({
   recurso,
@@ -1582,7 +1662,7 @@ const RecursoCompleto = ({
     cargando: cargandoLikes,
     darLike,
     darDislike,
-  } = useRecursoLikes(recurso.id_recurso)
+  } = useRecursoLikes(recurso.id_recurso);
 
   const {
     comentarios,
@@ -1604,39 +1684,41 @@ const RecursoCompleto = ({
     obtenerAvatar,
     obtenerNombre,
     estaEditando,
-  } = useComentarios(recurso.id_recurso)
+  } = useComentarios(recurso.id_recurso);
 
   const handleMeGusta = async () => {
-    await darLike(recurso.id_recurso)
-  }
+    await darLike(recurso.id_recurso);
+  };
 
   const handleNoMeGusta = async () => {
-    await darDislike(recurso.id_recurso)
-  }
+    await darDislike(recurso.id_recurso);
+  };
 
   const handleEnviarComentario = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (nuevoComentario.trim()) {
-      await crearNuevoComentario()
+      await crearNuevoComentario();
     }
-  }
+  };
 
   const verificarPermisosComentario = (comentario) => {
-    const token = localStorage.getItem("token")
-    if (!token) return false
+    const token = localStorage.getItem("token");
+    if (!token) return false;
 
     try {
-      const payload = JSON.parse(atob(token.split(".")[1]))
-      return payload.id_usuario === comentario.id_usuario
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.id_usuario === comentario.id_usuario;
     } catch {
-      return false
+      return false;
     }
-  }
+  };
 
   return (
     <div className="tarjeta-recurso">
       <div className="cabecera-recurso">
-        <div className="icono-recurso">{getIconoCategoria(recurso.id_categoria)}</div>
+        <div className="icono-recurso">
+          {getIconoCategoria(recurso.id_categoria)}
+        </div>
 
         <div className="info-recurso">
           <h3 className="titulo-recurso">{recurso.titulo}</h3>
@@ -1660,7 +1742,9 @@ const RecursoCompleto = ({
             className={`boton-favorito ${esFavoritoRecurso ? "activo" : ""}`}
             onClick={() => handleToggleFavorito(recurso)}
             disabled={estaProcesandoFavorito}
-            title={esFavoritoRecurso ? "Quitar de favoritos" : "Agregar a favoritos"}
+            title={
+              esFavoritoRecurso ? "Quitar de favoritos" : "Agregar a favoritos"
+            }
           >
             {estaProcesandoFavorito ? (
               <div className="spinner-favorito"></div>
@@ -1675,7 +1759,9 @@ const RecursoCompleto = ({
             className={`boton-reportar ${yaReportado ? "ya-reportado" : ""}`}
             onClick={() => handleAbrirModalReportar(recurso)}
             disabled={estaProcesandoReporte || yaReportado}
-            title={yaReportado ? "Ya reportaste este recurso" : "Reportar recurso"}
+            title={
+              yaReportado ? "Ya reportaste este recurso" : "Reportar recurso"
+            }
           >
             {estaProcesandoReporte ? (
               <div className="spinner-pequeno"></div>
@@ -1685,13 +1771,17 @@ const RecursoCompleto = ({
           </button>
 
           <button
-            className={`boton-comentarios ${mostrarComentarios ? "activo" : ""}`}
+            className={`boton-comentarios ${
+              mostrarComentarios ? "activo" : ""
+            }`}
             onClick={toggleMostrarComentarios}
             title="Ver comentarios"
           >
             <MessageCircle size={18} />
             {totalComentarios > 0 && (
-              <span className="contador-comentarios-mini">{totalComentarios}</span>
+              <span className="contador-comentarios-mini">
+                {totalComentarios}
+              </span>
             )}
           </button>
         </div>
@@ -1700,7 +1790,9 @@ const RecursoCompleto = ({
       <div className="seccion-likes-recurso">
         <div className="controles-likes">
           <button
-            className={`boton-me-gusta ${miReaccion === "like" ? "activo" : ""}`}
+            className={`boton-me-gusta ${
+              miReaccion === "like" ? "activo" : ""
+            }`}
             onClick={handleMeGusta}
             disabled={cargandoLikes}
             title="Me gusta"
@@ -1728,7 +1820,9 @@ const RecursoCompleto = ({
             ) : (
               <>
                 <ThumbsDown size={18} />
-                <span className="contador-no-me-gusta">{likesData.dislikes}</span>
+                <span className="contador-no-me-gusta">
+                  {likesData.dislikes}
+                </span>
               </>
             )}
           </button>
@@ -1755,7 +1849,10 @@ const RecursoCompleto = ({
             </button>
           </div>
 
-          <form className="formulario-nuevo-comentario" onSubmit={handleEnviarComentario}>
+          <form
+            className="formulario-nuevo-comentario"
+            onSubmit={handleEnviarComentario}
+          >
             <textarea
               className="area-comentario"
               value={nuevoComentario}
@@ -1764,7 +1861,9 @@ const RecursoCompleto = ({
               rows="3"
               maxLength="500"
             />
-            <div className="contador-caracteres">{nuevoComentario.length}/500</div>
+            <div className="contador-caracteres">
+              {nuevoComentario.length}/500
+            </div>
 
             <div className="acciones-formulario-comentario">
               <button
@@ -1817,12 +1916,19 @@ const RecursoCompleto = ({
               </div>
             ) : comentarios.length > 0 ? (
               comentarios.map((comentario) => (
-                <div key={comentario.id_comentario} className="tarjeta-comentario">
+                <div
+                  key={comentario.id_comentario}
+                  className="tarjeta-comentario"
+                >
                   <div className="cabecera-comentario">
-                    <div className="avatar-usuario">{obtenerAvatar(comentario)}</div>
+                    <div className="avatar-usuario">
+                      {obtenerAvatar(comentario)}
+                    </div>
 
                     <div className="info-comentario">
-                      <div className="nombre-usuario">{obtenerNombre(comentario)}</div>
+                      <div className="nombre-usuario">
+                        {obtenerNombre(comentario)}
+                      </div>
                       <div className="fecha-comentario">
                         <Clock size={12} />
                         <span>{formatearFecha(comentario.fecha)}</span>
@@ -1867,7 +1973,7 @@ const RecursoCompleto = ({
                                     "¿Estás seguro de eliminar este comentario?"
                                   )
                                 ) {
-                                  eliminarComentario(comentario.id_comentario)
+                                  eliminarComentario(comentario.id_comentario);
                                 }
                               }}
                               title="Eliminar comentario"
@@ -1945,7 +2051,7 @@ const RecursoCompleto = ({
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Semestres
+export default Semestres;

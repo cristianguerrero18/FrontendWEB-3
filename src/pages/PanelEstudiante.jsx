@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   Heart,
   FolderArchive,
-  BookCheck,
   Bell,
   RotateCw,
   BookOpen,
@@ -112,10 +111,15 @@ const PanelEstudiante = () => {
   const temporizadorRecargaRef = useRef(null);
 
   const usuarioStorage = parseLocalStorage("usuario");
-  const carreraStorage = parseLocalStorage("carrera");
   const usuarioId = usuarioStorage.id_usuario || null;
 
   const { userData, loadUserData } = useUser();
+
+  const carreraNombre =
+    userData?.carrera_nombre ||
+    userData?.nombre_carrera ||
+    usuarioStorage?.nombre_carrera ||
+    "Carrera no asignada";
 
   const {
     perfil,
@@ -268,39 +272,31 @@ const PanelEstudiante = () => {
     switch (seccionActiva) {
       case "inicio":
         return <DashboardEstudiante />;
-
       case "perfil":
         return (
           <Perfil
             perfil={perfil}
             cargando={cargandoPerfil}
             mensaje={mensaje}
-            carreraStorage={carreraStorage}
+            carreraStorage={{ nombre_carrera: carreraNombre }}
             guardarPerfil={guardarPerfil}
             eliminarPerfil={eliminarPerfil}
             mostrarModalEliminar={mostrarModalEliminar}
             setMostrarModalEliminar={setMostrarModalEliminar}
           />
         );
-
       case "recursos":
         return <Recursos />;
-
       case "favoritos":
         return <Favoritos />;
-
       case "adminrecursos":
         return <MisRecursos />;
-
       case "pqrs":
         return <PQRSStudent />;
-
       case "notificaciones":
         return <Notificaciones />;
-
       case "tutoriales":
         return <VideoTutorial />;
-
       default:
         return (
           <div className="panel-pro-empty">
@@ -399,9 +395,7 @@ const PanelEstudiante = () => {
               <div className="nombre-usuario">
                 {usuarioStorage.nombres_usuario || "Estudiante"}
               </div>
-              <div className="rol-usuario">
-                {carreraStorage?.nombre_carrera || "Carrera no asignada"}
-              </div>
+              <div className="rol-usuario">{carreraNombre}</div>
             </div>
           </div>
         )}

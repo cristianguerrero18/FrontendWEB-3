@@ -1,21 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useFavoritos } from '../../hooks/useFavoritos.js';
-import { getRecursoPorId } from '../../api/Admin/Recursos.js';
-import { 
-  Heart, 
-  FolderOpen, 
-  FileText, 
-  Image, 
-  Link, 
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useFavoritos } from "../../hooks/useFavoritos.js";
+import { getRecursoPorId } from "../../api/Admin/Recursos.js";
+import {
+  Heart,
+  FileText,
+  Image,
+  Link,
   File,
   Download,
   Eye,
-  ArrowLeft,
-  Home,
-  Book,
-  AlertCircle
-} from 'lucide-react';
-import '../../css/semestres.css';
+  AlertCircle,
+  Bookmark,
+  Clock3,
+  Grid2x2,
+} from "lucide-react";
+import "../../css/semestres.css";
+import "../../css/Favoritos.css";
 
 const Favoritos = ({ onVolver }) => {
   const {
@@ -26,13 +26,12 @@ const Favoritos = ({ onVolver }) => {
     alternarFavorito,
     operacion: operacionFavorito,
     cargarFavoritosUsuario,
-    idUsuario
+    idUsuario,
   } = useFavoritos();
 
   const [recursosDetallados, setRecursosDetallados] = useState([]);
   const [cargandoDetalles, setCargandoDetalles] = useState(false);
 
-  // Cargar detalles de los recursos favoritos
   const cargarDetallesRecursos = useCallback(async () => {
     if (!favoritosPorUsuario.length) {
       setRecursosDetallados([]);
@@ -47,7 +46,7 @@ const Favoritos = ({ onVolver }) => {
           return {
             ...recurso,
             id_favorito: favorito.id_favorito,
-            fecha_favorito: favorito.fecha_creacion
+            fecha_favorito: favorito.fecha_creacion,
           };
         } catch (err) {
           console.error(`Error cargando recurso ${favorito.id_recurso}:`, err);
@@ -56,81 +55,95 @@ const Favoritos = ({ onVolver }) => {
       });
 
       const resultados = await Promise.all(promesas);
-      const recursosValidos = resultados.filter(recurso => recurso !== null && recurso.activo === 1);
-      
+      const recursosValidos = resultados.filter(
+        (recurso) => recurso !== null && recurso.activo === 1
+      );
+
       setRecursosDetallados(recursosValidos);
     } catch (err) {
-      console.error('Error cargando detalles de recursos:', err);
+      console.error("Error cargando detalles de recursos:", err);
     } finally {
       setCargandoDetalles(false);
     }
   }, [favoritosPorUsuario]);
 
-  // Manejar toggle de favorito
-  const handleToggleFavorito = async (recurso) => {
-    const exito = await alternarFavorito(recurso.id_recurso);
-    if (exito) {
-      // Remover del estado si se eliminó
-      if (!esFavorito(recurso.id_recurso)) {
-        setRecursosDetallados(prev => 
-          prev.filter(r => r.id_recurso !== recurso.id_recurso)
-        );
+  const handleToggleFavorito = useCallback(
+    async (recurso) => {
+      const exito = await alternarFavorito(recurso.id_recurso);
+
+      if (exito) {
+        if (!esFavorito(recurso.id_recurso)) {
+          setRecursosDetallados((prev) =>
+            prev.filter((r) => r.id_recurso !== recurso.id_recurso)
+          );
+        }
       }
-    }
-  };
+    },
+    [alternarFavorito, esFavorito]
+  );
 
-  // Obtener icono por categoría
-  const getIconoCategoria = (idCategoria) => {
-    switch(idCategoria) {
-      case 1: return <Image size={20} />;
-      case 2: return <FileText size={20} />;
-      case 3: return <File size={20} />;
-      case 4: return <Link size={20} />;
-      default: return <File size={20} />;
+  const getIconoCategoria = useCallback((idCategoria) => {
+    switch (idCategoria) {
+      case 1:
+        return <Image size={20} />;
+      case 2:
+        return <FileText size={20} />;
+      case 3:
+        return <File size={20} />;
+      case 4:
+        return <Link size={20} />;
+      default:
+        return <File size={20} />;
     }
-  };
+  }, []);
 
-  // Obtener etiqueta por categoría
-  const getEtiquetaCategoria = (idCategoria) => {
-    switch(idCategoria) {
-      case 1: return "Imagen";
-      case 2: return "PDF";
-      case 3: return "Archivo";
-      case 4: return "Enlace";
-      default: return "Recurso";
+  const getEtiquetaCategoria = useCallback((idCategoria) => {
+    switch (idCategoria) {
+      case 1:
+        return "Imagen";
+      case 2:
+        return "PDF";
+      case 3:
+        return "Archivo";
+      case 4:
+        return "Enlace";
+      default:
+        return "Recurso";
     }
-  };
+  }, []);
 
-  // Ver recurso
-  const handleVerRecurso = (recurso) => {
+  const handleVerRecurso = useCallback((recurso) => {
     if (recurso.id_categoria === 4 || recurso.URL) {
-      window.open(recurso.URL, '_blank');
+      window.open(recurso.URL, "_blank");
     }
-  };
+  }, []);
 
-  // Descargar recurso
-  const handleDescargarRecurso = (recurso) => {
+  const handleDescargarRecurso = useCallback((recurso) => {
     if (recurso.URL) {
-      window.open(recurso.URL, '_blank');
+      window.open(recurso.URL, "_blank");
     }
-  };
+  }, []);
 
-  // Formatear fecha
-  const formatearFecha = (fechaString) => {
+  const formatearFecha = useCallback((fechaString) => {
+    if (!fechaString) return "Fecha no disponible";
+
     const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
+    return fecha.toLocaleDateString("es-CO", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
-  };
+  }, []);
 
-  // Cargar detalles cuando cambien los favoritos
+  const totalCategorias = useMemo(() => {
+    const categorias = new Set(recursosDetallados.map((r) => r.id_categoria));
+    return categorias.size;
+  }, [recursosDetallados]);
+
   useEffect(() => {
     cargarDetallesRecursos();
   }, [favoritosPorUsuario, cargarDetallesRecursos]);
 
-  // Recargar favoritos al montar
   useEffect(() => {
     if (idUsuario) {
       cargarFavoritosUsuario(idUsuario);
@@ -139,7 +152,7 @@ const Favoritos = ({ onVolver }) => {
 
   if (loading || cargandoDetalles) {
     return (
-      <div className="contenedor-recursos">
+      <div className="contenedor-recursos favoritos-page">
         <div className="estado-carga">
           <div className="spinner-grande"></div>
           <p>Cargando favoritos...</p>
@@ -150,8 +163,8 @@ const Favoritos = ({ onVolver }) => {
 
   if (error) {
     return (
-      <div className="contenedor-recursos">
-        <div className="error-recurso">
+      <div className="contenedor-recursos favoritos-page">
+        <div className="error-recurso favoritos-error">
           <div className="icono-error">
             <AlertCircle size={48} />
           </div>
@@ -163,53 +176,86 @@ const Favoritos = ({ onVolver }) => {
   }
 
   return (
-    <div className="contenedor-recursos">
+    <div className="contenedor-recursos favoritos-page">
+      <div className="cabecera-favoritos">
+        <div className="titulo-favoritos-bloque">
+         
 
-      {/* Cabecera */}
-      <div className="cabecera-materias-simple">
-        <div className="titulo-materias-con-info">
           <div>
-            
+            <p className="subtitulo-favoritos">
+              Aquí puedes encontrar rápidamente los recursos que has guardado.
+            </p>
           </div>
-          <div className="badge-contador-materias">
-            <Heart size={20} fill="currentColor" />
-            <span>
-              {recursosDetallados.length} {recursosDetallados.length === 1 ? 'favorito' : 'favoritos'}
-            </span>
-          </div>
+        </div>
+
+        <div className="badge-contador-favoritos">
+          <Heart size={18} fill="currentColor" />
+          <span>
+            {recursosDetallados.length}{" "}
+            {recursosDetallados.length === 1 ? "favorito" : "favoritos"}
+          </span>
         </div>
       </div>
 
-      {/* Listado de favoritos */}
-      <div className="seccion-materias">
+      <div className="resumen-favoritos">
+        <div className="tarjeta-resumen-favoritos">
+          <span>Total guardados</span>
+          <strong>{recursosDetallados.length}</strong>
+        </div>
+
+        <div className="tarjeta-resumen-favoritos">
+          <span>Categorías</span>
+          <strong>{totalCategorias}</strong>
+        </div>
+
+        <div className="tarjeta-resumen-favoritos">
+          <span>Acceso rápido</span>
+          <strong>Activo</strong>
+        </div>
+      </div>
+
+      <div className="seccion-materias favoritos-seccion">
         {recursosDetallados.length > 0 ? (
-          <div className="grid-recursos">
+          <div className="grid-recursos favoritos-grid">
             {recursosDetallados.map((recurso) => {
-              const estaProcesando = operacionFavorito.cargando && 
+              const estaProcesando =
+                operacionFavorito.cargando &&
                 operacionFavorito.idRecurso === recurso.id_recurso;
 
               return (
-                <div key={recurso.id_recurso} className="tarjeta-recurso">
-                  <div className="cabecera-recurso">
-                    <div className="icono-recurso">
+                <article key={recurso.id_recurso} className="tarjeta-recurso tarjeta-favorito">
+                  <div className="cabecera-recurso cabecera-favorito">
+                    <div className="icono-recurso icono-favorito-recurso">
                       {getIconoCategoria(recurso.id_categoria)}
                     </div>
-                    <div className="info-recurso">
+
+                    <div className="info-recurso info-favorito-recurso">
                       <h3 className="titulo-recurso">{recurso.titulo}</h3>
-                      <div className="detalles-recurso">
-                        <span className="categoria-recurso">
+
+                      <div className="detalles-recurso detalles-favorito-recurso">
+                        <span className="categoria-recurso categoria-favoritos-chip">
                           {getEtiquetaCategoria(recurso.id_categoria)}
                         </span>
-                        <span className="tema-recurso">{recurso.tema}</span>
+
+                        {recurso.tema && (
+                          <span className="tema-recurso tema-favoritos">
+                            {recurso.tema}
+                          </span>
+                        )}
                       </div>
+
                       {recurso.fecha_favorito && (
                         <div className="fecha-favorito">
-                          <small>Agregado el {formatearFecha(recurso.fecha_favorito)}</small>
+                          <Clock3 size={14} />
+                          <small>
+                            Agregado el {formatearFecha(recurso.fecha_favorito)}
+                          </small>
                         </div>
                       )}
                     </div>
-                    <button 
-                      className="boton-favorito activo"
+
+                    <button
+                      className="boton-favorito activo boton-favorito-destacado"
                       onClick={() => handleToggleFavorito(recurso)}
                       disabled={estaProcesando}
                       title="Quitar de favoritos"
@@ -221,33 +267,42 @@ const Favoritos = ({ onVolver }) => {
                       )}
                     </button>
                   </div>
-                  <div className="acciones-recurso">
-                    <button 
+
+                  <div className="acciones-recurso acciones-favorito">
+                    <button
                       className="boton-ver-recurso"
                       onClick={() => handleVerRecurso(recurso)}
                       title="Ver recurso"
+                      disabled={!recurso.URL}
                     >
                       <Eye size={16} />
                       <span>Ver</span>
                     </button>
-                    <button 
+
+                    <button
                       className="boton-descargar-recurso"
                       onClick={() => handleDescargarRecurso(recurso)}
                       title="Descargar recurso"
+                      disabled={!recurso.URL}
                     >
                       <Download size={16} />
                       <span>Descargar</span>
                     </button>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         ) : (
-          <div className="sin-recursos">
-            <Heart size={64} />
-            <h3>No tienes favoritos</h3>
-            <p>Comienza marcando recursos como favoritos para verlos aquí.</p>
+          <div className="sin-recursos sin-favoritos">
+            <div className="sin-favoritos-icono">
+              <Bookmark size={58} />
+            </div>
+            <h3>No tienes favoritos todavía</h3>
+            <p>
+              Comienza marcando recursos como favoritos para acceder a ellos más
+              rápido desde aquí.
+            </p>
           </div>
         )}
       </div>

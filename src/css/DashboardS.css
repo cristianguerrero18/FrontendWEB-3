@@ -879,3 +879,247 @@
       flex-direction: column;
     }
   }
+  /* ========================================
+   DASHBOARD ESTUDIANTE - VERSIÓN LIMPIA
+   ======================================== */
+
+.dashboard-estudiante-limpio {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-bottom: 1rem;
+}
+
+.hero-dashboard-limpio {
+  padding: 2.25rem 1.75rem;
+  margin-bottom: 0;
+  border-radius: 22px;
+}
+
+.hero-dashboard-limpio .hero-contenido {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.hero-icono-limpio {
+  width: 74px;
+  height: 74px;
+  min-width: 74px;
+  margin: 0;
+}
+
+.hero-texto-limpio {
+  flex: 1;
+}
+
+.etiqueta-dashboard,
+.etiqueta-seccion {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.etiqueta-dashboard {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  margin-bottom: 0.85rem;
+}
+
+.etiqueta-seccion {
+  background: #eaf2ff;
+  color: #2457a6;
+  margin-bottom: 0.75rem;
+}
+
+.hero-subtitulo-limpio {
+  margin-bottom: 0;
+  max-width: 760px;
+}
+
+.grid-caracteristicas-limpio {
+  margin-bottom: 0;
+  gap: 1.25rem;
+}
+
+.caracteristica-card-limpia {
+  padding: 1.6rem;
+  align-items: flex-start;
+  text-align: left;
+  min-height: 100%;
+}
+
+.caracteristica-card-limpia .caracteristica-icono {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  margin-bottom: 1rem;
+}
+
+.caracteristica-card-limpia h3 {
+  margin-bottom: 0.75rem;
+}
+
+.caracteristica-card-limpia p {
+  margin: 0;
+}
+
+.seccion-mision-limpia {
+  margin-bottom: 0;
+  padding: 2rem;
+  border-left-width: 5px;
+}
+
+.seccion-alerta-dashboard {
+  margin: 0;
+}
+
+.alerta-dashboard-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: linear-gradient(135deg, #fff8e6 0%, #fff3cd 100%);
+  border: 1px solid #f2c96d;
+  border-radius: 16px;
+  padding: 1.2rem 1.25rem;
+}
+
+.alerta-dashboard-icono {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(217, 119, 6, 0.12);
+  color: #c97a09;
+}
+
+.alerta-dashboard-texto h3 {
+  margin: 0 0 0.45rem 0;
+  color: #7a4b00;
+  font-size: 1.05rem;
+}
+
+.alerta-dashboard-texto p {
+  margin: 0;
+  color: #80510e;
+  line-height: 1.6;
+}
+
+.seccion-accesos-rapidos,
+.seccion-legal-compacta {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.seccion-header-simple h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.reporte-pasos-limpio {
+  margin-top: 1.25rem;
+  gap: 1rem;
+}
+
+.paso-limpio {
+  background: #f8fbff;
+  border: 1px solid #e5edf6;
+  border-radius: 14px;
+  padding: 1rem;
+  align-items: flex-start;
+}
+
+.paso-icono-limpio {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e8f0ff 0%, #dce9ff 100%);
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legal-compacta-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.legal-compacta-icono {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #eef2ff 0%, #dfe8ff 100%);
+  color: #3949ab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legal-compacta-texto h3 {
+  margin: 0 0 0.45rem 0;
+  color: #1f2937;
+  font-size: 1.05rem;
+}
+
+.legal-compacta-texto p {
+  margin: 0;
+  color: #5b6777;
+  line-height: 1.6;
+}
+
+/* Ajustes para ocultar peso visual viejo si quedó algo */
+.dashboard-estudiante-limpio .cta-dashboard,
+.dashboard-estudiante-limpio .seccion-errores,
+.dashboard-estudiante-limpio .seccion-reporte,
+.dashboard-estudiante-limpio .seccion-legal .legal-grid,
+.dashboard-estudiante-limpio .legal-footer,
+.dashboard-estudiante-limpio .estadisticas-beneficios,
+.dashboard-estudiante-limpio .hero-badges {
+  margin-top: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-dashboard-limpio .hero-contenido,
+  .mision-contenido,
+  .alerta-dashboard-card,
+  .legal-compacta-card {
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .hero-icono-limpio,
+  .mision-icono {
+    margin: 0;
+  }
+
+  .hero-dashboard-limpio {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .seccion-mision-limpia,
+  .seccion-accesos-rapidos,
+  .seccion-legal-compacta {
+    padding: 1.35rem;
+  }
+
+  .seccion-header-simple h2 {
+    font-size: 1.25rem;
+  }
+}

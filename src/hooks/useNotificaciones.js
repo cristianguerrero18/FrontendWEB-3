@@ -1,309 +1,233 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { 
+import { useState, useEffect, useCallback, useMemo } from "react";
+import {
   getNotificacionesPorUsuario,
   deleteNotificacion,
-  updateNotificacionVisto 
+  updateNotificacionVisto,
+  marcarTodasComoVistas,
+  getCantidadNoLeidas,
 } from "../api/Admin/Notificaciones.js";
 import { useUser } from "../context/UserContext.jsx";
 
 export const useNotificaciones = (idUsuarioParam = null) => {
-  console.log("🚀 [useNotificaciones] Iniciando hook...");
-  
   const [notificaciones, setNotificaciones] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
-  
-  const { getUserId, userData, isAuthenticated, logout } = useUser();
-  const idUsuarioRef = useRef(null);
-  
-  console.log("📋 [useNotificaciones] Estado del usuario:");
-  console.log("   - userData:", userData);
-  console.log("   - isAuthenticated:", isAuthenticated);
-  console.log("   - userData?.id_usuario:", userData?.id_usuario);
+  const [noLeidas, setNoLeidas] = useState(0);
 
-  // Obtener el ID del usuario actual del contexto con limpieza
-  const obtenerIdUsuario = useCallback(() => {
-    console.log("🆔 [obtenerIdUsuario] Ejecutándose...");
-    
-    // Si se pasa un idUsuario como parámetro, usarlo
-    if (idUsuarioParam) {
-      console.log("🆔 [obtenerIdUsuario] Usando idUsuarioParam:", idUsuarioParam);
-      return idUsuarioParam;
-    }
-    
-    // Verificar primero si hay un usuario autenticado
-    if (!isAuthenticated) {
-      console.log("🆔 [obtenerIdUsuario] No hay usuario autenticado");
-      // Limpiar notificaciones si no hay usuario autenticado
-      setNotificaciones([]);
-      return null;
-    }
-    
-    // Intentar obtener del contexto
-    try {
-      // Usar userData actual
-      if (userData && userData.id_usuario) {
-        const newId = userData.id_usuario;
-        console.log("🆔 [obtenerIdUsuario] Usando userData.id_usuario:", newId);
-        
-        // Verificar si el ID ha cambiado
-        if (idUsuarioRef.current !== newId) {
-          console.log("🔄 [obtenerIdUsuario] ID de usuario ha cambiado:", idUsuarioRef.current, "→", newId);
-          idUsuarioRef.current = newId;
-          // Limpiar notificaciones anteriores
-          setNotificaciones([]);
-        }
-        return newId;
-      }
-      
-      // Si no hay userData pero hay autenticación, intentar con getUserId
-      if (getUserId) {
-        const userIdFromContext = getUserId();
-        console.log("🆔 [obtenerIdUsuario] getUserId() devolvió:", userIdFromContext);
-        if (userIdFromContext) {
-          if (idUsuarioRef.current !== userIdFromContext) {
-            console.log("🔄 [obtenerIdUsuario] ID de usuario ha cambiado:", idUsuarioRef.current, "→", userIdFromContext);
-            idUsuarioRef.current = userIdFromContext;
-            setNotificaciones([]);
-          }
-          return userIdFromContext;
-        }
-      }
-      
-      console.log("🆔 [obtenerIdUsuario] No se pudo obtener ID de usuario");
-      setNotificaciones([]);
-      return null;
-    } catch (error) {
-      console.error("❌ [obtenerIdUsuario] Error obteniendo ID de usuario:", error);
-      return null;
-    }
-  }, [idUsuarioParam, getUserId, userData, isAuthenticated]);
+  const { getUserId, userData, isAuthenticated } = useUser();
 
-  // Cargar notificaciones del usuario específico
-  const cargarNotificacionesPorUsuario = useCallback(async () => {
-    console.log("📥 [cargarNotificacionesPorUsuario] Ejecutándose...");
-    
-    // Verificar autenticación primero
-    if (!isAuthenticated) {
-      console.warn("⚠️ [cargarNotificacionesPorUsuario] Usuario no autenticado");
-      setNotificaciones([]);
-      setMensaje("Usuario no autenticado");
-      return [];
-    }
-    
-    const idUsuario = obtenerIdUsuario();
-    console.log("📥 ID de usuario obtenido:", idUsuario);
-    
-    if (!idUsuario) {
-      console.warn("⚠️ [cargarNotificacionesPorUsuario] No se pudo obtener el ID del usuario");
-      setMensaje("No se pudo identificar al usuario");
-      setNotificaciones([]);
-      return [];
-    }
-    
-    setCargando(true);
+  const idUsuario = useMemo(() => {
+    if (idUsuarioParam) return Number(idUsuarioParam);
+    if (userData?.id_usuario) return Number(userData.id_usuario);
+    if (getUserId) return Number(getUserId());
+    return null;
+  }, [idUsuarioParam, userData, getUserId]);
+
+  const limpiarMensaje = useCallback(() => {
     setMensaje("");
-    console.log("🔄 [cargarNotificacionesPorUsuario] Cargando notificaciones para usuario:", idUsuario);
-    
-    try {
-      const resultado = await getNotificacionesPorUsuario(idUsuario);
-      console.log("✅ [cargarNotificacionesPorUsuario] Resultado de API:", resultado);
-      
-      if (resultado.error) {
-        console.error("❌ [cargarNotificacionesPorUsuario] Error en resultado:", resultado.mensaje);
-        
-        // Si hay error de autenticación, cerrar sesión
-        if (resultado.mensaje && resultado.mensaje.includes("autenticación")) {
-          setMensaje("Sesión expirada. Por favor, inicie sesión nuevamente.");
-          logout();
-        } else {
-          setMensaje(resultado.mensaje || "Error al cargar notificaciones del usuario");
-        }
-        
-        setNotificaciones([]);
-      } else {
-        // Asegurarnos de que sea un array
-        const notificacionesArray = Array.isArray(resultado) ? resultado : [];
-        console.log(`📊 [cargarNotificacionesPorUsuario] ${notificacionesArray.length} notificaciones cargadas`);
-        
-        // Verificar que las notificaciones correspondan al usuario actual
-        const notificacionesFiltradas = notificacionesArray.filter(
-          notif => notif.id_usuario == idUsuario
-        );
-        
-        console.log("📊 Notificaciones filtradas por usuario:", notificacionesFiltradas);
-        setNotificaciones(notificacionesFiltradas);
-      }
-      return resultado;
-    } catch (error) {
-      console.error("❌ [cargarNotificacionesPorUsuario] Error en catch:", error);
-      setMensaje("Error al cargar notificaciones del usuario");
-      return [];
-    } finally {
-      console.log("🏁 [cargarNotificacionesPorUsuario] Finalizando carga");
-      setCargando(false);
-    }
-  }, [obtenerIdUsuario, isAuthenticated, logout]);
-
-  // Marcar notificación como vista
-  const marcarComoVista = useCallback(async (idNotificacion) => {
-    console.log("👁️ [marcarComoVista] Marcando notificación:", idNotificacion);
-    try {
-      const resultado = await updateNotificacionVisto(idNotificacion);
-      if (resultado.error) {
-        console.error("❌ [marcarComoVista] Error:", resultado.mensaje);
-        return { error: true, datos: resultado };
-      } else {
-        console.log("✅ [marcarComoVista] Notificación marcada como vista");
-        // Actualizar el estado local
-        setNotificaciones(prev => prev.map(notif => 
-          notif.id_notificacion === idNotificacion 
-            ? { ...notif, estado: 'visto' } 
-            : notif
-        ));
-        return { error: false, datos: resultado };
-      }
-    } catch (error) {
-      console.error("❌ [marcarComoVista] Error en catch:", error);
-      return { error: true, datos: { mensaje: "Error al marcar como vista" } };
-    }
   }, []);
 
-  // Eliminar notificación del usuario
-  const eliminarNotificacion = useCallback(async (idNotificacion) => {
-    console.log("🗑️ [eliminarNotificacion] Eliminando notificación:", idNotificacion);
+  const cargarNoLeidas = useCallback(async () => {
+    if (!idUsuario || !isAuthenticated) {
+      setNoLeidas(0);
+      return 0;
+    }
+
+    const resultado = await getCantidadNoLeidas(idUsuario);
+
+    if (!resultado.error) {
+      setNoLeidas(Number(resultado.data || 0));
+      return Number(resultado.data || 0);
+    }
+
+    return 0;
+  }, [idUsuario, isAuthenticated]);
+
+  const cargarNotificacionesPorUsuario = useCallback(async () => {
+    if (!idUsuario || !isAuthenticated) {
+      setNotificaciones([]);
+      setNoLeidas(0);
+      return [];
+    }
+
     setCargando(true);
     setMensaje("");
+
     try {
-      const resultado = await deleteNotificacion(idNotificacion);
+      const resultado = await getNotificacionesPorUsuario(idUsuario);
+
       if (resultado.error) {
-        console.error("❌ [eliminarNotificacion] Error:", resultado.mensaje);
+        setNotificaciones([]);
+        setMensaje(resultado.mensaje || "Error al cargar notificaciones");
+        return [];
+      }
+
+      const lista = Array.isArray(resultado.data) ? resultado.data : [];
+      setNotificaciones(lista);
+
+      const cantidadNoLeidas = lista.filter(
+        (n) => (n?.estado || "").toLowerCase() !== "visto"
+      ).length;
+      setNoLeidas(cantidadNoLeidas);
+
+      return lista;
+    } catch (error) {
+      console.error("Error en cargarNotificacionesPorUsuario:", error);
+      setNotificaciones([]);
+      setMensaje("Error al cargar notificaciones");
+      return [];
+    } finally {
+      setCargando(false);
+    }
+  }, [idUsuario, isAuthenticated]);
+
+  const marcarComoVista = useCallback(async (idNotificacion) => {
+    const resultado = await updateNotificacionVisto(idNotificacion);
+
+    if (resultado.error) {
+      setMensaje(resultado.mensaje || "No se pudo marcar como vista");
+      return { error: true, datos: resultado };
+    }
+
+    setNotificaciones((prev) =>
+      prev.map((notif) =>
+        notif.id_notificacion === idNotificacion
+          ? { ...notif, estado: "visto" }
+          : notif
+      )
+    );
+
+    setNoLeidas((prev) => Math.max(0, prev - 1));
+
+    return { error: false, datos: resultado };
+  }, []);
+
+  const marcarTodoComoVista = useCallback(async () => {
+    if (!idUsuario) {
+      return { error: true, datos: { mensaje: "Usuario no identificado" } };
+    }
+
+    setCargando(true);
+    setMensaje("");
+
+    try {
+      const resultado = await marcarTodasComoVistas(idUsuario);
+
+      if (resultado.error) {
+        setMensaje(resultado.mensaje || "No se pudieron marcar todas como vistas");
+        return { error: true, datos: resultado };
+      }
+
+      setNotificaciones((prev) =>
+        prev.map((notif) => ({ ...notif, estado: "visto" }))
+      );
+      setNoLeidas(0);
+      setMensaje("Todas las notificaciones fueron marcadas como vistas");
+
+      return { error: false, datos: resultado };
+    } catch (error) {
+      console.error("Error en marcarTodoComoVista:", error);
+      setMensaje("Error al marcar todas como vistas");
+      return { error: true, datos: { mensaje: "Error al marcar todas como vistas" } };
+    } finally {
+      setCargando(false);
+    }
+  }, [idUsuario]);
+
+  const eliminarNotificacion = useCallback(async (idNotificacion) => {
+    setCargando(true);
+    setMensaje("");
+
+    try {
+      const notificacionObjetivo = notificaciones.find(
+        (n) => n.id_notificacion === idNotificacion
+      );
+
+      const resultado = await deleteNotificacion(idNotificacion);
+
+      if (resultado.error) {
         setMensaje(resultado.mensaje || "Error al eliminar la notificación");
         return { error: true, datos: resultado };
-      } else {
-        console.log("✅ [eliminarNotificacion] Notificación eliminada exitosamente");
-        setMensaje("Notificación eliminada exitosamente");
-        await cargarNotificacionesPorUsuario(); // Recargar la lista del usuario
-        return { error: false, datos: resultado };
       }
+
+      setNotificaciones((prev) =>
+        prev.filter((n) => n.id_notificacion !== idNotificacion)
+      );
+
+      if (
+        notificacionObjetivo &&
+        (notificacionObjetivo.estado || "").toLowerCase() !== "visto"
+      ) {
+        setNoLeidas((prev) => Math.max(0, prev - 1));
+      }
+
+      setMensaje("Notificación eliminada correctamente");
+      return { error: false, datos: resultado };
     } catch (error) {
-      console.error("❌ [eliminarNotificacion] Error en catch:", error);
+      console.error("Error en eliminarNotificacion:", error);
       setMensaje("Error al eliminar la notificación");
       return { error: true, datos: { mensaje: "Error al eliminar la notificación" } };
     } finally {
       setCargando(false);
     }
-  }, [cargarNotificacionesPorUsuario]);
+  }, [notificaciones]);
 
-  // Eliminar todas las notificaciones del usuario
   const eliminarTodasNotificacionesUsuario = useCallback(async () => {
-    console.log("🗑️🗑️ [eliminarTodasNotificacionesUsuario] Eliminando todas las notificaciones");
-    const idUsuario = obtenerIdUsuario();
-    
-    if (!idUsuario) {
-      console.error("❌ [eliminarTodasNotificacionesUsuario] No hay ID de usuario");
-      setMensaje("No se pudo identificar al usuario");
-      return { error: true, datos: { mensaje: "No se pudo identificar al usuario" } };
+    if (!notificaciones.length) {
+      setMensaje("No hay notificaciones para eliminar");
+      return { error: false, datos: [] };
     }
-    
+
     setCargando(true);
     setMensaje("");
+
     try {
-      const notificacionesUsuario = [...notificaciones];
-      console.log(`📊 [eliminarTodasNotificacionesUsuario] ${notificacionesUsuario.length} notificaciones a eliminar`);
-      
-      if (notificacionesUsuario.length === 0) {
-        console.log("ℹ️ [eliminarTodasNotificacionesUsuario] No hay notificaciones para eliminar");
-        setMensaje("No hay notificaciones para eliminar");
-        return { error: false, datos: [] };
+      const resultados = await Promise.all(
+        notificaciones.map((n) => deleteNotificacion(n.id_notificacion))
+      );
+
+      const huboError = resultados.some((r) => r.error);
+
+      if (huboError) {
+        setMensaje("Algunas notificaciones no pudieron eliminarse");
+      } else {
+        setMensaje("Todas las notificaciones fueron eliminadas");
       }
 
-      const resultados = [];
-      for (const notificacion of notificacionesUsuario) {
-        if (notificacion.id_usuario == idUsuario) {
-          console.log(`🗑️ Eliminando notificación ${notificacion.id_notificacion}`);
-          const resultado = await deleteNotificacion(notificacion.id_notificacion);
-          resultados.push(resultado);
-        }
-      }
+      setNotificaciones([]);
+      setNoLeidas(0);
 
-      await cargarNotificacionesPorUsuario();
-      console.log("✅ [eliminarTodasNotificacionesUsuario] Todas las notificaciones eliminadas");
-      setMensaje("Todas las notificaciones han sido eliminadas");
-      
-      return { error: false, datos: resultados };
+      return { error: huboError, datos: resultados };
     } catch (error) {
-      console.error("❌ [eliminarTodasNotificacionesUsuario] Error:", error);
+      console.error("Error en eliminarTodasNotificacionesUsuario:", error);
       setMensaje("Error al eliminar notificaciones");
       return { error: true, datos: { mensaje: "Error al eliminar notificaciones" } };
     } finally {
       setCargando(false);
     }
-  }, [notificaciones, cargarNotificacionesPorUsuario, obtenerIdUsuario]);
+  }, [notificaciones]);
 
-  // Limpiar mensajes
-  const limpiarMensaje = useCallback(() => {
-    console.log("🧹 [limpiarMensaje] Limpiando mensaje");
-    setMensaje("");
-  }, []);
-
-  // Efecto para limpiar notificaciones cuando el usuario cambia
   useEffect(() => {
-    console.log("🔄 [useEffect] Verificando cambio de usuario");
-    
-    // Si no hay usuario autenticado, limpiar notificaciones
-    if (!isAuthenticated) {
-      console.log("🧹 [useEffect] Limpiando notificaciones - usuario no autenticado");
-      setNotificaciones([]);
-      return;
-    }
-    
-    // Obtener el ID actual
-    const currentId = obtenerIdUsuario();
-    console.log("📊 [useEffect] ID actual:", currentId);
-    
-    // Si el ID es diferente al anterior, limpiar notificaciones
-    if (idUsuarioRef.current !== currentId) {
-      console.log("🧹 [useEffect] Limpiando notificaciones - ID de usuario ha cambiado");
-      setNotificaciones([]);
-    }
-    
-    idUsuarioRef.current = currentId;
-  }, [isAuthenticated, obtenerIdUsuario, userData?.id_usuario]);
-
-  // Cargar notificaciones solo cuando haya un usuario válido
-  useEffect(() => {
-    console.log("🎯 [useEffect-carga] Iniciando carga de notificaciones");
-    
-    // No cargar si no hay usuario autenticado
-    if (!isAuthenticated) {
-      console.log("⏸️ [useEffect-carga] No hay usuario autenticado, no cargar");
-      return;
-    }
-    
-    const idUsuario = obtenerIdUsuario();
-    if (idUsuario) {
-      console.log("🔄 [useEffect-carga] Cargando notificaciones para usuario:", idUsuario);
+    if (isAuthenticated && idUsuario) {
       cargarNotificacionesPorUsuario();
     } else {
-      console.log("⏸️ [useEffect-carga] No hay ID de usuario, no cargar");
+      setNotificaciones([]);
+      setNoLeidas(0);
     }
-  }, [isAuthenticated, obtenerIdUsuario, cargarNotificacionesPorUsuario]);
+  }, [isAuthenticated, idUsuario, cargarNotificacionesPorUsuario]);
 
-  console.log("📊 [useNotificaciones] Estado final:");
-  console.log("   - notificaciones:", notificaciones.length);
-  console.log("   - cargando:", cargando);
-  console.log("   - mensaje:", mensaje);
-  console.log("   - usuario actual:", obtenerIdUsuario());
-
-  return { 
-    notificaciones, 
-    cargando, 
-    mensaje, 
+  return {
+    notificaciones,
+    cargando,
+    mensaje,
+    noLeidas,
+    idUsuario,
     recargarNotificaciones: cargarNotificacionesPorUsuario,
     eliminarNotificacion,
     eliminarTodasNotificacionesUsuario,
     marcarComoVista,
-    limpiarMensaje
+    marcarTodoComoVista,
+    limpiarMensaje,
+    cargarNoLeidas,
   };
 };

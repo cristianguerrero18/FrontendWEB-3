@@ -1,0 +1,203 @@
+.pqrs-student-panel {
+    position: relative;
+  }
+  
+  .cabecera-pqrs-student {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+  
+  .encabezado-student-pqrs {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .encabezado-student-pqrs h2 {
+    margin: 0;
+    color: var(--pqrs-texto, #233243);
+  }
+  
+  .subtitulo-student-pqrs {
+    margin: 0.35rem 0 0 0;
+    color: var(--pqrs-texto-secundario, #6b7b8c);
+    max-width: 760px;
+    line-height: 1.5;
+  }
+  
+  .resumen-pqrs-student {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(170px, 1fr));
+    gap: 1rem;
+  }
+  
+  .tarjeta-resumen-student {
+    background: linear-gradient(135deg, #f8fbff, #eef5fb);
+    border: 1px solid #dfe8f3;
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 4px 14px rgba(28, 45, 74, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  
+  .tarjeta-resumen-student span {
+    color: #6b7b8c;
+    font-size: 0.92rem;
+  }
+  
+  .tarjeta-resumen-student strong {
+    font-size: 1.6rem;
+    color: #233243;
+  }
+  
+  .tarjeta-resumen-student.pendientes {
+    background: linear-gradient(135deg, #fff9ef, #fff1d8);
+  }
+  
+  .tarjeta-resumen-student.respondidos {
+    background: linear-gradient(135deg, #eefaf1, #e4f7e9);
+  }
+  
+  .estado-estudiante,
+  .estado-vacio-student {
+    background: #ffffff;
+    border: 1px solid #e4eaf1;
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(20, 38, 63, 0.08);
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .contenedor-debug-inicial {
+    margin-top: 20px;
+  }
+  
+  .boton-debug-pqrs {
+    padding: 5px 10px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .boton-debug-flotante-pqrs {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 6px 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 12px;
+    box-shadow: 0 6px 18px rgba(0, 123, 255, 0.25);
+  }
+  
+  .mensaje-api-contenido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .mensaje-api-titulo {
+    margin: 0;
+    font-weight: 700;
+  }
+  
+  .mensaje-api-texto {
+    margin: 0;
+    font-size: 14px;
+  }
+  
+  .info-usuario-modal-student {
+    padding: 12px 14px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    border: 1px solid #e9ecef;
+    line-height: 1.5;
+  }
+  
+  .instrucciones-student {
+    background: #f9fbff;
+    border: 1px solid #e1ebf6;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+  }
+  
+  .instrucciones-student h4 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #233243;
+  }
+  
+  .instrucciones-student ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #5f6f82;
+    line-height: 1.6;
+  }
+  
+  .tipo-pqr-con-icono {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+  }
+  
+  .estado-pqr-con-icono {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.48rem 0.78rem;
+    border: 1px solid;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  
+  .descripcion-pqr {
+    line-height: 1.5;
+  }
+  
+  .estado-vacio-student p {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (max-width: 992px) {
+    .resumen-pqrs-student {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .encabezado-student-pqrs {
+      flex-direction: column;
+    }
+  
+    .botones-acciones-superiores {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .botones-acciones-superiores button {
+      width: 100%;
+    }
+  
+    .boton-debug-flotante-pqrs {
+      bottom: 14px;
+      right: 14px;
+    }
+  }

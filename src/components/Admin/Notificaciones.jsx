@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNotificaciones } from "../../hooks/useNotificaciones.js";
-import { useUser } from "../../context/UserContext.jsx";
 import "../../css/Principal.css";
 import "../../css/Notificaciones.css";
 
 const Notificaciones = () => {
-  // 1. PRIMERO: Hooks de React
   const [paginaActual, setPaginaActual] = useState(1);
   const [elementosPorPagina, setElementosPorPagina] = useState(10);
   const [busqueda, setBusqueda] = useState("");
@@ -15,166 +13,164 @@ const Notificaciones = () => {
   const [notificacionDetallada, setNotificacionDetallada] = useState(null);
   const [mostrarConfirmacionEliminarTodas, setMostrarConfirmacionEliminarTodas] = useState(false);
 
-  // 2. DESPUÉS: Custom hooks
-  const { getUserId, userData } = useUser();
-  const { 
-    notificaciones, 
-    cargando, 
-    mensaje, 
+  const {
+    notificaciones,
+    cargando,
+    mensaje,
+    noLeidas,
+    idUsuario,
     recargarNotificaciones,
     eliminarNotificacion,
     marcarComoVista,
+    marcarTodoComoVista,
     eliminarTodasNotificacionesUsuario,
-    limpiarMensaje 
+    limpiarMensaje,
   } = useNotificaciones();
 
-  // Obtener el ID del usuario actual
-  const idUsuario = useMemo(() => {
-    try {
-      if (userData && userData.id_usuario) {
-        return userData.id_usuario;
-      }
-      if (getUserId) {
-        return getUserId();
-      }
-      return null;
-    } catch (error) {
-      console.error("Error obteniendo ID de usuario:", error);
-      return null;
-    }
-  }, [userData, getUserId]);
-
-  // Recargar notificaciones cuando el ID del usuario cambia
-  useEffect(() => {
-    if (idUsuario) {
-      recargarNotificaciones();
-    }
-  }, [idUsuario, recargarNotificaciones]);
-
-  // Limpiar mensaje después de 5 segundos
   useEffect(() => {
     if (mensaje) {
       const timer = setTimeout(() => {
         limpiarMensaje();
-      }, 5000);
+      }, 4500);
       return () => clearTimeout(timer);
     }
   }, [mensaje, limpiarMensaje]);
 
-  // Filtrar notificaciones por búsqueda
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, elementosPorPagina]);
+
+  const normalizarEstado = useCallback((estado) => {
+    return (estado || "").toLowerCase().trim();
+  }, []);
+
+  const formatearFecha = useCallback((fechaString) => {
+    if (!fechaString) return "Fecha no disponible";
+
+    try {
+      const fecha = new Date(fechaString);
+      if (isNaN(fecha.getTime())) return "Fecha inválida";
+
+      return fecha.toLocaleString("es-CO", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "Fecha inválida";
+    }
+  }, []);
+
+  const getColorEstado = useCallback((estado) => {
+    const estadoLower = normalizarEstado(estado);
+
+    switch (estadoLower) {
+      case "visto":
+        return {
+          bg: "#e8f5e9",
+          color: "#2e7d32",
+          border: "#c8e6c9",
+          texto: "Vista",
+        };
+      default:
+        return {
+          bg: "#fff3e0",
+          color: "#ef6c00",
+          border: "#ffcc80",
+          texto: "No vista",
+        };
+    }
+  }, [normalizarEstado]);
+
+  const getClaseTipo = useCallback((tipo) => {
+    const valor = (tipo || "general").toLowerCase();
+
+    if (valor.includes("pqrs")) return "tipo-pqrs";
+    if (valor.includes("recurso")) return "tipo-recurso";
+    if (valor.includes("admin")) return "tipo-admin";
+    if (valor.includes("sistema")) return "tipo-sistema";
+
+    return "tipo-general";
+  }, []);
+
   const notificacionesFiltradas = useMemo(() => {
-    if (!notificaciones || !Array.isArray(notificaciones)) return [];
-    
-    const textoBusqueda = busqueda.toLowerCase();
-    
-    return notificaciones.filter(notificacion => {
-      if (!notificacion) return false;
-      
+    const texto = busqueda.toLowerCase().trim();
+
+    if (!texto) return notificaciones;
+
+    return notificaciones.filter((notificacion) => {
+      const id = String(notificacion?.id_notificacion || "");
+      const tipo = String(notificacion?.tipo || "").toLowerCase();
+      const estado = String(notificacion?.estado || "").toLowerCase();
+      const mensajeTexto = String(notificacion?.mensaje || "").toLowerCase();
+
       return (
-        (notificacion.mensaje && notificacion.mensaje.toLowerCase().includes(textoBusqueda)) ||
-        (notificacion.id_notificacion && notificacion.id_notificacion.toString().includes(textoBusqueda)) ||
-        (notificacion.estado && notificacion.estado.toLowerCase().includes(textoBusqueda)) ||
-        (notificacion.tipo && notificacion.tipo.toLowerCase().includes(textoBusqueda))
+        id.includes(texto) ||
+        tipo.includes(texto) ||
+        estado.includes(texto) ||
+        mensajeTexto.includes(texto)
       );
     });
   }, [notificaciones, busqueda]);
 
-  // Calcular elementos para la página actual
+  const totalNotificaciones = notificaciones.length;
+  const totalVistas = notificaciones.filter(
+    (n) => normalizarEstado(n.estado) === "visto"
+  ).length;
+
   const indiceUltimoElemento = paginaActual * elementosPorPagina;
   const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
-  const elementosActuales = notificacionesFiltradas.slice(indicePrimerElemento, indiceUltimoElemento);
-  const totalPaginas = Math.ceil(notificacionesFiltradas.length / elementosPorPagina);
+  const elementosActuales = notificacionesFiltradas.slice(
+    indicePrimerElemento,
+    indiceUltimoElemento
+  );
+  const totalPaginas = Math.ceil(
+    notificacionesFiltradas.length / elementosPorPagina
+  );
 
-  // Función para ver detalles de la notificación
   const handleVerDetalles = useCallback(async (notificacion) => {
     if (!notificacion) return;
-    
-    // Marcar como vista solo si está en estado "no visto"
-    if (notificacion.estado === "no visto") {
+
+    if (normalizarEstado(notificacion.estado) !== "visto") {
       await marcarComoVista(notificacion.id_notificacion);
+      notificacion = { ...notificacion, estado: "visto" };
     }
-    
+
     setNotificacionDetallada(notificacion);
     setMostrarModalDetalles(true);
-  }, [marcarComoVista]);
+  }, [marcarComoVista, normalizarEstado]);
 
-  // Función para cerrar modal de detalles
   const cerrarModalDetalles = useCallback(() => {
     setMostrarModalDetalles(false);
     setNotificacionDetallada(null);
   }, []);
 
-  // Función para eliminar notificación específica
   const handleEliminarNotificacion = useCallback((notificacion) => {
-    if (!notificacion) return;
     setNotificacionAEliminar(notificacion);
     setMostrarConfirmacionEliminar(true);
   }, []);
 
   const confirmarEliminarNotificacion = useCallback(async () => {
-    if (notificacionAEliminar && notificacionAEliminar.id_notificacion) {
-      await eliminarNotificacion(notificacionAEliminar.id_notificacion);
-      setMostrarConfirmacionEliminar(false);
-      setNotificacionAEliminar(null);
-    }
-  }, [notificacionAEliminar, eliminarNotificacion]);
+    if (!notificacionAEliminar?.id_notificacion) return;
 
-  // Función para eliminar todas las notificaciones
-  const handleEliminarTodas = useCallback(() => {
-    setMostrarConfirmacionEliminarTodas(true);
-  }, []);
+    await eliminarNotificacion(notificacionAEliminar.id_notificacion);
+    setMostrarConfirmacionEliminar(false);
+    setNotificacionAEliminar(null);
+  }, [notificacionAEliminar, eliminarNotificacion]);
 
   const confirmarEliminarTodas = useCallback(async () => {
     await eliminarTodasNotificacionesUsuario();
     setMostrarConfirmacionEliminarTodas(false);
   }, [eliminarTodasNotificacionesUsuario]);
 
-  // Formatear fecha
-  const formatearFecha = useCallback((fechaString) => {
-    if (!fechaString) return 'Fecha no disponible';
-    try {
-      const fecha = new Date(fechaString);
-      if (isNaN(fecha.getTime())) return 'Fecha inválida';
-      
-      return fecha.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-    } catch (error) {
-      console.error("Error formateando fecha:", fechaString, error);
-      return 'Fecha inválida';
-    }
-  }, []);
-
-  // Obtener color según estado de la notificación
-  const getColorEstado = useCallback((estado) => {
-    const estadoLower = estado?.toLowerCase() || 'no visto';
-    
-    switch(estadoLower) {
-      case 'visto':
-        return { bg: "#e8f5e9", color: "#388e3c", border: "#c8e6c9", texto: "Visto" };
-      case 'no visto':
-        return { bg: "#ffebee", color: "#d32f2f", border: "#ffcdd2", texto: "No visto" };
-      default:
-        return { bg: "#f5f5f5", color: "#616161", border: "#e0e0e0", texto: estado || "No visto" };
-    }
-  }, []);
-
-  // Resetear paginación cuando cambia la búsqueda
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [busqueda]);
-
-  // Si no hay usuario identificado
   if (!idUsuario && !cargando) {
     return (
       <div className="estado-inicial">
+        <div className="estado-icono">🔒</div>
         <h2>Usuario no identificado</h2>
-        <p>No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.</p>
+        <p>No se pudo obtener la información del usuario. Inicia sesión nuevamente.</p>
       </div>
     );
   }
@@ -188,30 +184,12 @@ const Notificaciones = () => {
     );
   }
 
-  if (!notificaciones.length && !cargando) {
-    return (
-      <div className="estado-inicial">
-        <h2>No tienes notificaciones</h2>
-        <p>No se encontraron notificaciones para tu cuenta.</p>
-        <button 
-          className="boton-nuevo-notificacion"
-          onClick={recargarNotificaciones}
-        >
-          ↻ Recargar
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="contenedor-notificaciones">
       {mensaje && (
-        <div className={`mensaje-api ${mensaje.includes("Error") ? "error" : "exito"}`}>
+        <div className={`mensaje-api ${mensaje.toLowerCase().includes("error") ? "error" : "exito"}`}>
           <p>{mensaje}</p>
-          <button 
-            className="boton-cerrar-mensaje"
-            onClick={limpiarMensaje}
-          >
+          <button className="boton-cerrar-mensaje" onClick={limpiarMensaje}>
             ×
           </button>
         </div>
@@ -219,46 +197,68 @@ const Notificaciones = () => {
 
       <div className="cabecera-notificaciones">
         <div className="titulo-notificaciones-con-boton">
+          <div>
+            <h2>Centro de Notificaciones</h2>
+            <p className="subtitulo-notificaciones">
+              Consulta, filtra y administra tus alertas del sistema.
+            </p>
+          </div>
+
           <div className="botones-superiores">
-            <button 
+            <button
               className="boton-nuevo-notificacion boton-secundario"
               onClick={recargarNotificaciones}
               disabled={cargando}
             >
               ↻ Actualizar
             </button>
-            {notificaciones.length > 0 && (
-              <button 
+
+          
+
+            {!!notificaciones.length && (
+              <button
                 className="boton-nuevo-notificacion boton-peligro"
-                onClick={handleEliminarTodas}
+                onClick={() => setMostrarConfirmacionEliminarTodas(true)}
                 disabled={cargando}
               >
-                🗑️ Eliminar Todas
+                🗑 Eliminar todas
               </button>
             )}
           </div>
         </div>
-        
+
+        <div className="resumen-notificaciones">
+          <div className="tarjeta-resumen-notificacion">
+            <span className="resumen-etiqueta">Total</span>
+            <strong>{totalNotificaciones}</strong>
+          </div>
+          <div className="tarjeta-resumen-notificacion tarjeta-pendientes">
+            <span className="resumen-etiqueta">No vistas</span>
+            <strong>{noLeidas}</strong>
+          </div>
+          <div className="tarjeta-resumen-notificacion tarjeta-vistas">
+            <span className="resumen-etiqueta">Vistas</span>
+            <strong>{totalVistas}</strong>
+          </div>
+        </div>
+
         <div className="controles-notificaciones">
           <div className="buscador-notificaciones">
             <input
               type="text"
-              placeholder="Buscar por mensaje, tipo, estado..."
+              placeholder="Buscar por mensaje, tipo, estado o ID..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="input-busqueda-notificaciones"
             />
           </div>
-          
+
           <div className="controles-paginacion-superior">
             <div className="seleccion-elementos-notificaciones">
               <span>Mostrar:</span>
-              <select 
-                value={elementosPorPagina} 
-                onChange={(e) => {
-                  setElementosPorPagina(Number(e.target.value));
-                  setPaginaActual(1);
-                }}
+              <select
+                value={elementosPorPagina}
+                onChange={(e) => setElementosPorPagina(Number(e.target.value))}
                 className="select-elementos-notificaciones"
               >
                 <option value="5">5</option>
@@ -267,162 +267,249 @@ const Notificaciones = () => {
                 <option value="50">50</option>
               </select>
             </div>
-            
+
             <div className="info-cantidad-notificaciones">
-              {notificacionesFiltradas.length} {notificacionesFiltradas.length === 1 ? 'notificación encontrada' : 'notificaciones encontradas'}
+              {notificacionesFiltradas.length}{" "}
+              {notificacionesFiltradas.length === 1
+                ? "notificación encontrada"
+                : "notificaciones encontradas"}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="contenedor-tabla-notificaciones">
-        <table className="tabla-notificaciones">
-          <thead>
-            <tr>
-              <th className="columna-id-notificacion">ID</th>
-              <th className="columna-tipo-notificacion">Tipo</th>
-              <th className="columna-mensaje-notificacion">Mensaje</th>
-              <th className="columna-estado-notificacion">Estado</th>
-              <th className="columna-fecha-notificacion">Fecha</th>
-              <th className="columna-acciones-notificacion">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {elementosActuales.map((notificacion) => {
-              const estadoInfo = getColorEstado(notificacion.estado);
-              
-              return (
-                <tr key={notificacion.id_notificacion} className="fila-notificacion">
-                  <td className="celda-id-notificacion">
-                    <div className="badge-id-notificacion">
-                      #{notificacion.id_notificacion}
-                    </div>
-                  </td>
-                  <td className="celda-tipo-notificacion">
-                    <div className="tipo-notificacion">
-                      {notificacion.tipo || 'Sin tipo'}
-                    </div>
-                  </td>
-                  <td className="celda-mensaje-notificacion">
-                    <div className="mensaje-notificacion" title={notificacion.mensaje}>
-                      {notificacion.mensaje && notificacion.mensaje.length > 60 ? 
-                        notificacion.mensaje.substring(0, 60) + '...' : 
-                        notificacion.mensaje || 'Sin mensaje'}
-                    </div>
-                  </td>
-                  <td className="celda-estado-notificacion">
-                    <div className="estado-notificacion" style={{ 
-                      backgroundColor: estadoInfo.bg,
-                      color: estadoInfo.color,
-                      borderColor: estadoInfo.border
-                    }}>
-                      {estadoInfo.texto}
-                    </div>
-                  </td>
-                  <td className="celda-fecha-notificacion">
-                    <div className="fecha-info-notificacion">
-                      {formatearFecha(notificacion.fecha)}
-                    </div>
-                  </td>
-                  <td className="celda-acciones-notificacion">
-                    <div className="botones-acciones-notificacion">
-                      <button 
-                        className="boton-ver-notificacion"
-                        onClick={() => handleVerDetalles(notificacion)}
-                        title="Ver detalles completos"
-                        disabled={cargando}
-                      >
-                        Ver
-                      </button>
-                      <button 
-                        className="boton-eliminar-notificacion"
-                        onClick={() => handleEliminarNotificacion(notificacion)}
-                        title="Eliminar notificación"
-                        disabled={cargando}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
+      {!notificaciones.length && !cargando ? (
+        <div className="estado-inicial estado-vacio-profesional">
+          <div className="estado-icono">🔔</div>
+          <h2>No tienes notificaciones</h2>
+          <p>Cuando ocurra alguna acción importante en el sistema, aparecerá aquí.</p>
+          <button className="boton-nuevo-notificacion" onClick={recargarNotificaciones}>
+            ↻ Recargar
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="contenedor-tabla-notificaciones">
+            <table className="tabla-notificaciones">
+              <thead>
+                <tr>
+                  <th className="columna-id-notificacion">ID</th>
+                  <th className="columna-tipo-notificacion">Tipo</th>
+                  <th className="columna-mensaje-notificacion">Mensaje</th>
+                  <th className="columna-estado-notificacion">Estado</th>
+                  <th className="columna-fecha-notificacion">Fecha</th>
+                  <th className="columna-acciones-notificacion">Acciones</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {elementosActuales.map((notificacion) => {
+                  const estadoInfo = getColorEstado(notificacion.estado);
 
-      {/* Modal de detalles de la notificación */}
+                  return (
+                    <tr
+                      key={notificacion.id_notificacion}
+                      className={`fila-notificacion ${
+                        normalizarEstado(notificacion.estado) !== "visto"
+                          ? "fila-no-vista"
+                          : ""
+                      }`}
+                    >
+                      <td className="celda-id-notificacion">
+                        <div className="badge-id-notificacion">
+                          #{notificacion.id_notificacion}
+                        </div>
+                      </td>
+
+                      <td className="celda-tipo-notificacion">
+                        <span className={`tipo-notificacion ${getClaseTipo(notificacion.tipo)}`}>
+                          {notificacion.tipo || "general"}
+                        </span>
+                      </td>
+
+                      <td className="celda-mensaje-notificacion">
+                        <div className="mensaje-notificacion" title={notificacion.mensaje}>
+                          {notificacion.mensaje?.length > 85
+                            ? `${notificacion.mensaje.substring(0, 85)}...`
+                            : notificacion.mensaje || "Sin mensaje"}
+                        </div>
+                      </td>
+
+                      <td className="celda-estado-notificacion">
+                        <div
+                          className="estado-notificacion"
+                          style={{
+                            backgroundColor: estadoInfo.bg,
+                            color: estadoInfo.color,
+                            borderColor: estadoInfo.border,
+                          }}
+                        >
+                          {estadoInfo.texto}
+                        </div>
+                      </td>
+
+                      <td className="celda-fecha-notificacion">
+                        <div className="fecha-info-notificacion">
+                          {formatearFecha(notificacion.fecha)}
+                        </div>
+                      </td>
+
+                      <td className="celda-acciones-notificacion">
+                        <div className="botones-acciones-notificacion">
+                          <button
+                            className="boton-ver-notificacion"
+                            onClick={() => handleVerDetalles(notificacion)}
+                            disabled={cargando}
+                          >
+                            Ver
+                          </button>
+                          <button
+                            className="boton-eliminar-notificacion"
+                            onClick={() => handleEliminarNotificacion(notificacion)}
+                            disabled={cargando}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPaginas > 1 && (
+            <div className="paginador-notificaciones">
+              <div className="info-paginacion-notificaciones">
+                Mostrando {indicePrimerElemento + 1} -{" "}
+                {Math.min(indiceUltimoElemento, notificacionesFiltradas.length)} de{" "}
+                {notificacionesFiltradas.length} notificaciones
+              </div>
+
+              <div className="controles-navegacion-notificaciones">
+                <button
+                  onClick={() => setPaginaActual((prev) => Math.max(1, prev - 1))}
+                  disabled={paginaActual === 1}
+                  className="boton-paginador-notificaciones"
+                >
+                  ← Anterior
+                </button>
+
+                <div className="numeros-pagina-notificaciones">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                    .slice(
+                      Math.max(0, paginaActual - 3),
+                      Math.max(0, paginaActual - 3) + 5
+                    )
+                    .map((numeroPagina) => (
+                      <button
+                        key={numeroPagina}
+                        onClick={() => setPaginaActual(numeroPagina)}
+                        className={`numero-pagina-notificaciones ${
+                          paginaActual === numeroPagina ? "activa" : ""
+                        }`}
+                      >
+                        {numeroPagina}
+                      </button>
+                    ))}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setPaginaActual((prev) => Math.min(totalPaginas, prev + 1))
+                  }
+                  disabled={paginaActual === totalPaginas}
+                  className="boton-paginador-notificaciones"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {mostrarModalDetalles && (
         <div className="modal-fondo-notificaciones" onClick={cerrarModalDetalles}>
-          <div className="modal-contenido-notificaciones modal-detalles" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-contenido-notificaciones modal-detalles"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-cabecera-notificaciones">
-              <h2>
-                Detalles de la Notificación #{notificacionDetallada?.id_notificacion}
-              </h2>
-              <button 
-                className="modal-cerrar-notificaciones"
-                onClick={cerrarModalDetalles}
-              >
+              <h2>Detalle de notificación</h2>
+              <button className="modal-cerrar-notificaciones" onClick={cerrarModalDetalles}>
                 ×
               </button>
             </div>
-            
+
             <div className="modal-cuerpo-notificaciones">
-              {notificacionDetallada ? (
+              {notificacionDetallada && (
                 <div className="detalles-simple-notificaciones">
                   <div className="detalle-grupo-notificaciones">
-                    <h3>Información de la Notificación</h3>
+                    <h3>Información general</h3>
+
                     <div className="detalle-fila-notificaciones">
-                      <span className="detalle-etiqueta">ID Notificación:</span>
-                      <span className="detalle-valor">#{notificacionDetallada.id_notificacion}</span>
+                      <span className="detalle-etiqueta">ID:</span>
+                      <span className="detalle-valor">
+                        #{notificacionDetallada.id_notificacion}
+                      </span>
                     </div>
+
                     <div className="detalle-fila-notificaciones">
-                      <span className="detalle-etiqueta">ID Usuario:</span>
-                      <span className="detalle-valor">{notificacionDetallada.id_usuario || 'N/A'}</span>
+                      <span className="detalle-etiqueta">Usuario:</span>
+                      <span className="detalle-valor">
+                        {notificacionDetallada.id_usuario || "N/A"}
+                      </span>
                     </div>
+
                     <div className="detalle-fila-notificaciones">
                       <span className="detalle-etiqueta">Tipo:</span>
-                      <span className="detalle-valor">{notificacionDetallada.tipo || 'No especificado'}</span>
+                      <span className="detalle-valor">
+                        <span
+                          className={`tipo-notificacion ${getClaseTipo(
+                            notificacionDetallada.tipo
+                          )}`}
+                        >
+                          {notificacionDetallada.tipo || "general"}
+                        </span>
+                      </span>
                     </div>
+
                     <div className="detalle-fila-notificaciones">
                       <span className="detalle-etiqueta">Estado:</span>
                       <span className="detalle-valor">
-                        <span className="badge-estado-detalle" style={{ 
-                          backgroundColor: getColorEstado(notificacionDetallada.estado).bg,
-                          color: getColorEstado(notificacionDetallada.estado).color
-                        }}>
+                        <span
+                          className="badge-estado-detalle"
+                          style={{
+                            backgroundColor: getColorEstado(notificacionDetallada.estado).bg,
+                            color: getColorEstado(notificacionDetallada.estado).color,
+                          }}
+                        >
                           {getColorEstado(notificacionDetallada.estado).texto}
                         </span>
                       </span>
                     </div>
+
                     <div className="detalle-fila-notificaciones">
                       <span className="detalle-etiqueta">Fecha:</span>
-                      <span className="detalle-valor">{formatearFecha(notificacionDetallada.fecha)}</span>
+                      <span className="detalle-valor">
+                        {formatearFecha(notificacionDetallada.fecha)}
+                      </span>
                     </div>
                   </div>
 
                   <div className="detalle-grupo-notificaciones">
-                    <h3>Mensaje Completo</h3>
+                    <h3>Mensaje completo</h3>
                     <div className="detalle-mensaje-completo">
-                      {notificacionDetallada.mensaje || 'No hay mensaje disponible'}
+                      {notificacionDetallada.mensaje || "No hay mensaje disponible"}
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="estado-error">
-                  <p>No se pudieron cargar los detalles de la notificación.</p>
-                  <button 
-                    className="boton-cerrar-detalles-notificaciones"
-                    onClick={cerrarModalDetalles}
-                  >
-                    Cerrar
-                  </button>
-                </div>
               )}
             </div>
-            
+
             <div className="modal-pie-notificaciones">
-              <button 
+              <button
                 className="boton-cerrar-detalles-notificaciones"
                 onClick={cerrarModalDetalles}
               >
@@ -433,60 +520,62 @@ const Notificaciones = () => {
         </div>
       )}
 
-      {/* Modal de confirmación para eliminar notificación específica */}
       {mostrarConfirmacionEliminar && (
         <div className="modal-fondo-notificaciones">
           <div className="modal-contenido-notificaciones modal-confirmacion">
             <div className="modal-cabecera-notificaciones">
-              <h2>Confirmar Eliminación</h2>
-              <button 
+              <h2>Confirmar eliminación</h2>
+              <button
                 className="modal-cerrar-notificaciones"
-                onClick={() => setMostrarConfirmacionEliminar(false)}
+                onClick={() => {
+                  setMostrarConfirmacionEliminar(false);
+                  setNotificacionAEliminar(null);
+                }}
               >
                 ×
               </button>
             </div>
-            
+
             <div className="modal-cuerpo-notificaciones">
-              <p>¿Estás seguro de que deseas eliminar esta notificación?</p>
+              <p>¿Deseas eliminar esta notificación?</p>
+
               <div className="notificacion-a-eliminar-detalle">
                 <div className="notificacion-eliminar-header">
-                  <span className="notificacion-id">Notificación #{notificacionAEliminar?.id_notificacion}</span>
-                  <span className="notificacion-estado" style={{ 
-                    backgroundColor: getColorEstado(notificacionAEliminar?.estado).bg,
-                    color: getColorEstado(notificacionAEliminar?.estado).color
-                  }}>
+                  <span className="notificacion-id">
+                    Notificación #{notificacionAEliminar?.id_notificacion}
+                  </span>
+                  <span
+                    className="notificacion-estado"
+                    style={{
+                      backgroundColor: getColorEstado(notificacionAEliminar?.estado).bg,
+                      color: getColorEstado(notificacionAEliminar?.estado).color,
+                    }}
+                  >
                     {getColorEstado(notificacionAEliminar?.estado).texto}
                   </span>
                 </div>
-                
+
                 <div className="notificacion-eliminar-info">
                   <div className="info-linea">
-                    <strong>Tipo:</strong> {notificacionAEliminar?.tipo || 'No especificado'}
-                  </div>
-                  <div className="info-linea">
-                    <strong>Estado:</strong> {notificacionAEliminar?.estado || 'No visto'}
-                  </div>
-                  <div className="info-linea">
-                    <strong>Fecha:</strong> {formatearFecha(notificacionAEliminar?.fecha)}
+                    <strong>Tipo:</strong> {notificacionAEliminar?.tipo || "general"}
                   </div>
                   <div className="info-linea mensaje-resumen">
-                    <strong>Mensaje:</strong> 
+                    <strong>Mensaje:</strong>
                     <div className="mensaje-texto">
-                      {notificacionAEliminar?.mensaje?.substring(0, 150) || 'Sin mensaje'}...
+                      {notificacionAEliminar?.mensaje || "Sin mensaje"}
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="advertencia-eliminar-notificaciones">
                 <span className="icono-advertencia">⚠️</span>
                 <span>Esta acción no se puede deshacer.</span>
               </div>
             </div>
-            
+
             <div className="modal-pie-notificaciones">
-              <button 
+              <button
                 className="boton-cancelar-notificaciones"
                 onClick={() => {
                   setMostrarConfirmacionEliminar(false);
@@ -496,150 +585,80 @@ const Notificaciones = () => {
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 className="boton-eliminar-confirmar-notificaciones"
                 onClick={confirmarEliminarNotificacion}
                 disabled={cargando}
               >
-                {cargando ? 'Eliminando...' : 'Eliminar'}
+                {cargando ? "Eliminando..." : "Eliminar"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal de confirmación para eliminar todas las notificaciones */}
       {mostrarConfirmacionEliminarTodas && (
         <div className="modal-fondo-notificaciones">
           <div className="modal-contenido-notificaciones modal-confirmacion">
             <div className="modal-cabecera-notificaciones">
-              <h2>Confirmar Eliminación de Todas las Notificaciones</h2>
-              <button 
+              <h2>Eliminar todas las notificaciones</h2>
+              <button
                 className="modal-cerrar-notificaciones"
                 onClick={() => setMostrarConfirmacionEliminarTodas(false)}
               >
                 ×
               </button>
             </div>
-            
+
             <div className="modal-cuerpo-notificaciones">
-              <p>¿Estás seguro de que deseas eliminar <strong>TODAS</strong> tus notificaciones?</p>
-              
+              <p>¿Deseas eliminar todas tus notificaciones?</p>
+
               <div className="info-eliminar-todas">
                 <div className="estadisticas-eliminar-todas">
                   <div className="estadistica-item">
-                    <span className="estadistica-numero">{notificaciones.length}</span>
-                    <span className="estadistica-label">Notificaciones totales</span>
+                    <span className="estadistica-numero">{totalNotificaciones}</span>
+                    <span className="estadistica-label">Totales</span>
                   </div>
                   <div className="estadistica-item">
-                    <span className="estadistica-numero" style={{color: '#d32f2f'}}>
-                      {notificaciones.filter(n => n.estado === 'no visto').length}
+                    <span className="estadistica-numero" style={{ color: "#ef6c00" }}>
+                      {noLeidas}
                     </span>
                     <span className="estadistica-label">No vistas</span>
                   </div>
                   <div className="estadistica-item">
-                    <span className="estadistica-numero" style={{color: '#388e3c'}}>
-                      {notificaciones.filter(n => n.estado === 'visto').length}
+                    <span className="estadistica-numero" style={{ color: "#2e7d32" }}>
+                      {totalVistas}
                     </span>
                     <span className="estadistica-label">Vistas</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="advertencia-eliminar-notificaciones advertencia-grande">
                 <span className="icono-advertencia">⚠️</span>
                 <div>
-                  <p><strong>Esta acción eliminará permanentemente:</strong></p>
-                  <ul>
-                    <li>Todas tus notificaciones ({notificaciones.length} elementos)</li>
-                    <li>Notificaciones no vistas ({notificaciones.filter(n => n.estado === 'no visto').length})</li>
-                    <li>Notificaciones vistas ({notificaciones.filter(n => n.estado === 'visto').length})</li>
-                  </ul>
-                  <p><strong>Esta acción no se puede deshacer.</strong></p>
+                  <p><strong>Esta acción eliminará permanentemente todos los registros.</strong></p>
+                  <p>No podrá deshacerse después.</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="modal-pie-notificaciones">
-              <button 
+              <button
                 className="boton-cancelar-notificaciones"
                 onClick={() => setMostrarConfirmacionEliminarTodas(false)}
                 disabled={cargando}
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 className="boton-eliminar-confirmar-notificaciones boton-peligro-grande"
                 onClick={confirmarEliminarTodas}
                 disabled={cargando}
               >
-                {cargando ? 'Eliminando...' : 'Eliminar Todas las Notificaciones'}
+                {cargando ? "Eliminando..." : "Eliminar todas"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Paginador */}
-      {totalPaginas > 1 && (
-        <div className="paginador-notificaciones">
-          <div className="info-paginacion-notificaciones">
-            Mostrando {indicePrimerElemento + 1} - {Math.min(indiceUltimoElemento, notificacionesFiltradas.length)} de {notificacionesFiltradas.length} notificaciones
-          </div>
-          
-          <div className="controles-navegacion-notificaciones">
-            <button 
-              onClick={() => setPaginaActual(prev => Math.max(1, prev - 1))} 
-              disabled={paginaActual === 1}
-              className="boton-paginador-notificaciones boton-anterior-notificaciones"
-            >
-              ← Anterior
-            </button>
-
-            <div className="numeros-pagina-notificaciones">
-              {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
-                let numeroPagina;
-                if (totalPaginas <= 5) {
-                  numeroPagina = i + 1;
-                } else if (paginaActual <= 3) {
-                  numeroPagina = i + 1;
-                } else if (paginaActual >= totalPaginas - 2) {
-                  numeroPagina = totalPaginas - 4 + i;
-                } else {
-                  numeroPagina = paginaActual - 2 + i;
-                }
-
-                return (
-                  <button
-                    key={numeroPagina}
-                    onClick={() => setPaginaActual(numeroPagina)}
-                    className={`numero-pagina-notificaciones ${paginaActual === numeroPagina ? 'activa' : ''}`}
-                  >
-                    {numeroPagina}
-                  </button>
-                );
-              })}
-              
-              {totalPaginas > 5 && paginaActual < totalPaginas - 2 && (
-                <>
-                  <span className="puntos-suspensivos-notificaciones">...</span>
-                  <button
-                    onClick={() => setPaginaActual(totalPaginas)}
-                    className={`numero-pagina-notificaciones ${paginaActual === totalPaginas ? 'activa' : ''}`}
-                  >
-                    {totalPaginas}
-                  </button>
-                </>
-              )}
-            </div>
-
-            <button 
-              onClick={() => setPaginaActual(prev => Math.min(totalPaginas, prev + 1))} 
-              disabled={paginaActual === totalPaginas}
-              className="boton-paginador-notificaciones boton-siguiente-notificaciones"
-            >
-              Siguiente →
-            </button>
           </div>
         </div>
       )}
