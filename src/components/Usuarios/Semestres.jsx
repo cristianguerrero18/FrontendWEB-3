@@ -43,7 +43,7 @@ import {
 import "../../css/semestres.css";
 import { useState, useEffect, useCallback } from "react";
 
-const API_URL = "http://localhost:4000";
+const API_URL = "https://proyectoweb-2-ir8x.onrender.com";
 
 const Semestres = () => {
   const {
