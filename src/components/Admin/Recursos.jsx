@@ -7,7 +7,7 @@ const Recursos = () => {
   const usuarioStorage = JSON.parse(localStorage.getItem("usuario") || "{}");
   const idUsuarioActual = usuarioStorage.id_usuario || 22;
   const nombreUsuarioActual = usuarioStorage.nombres_usuario
-    ? `${usuarioStorage.nombres_usuario} ${usuarioStorage.apellidos_usuario}`
+    ? `${usuarioStorage.nombres_usuario} ${usuarioStorage.apellidos_usuario || ""}`.trim()
     : "Administrador";
 
   const {
@@ -17,7 +17,9 @@ const Recursos = () => {
     usuarios,
     cargando,
     cargandoDetalle,
+    cargandoArchivo,
     recursoDetalle,
+    recursoArchivoMeta,
     mensaje,
     recargarRecursos,
     crearRecurso,
@@ -25,7 +27,11 @@ const Recursos = () => {
     eliminarRecurso,
     toggleEstadoRecurso,
     cargarRecursoDetalle,
+    cargarRecursoArchivoMeta,
+    abrirRecurso,
+    descargarRecurso,
     limpiarDetalle,
+    limpiarArchivoMeta,
     limpiarMensaje
   } = useRecursos();
 
@@ -88,18 +94,26 @@ const Recursos = () => {
     };
   }, [mostrarModal, mostrarModalDetalle, mostrarConfirmacionEliminar]);
 
+  useEffect(() => {
+    document.addEventListener("click", handleClickFueraDropdown);
+    return () => {
+      document.removeEventListener("click", handleClickFueraDropdown);
+    };
+  }, []);
+
   const esCategoriaLinks = () => {
     const categoriaSeleccionada = categorias.find(
-      (c) => c.id_categoria === recursoActual.id_categoria
+      (c) => Number(c.id_categoria) === Number(recursoActual.id_categoria)
     );
+
     return (
       categoriaSeleccionada?.nombre_categoria === "Links" ||
-      recursoActual.id_categoria === 4
+      Number(recursoActual.id_categoria) === 4
     );
   };
 
   const asignaturasFiltradas = asignaturas.filter((asignatura) =>
-    asignatura.nombre_asignatura
+    (asignatura.nombre_asignatura || "")
       .toLowerCase()
       .includes(busquedaAsignatura.toLowerCase())
   );
@@ -107,20 +121,23 @@ const Recursos = () => {
   const getNombreAsignaturaSeleccionada = () => {
     if (!filtroAsignatura) return "Todas las asignaturas";
     const asignatura = asignaturas.find(
-      (a) => a.id_asignatura === parseInt(filtroAsignatura)
+      (a) => Number(a.id_asignatura) === Number(filtroAsignatura)
     );
     return asignatura ? asignatura.nombre_asignatura : "Todas las asignaturas";
   };
 
   const recursosFiltrados = recursos.filter((recurso) => {
+    const textoBusqueda = busqueda.toLowerCase();
+
     const coincideBusqueda =
-      recurso.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-      recurso.tema.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (recurso.URL && recurso.URL.toLowerCase().includes(busqueda.toLowerCase()));
+      (recurso.titulo || "").toLowerCase().includes(textoBusqueda) ||
+      (recurso.tema || "").toLowerCase().includes(textoBusqueda) ||
+      (recurso.URL || "").toLowerCase().includes(textoBusqueda) ||
+      (recurso.PUBLIC_ID || "").toLowerCase().includes(textoBusqueda);
 
     const coincideAsignatura =
       filtroAsignatura === "" ||
-      recurso.id_asignatura === parseInt(filtroAsignatura);
+      Number(recurso.id_asignatura) === Number(filtroAsignatura);
 
     return coincideBusqueda && coincideAsignatura;
   });
@@ -131,7 +148,7 @@ const Recursos = () => {
     indicePrimerElemento,
     indiceUltimoElemento
   );
-  const totalPaginas = Math.ceil(recursosFiltrados.length / elementosPorPagina);
+  const totalPaginas = Math.max(1, Math.ceil(recursosFiltrados.length / elementosPorPagina));
 
   const cambiarPagina = (numeroPagina) => {
     setPaginaActual(numeroPagina);
@@ -175,16 +192,17 @@ const Recursos = () => {
   const handleEditarRecurso = (recurso) => {
     setRecursoActual({
       id_recurso: recurso.id_recurso,
-      titulo: recurso.titulo,
-      tema: recurso.tema,
+      titulo: recurso.titulo || "",
+      tema: recurso.tema || "",
       URL: recurso.URL || "",
       PUBLIC_ID: recurso.PUBLIC_ID || "",
       contador_reportes: recurso.contador_reportes || 0,
-      id_asignatura: recurso.id_asignatura,
+      id_asignatura: recurso.id_asignatura || "",
       id_categoria: recurso.id_categoria || 1,
       id_usuario: recurso.id_usuario || idUsuarioActual,
       activo: recurso.activo !== undefined ? recurso.activo : 1
     });
+
     setArchivoFormulario(null);
     setNombreArchivo("");
     setUrlManual(recurso.URL || "");
@@ -193,8 +211,9 @@ const Recursos = () => {
   };
 
   const handleVerDetalle = async (recurso) => {
-    const resultado = await cargarRecursoDetalle(recurso.id_recurso);
-    if (!resultado.error) {
+    const detalle = await cargarRecursoDetalle(recurso.id_recurso);
+    if (!detalle.error) {
+      await cargarRecursoArchivoMeta(recurso.id_recurso);
       setMostrarModalDetalle(true);
     }
   };
@@ -218,7 +237,7 @@ const Recursos = () => {
   };
 
   const handleArchivoSeleccionado = (e) => {
-    const archivo = e.target.files[0];
+    const archivo = e.target.files?.[0];
     if (archivo) {
       setArchivoFormulario(archivo);
       setNombreArchivo(archivo.name);
@@ -240,7 +259,7 @@ const Recursos = () => {
         alert("Por favor ingresa una URL válida para el enlace");
         return;
       }
-      datosRecurso.URL = urlManual;
+      datosRecurso.URL = urlManual.trim();
       datosRecurso.PUBLIC_ID = `link_${Date.now()}`;
     }
 
@@ -257,6 +276,7 @@ const Recursos = () => {
         datosRecurso,
         esCategoriaLinks() ? null : archivoFormulario
       );
+
       if (!resultado.error) {
         setMostrarModal(false);
         setArchivoFormulario(null);
@@ -270,10 +290,10 @@ const Recursos = () => {
     const { name, value } = e.target;
 
     if (name === "id_categoria") {
-      const nuevaCategoriaId = parseInt(value);
+      const nuevaCategoriaId = parseInt(value, 10);
       const esLinks =
-        categorias.find((c) => c.id_categoria === nuevaCategoriaId)
-          ?.nombre_categoria === "Links";
+        categorias.find((c) => Number(c.id_categoria) === nuevaCategoriaId)
+          ?.nombre_categoria === "Links" || nuevaCategoriaId === 4;
 
       if (esLinks) {
         setArchivoFormulario(null);
@@ -285,45 +305,73 @@ const Recursos = () => {
 
     setRecursoActual((prev) => ({
       ...prev,
-      [name]: name === "id_categoria" ? parseInt(value) : value
+      [name]:
+        name === "id_categoria" || name === "id_asignatura"
+          ? Number(value)
+          : value
     }));
   };
 
   const getNombreAsignatura = (idAsignatura) => {
-    const asignatura = asignaturas.find((a) => a.id_asignatura === idAsignatura);
+    const asignatura = asignaturas.find(
+      (a) => Number(a.id_asignatura) === Number(idAsignatura)
+    );
     return asignatura ? asignatura.nombre_asignatura : "Sin asignatura";
   };
 
   const getNombreCategoria = (idCategoria) => {
-    const categoria = categorias.find((c) => c.id_categoria === idCategoria);
+    const categoria = categorias.find(
+      (c) => Number(c.id_categoria) === Number(idCategoria)
+    );
     return categoria ? categoria.nombre_categoria : "Sin categoría";
   };
 
   const getNombreUsuario = (idUsuario) => {
-    const usuario = usuarios.find((u) => u.id_usuario === idUsuario);
+    const usuario = usuarios.find((u) => Number(u.id_usuario) === Number(idUsuario));
+
     if (usuario) {
       return `${usuario.nombres_usuario || usuario.nombre || ""} ${
         usuario.apellidos_usuario || usuario.apellido || ""
       }`.trim();
     }
-    if (idUsuario === idUsuarioActual) return nombreUsuarioActual;
+
+    if (Number(idUsuario) === Number(idUsuarioActual)) return nombreUsuarioActual;
     return "Usuario desconocido";
   };
 
-  const getTipoArchivo = (url) => {
-    if (!url) return "desconocido";
+  const getTipoDesdeExtension = (extension = "") => {
+    const ext = extension.toLowerCase();
 
-    const extension = url.split(".").pop().toLowerCase();
-
-    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) return "imagen";
-    if (["pdf"].includes(extension)) return "pdf";
-    if (["doc", "docx"].includes(extension)) return "word";
-    if (["xls", "xlsx"].includes(extension)) return "excel";
-    if (["ppt", "pptx"].includes(extension)) return "powerpoint";
-    if (["mp4", "avi", "mov", "mkv"].includes(extension)) return "video";
-    if (["mp3", "wav", "ogg"].includes(extension)) return "audio";
-    if (url.startsWith("http")) return "link";
+    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext)) return "imagen";
+    if (["pdf"].includes(ext)) return "pdf";
+    if (["doc", "docx"].includes(ext)) return "word";
+    if (["xls", "xlsx", "csv"].includes(ext)) return "excel";
+    if (["ppt", "pptx"].includes(ext)) return "powerpoint";
+    if (["mp4", "avi", "mov", "mkv", "webm"].includes(ext)) return "video";
+    if (["mp3", "wav", "ogg"].includes(ext)) return "audio";
+    if (["txt", "zip", "rar"].includes(ext)) return "archivo";
     return "archivo";
+  };
+
+  const getTipoArchivo = (recurso) => {
+    if (!recurso) return "archivo";
+
+    if (Number(recurso.id_categoria) === 4) return "link";
+
+    if (recurso.extension) {
+      return getTipoDesdeExtension(recurso.extension);
+    }
+
+    const url = recurso.URL || "";
+    if (!url) return "archivo";
+
+    try {
+      const cleanUrl = url.split("?")[0];
+      const extension = cleanUrl.split(".").pop()?.toLowerCase() || "";
+      return getTipoDesdeExtension(extension);
+    } catch {
+      return "archivo";
+    }
   };
 
   const getIconoArchivo = (tipo) => {
@@ -349,19 +397,42 @@ const Recursos = () => {
     }
   };
 
-  const copiarURL = (url) => {
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        alert("URL copiada al portapapeles");
-      })
-      .catch((err) => {
-        console.error("Error al copiar URL:", err);
-      });
+  const getNombreTipoArchivo = (tipo) => {
+    switch (tipo) {
+      case "link":
+        return "Enlace web";
+      case "imagen":
+        return "Imagen";
+      case "video":
+        return "Video";
+      case "pdf":
+        return "PDF";
+      case "word":
+        return "Documento";
+      case "excel":
+        return "Hoja de cálculo";
+      case "powerpoint":
+        return "Presentación";
+      case "audio":
+        return "Audio";
+      default:
+        return "Archivo";
+    }
+  };
+
+  const copiarTexto = async (texto, mensajeExito = "Texto copiado al portapapeles") => {
+    if (!texto) return;
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      alert(mensajeExito);
+    } catch (err) {
+      console.error("Error al copiar:", err);
+    }
   };
 
   const getNombreUsuarioFormulario = (idUsuario) => {
-    if (idUsuario === idUsuarioActual) {
+    if (Number(idUsuario) === Number(idUsuarioActual)) {
       return `${nombreUsuarioActual} (Tú)`;
     }
     return getNombreUsuario(idUsuario);
@@ -369,7 +440,10 @@ const Recursos = () => {
 
   const formatearFecha = (fechaString) => {
     if (!fechaString) return "No disponible";
+
     const fecha = new Date(fechaString);
+    if (Number.isNaN(fecha.getTime())) return "No disponible";
+
     return fecha.toLocaleDateString("es-ES", {
       year: "numeric",
       month: "long",
@@ -382,6 +456,7 @@ const Recursos = () => {
   const cerrarModalDetalle = () => {
     setMostrarModalDetalle(false);
     limpiarDetalle();
+    limpiarArchivoMeta();
   };
 
   const limpiarFiltros = () => {
@@ -393,7 +468,7 @@ const Recursos = () => {
   };
 
   const seleccionarAsignatura = (idAsignatura) => {
-    setFiltroAsignatura(idAsignatura.toString());
+    setFiltroAsignatura(idAsignatura ? idAsignatura.toString() : "");
     setBusquedaAsignatura("");
     setMostrarOpcionesAsignatura(false);
     setPaginaActual(1);
@@ -405,12 +480,13 @@ const Recursos = () => {
     }
   };
 
-  useEffect(() => {
-    document.addEventListener("click", handleClickFueraDropdown);
-    return () => {
-      document.removeEventListener("click", handleClickFueraDropdown);
-    };
-  }, []);
+  const handleAbrirArchivo = async (idRecurso) => {
+    await abrirRecurso(idRecurso);
+  };
+
+  const handleDescargarArchivo = async (idRecurso) => {
+    await descargarRecurso(idRecurso);
+  };
 
   if (cargando && !recursos.length) {
     return (
@@ -436,7 +512,7 @@ const Recursos = () => {
   return (
     <div className="contenedor-recursos recursos-pro">
       {mensaje && (
-        <div className={`mensaje-api ${mensaje.includes("Error") ? "error" : "exito"}`}>
+        <div className={`mensaje-api ${mensaje.toLowerCase().includes("error") ? "error" : "exito"}`}>
           <p>{mensaje}</p>
           <button className="boton-cerrar-mensaje" onClick={limpiarMensaje}>
             ×
@@ -460,8 +536,6 @@ const Recursos = () => {
           </button>
         </div>
 
-      
-
         <div className="controles-recursos controles-recursos-pro">
           <div className="filtros-recursos filtros-recursos-pro">
             <div className="filtro-bloque filtro-busqueda-principal">
@@ -469,7 +543,7 @@ const Recursos = () => {
               <div className="buscador-recursos">
                 <input
                   type="text"
-                  placeholder="Buscar por título, tema o URL"
+                  placeholder="Buscar por título, tema, URL o public_id"
                   value={busqueda}
                   onChange={(e) => {
                     setBusqueda(e.target.value);
@@ -577,17 +651,13 @@ const Recursos = () => {
       </div>
 
       <div className="contenedor-tabla-recursos tabla-recursos-pro">
-        <div className="tabla-recursos-toolbar">
-          
-        </div>
-
         <table className="tabla-recursos">
           <thead>
             <tr>
               <th className="columna-id-recurso">ID</th>
               <th className="columna-titulo-recurso">Título</th>
               <th className="columna-tema-recurso">Tema</th>
-              <th className="columna-url-recurso">URL</th>
+              <th className="columna-url-recurso">Archivo / enlace</th>
               <th className="columna-tipo-recurso">Tipo</th>
               <th className="columna-asignatura-recurso">Asignatura</th>
               <th className="columna-categoria-recurso">Categoría</th>
@@ -597,18 +667,23 @@ const Recursos = () => {
               <th className="columna-acciones-recurso">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
             {elementosActuales.map((recurso) => {
-              const tipoArchivo = getTipoArchivo(recurso.URL);
+              const tipoArchivo = getTipoArchivo(recurso);
               const iconoArchivo = getIconoArchivo(tipoArchivo);
-              const fecha = new Date(recurso.fecha_subida || recurso.fecha_creacion || new Date());
+
+              const fecha = new Date(
+                recurso.fecha_subida || recurso.fecha_creacion || new Date()
+              );
+
               const fechaFormateada = fecha.toLocaleDateString("es-ES", {
                 year: "numeric",
                 month: "short",
                 day: "numeric"
               });
 
-              const estaActivo = recurso.activo !== undefined ? recurso.activo === 1 : true;
+              const estaActivo = recurso.activo !== undefined ? Number(recurso.activo) === 1 : true;
 
               return (
                 <tr
@@ -622,7 +697,7 @@ const Recursos = () => {
                   <td className="celda-titulo-recurso">
                     <div className="titulo-recurso">
                       <span className="titulo-recurso-principal">{recurso.titulo}</span>
-                      {recurso.contador_reportes > 0 && (
+                      {Number(recurso.contador_reportes) > 0 && (
                         <span className="badge-reportes">
                           ⚠️ {recurso.contador_reportes} reporte(s)
                         </span>
@@ -632,60 +707,60 @@ const Recursos = () => {
 
                   <td className="celda-tema-recurso">
                     <div className="tema-recurso" title={recurso.tema}>
-                      {recurso.tema.length > 50
-                        ? recurso.tema.substring(0, 50) + "..."
+                      {(recurso.tema || "").length > 50
+                        ? `${recurso.tema.substring(0, 50)}...`
                         : recurso.tema}
                     </div>
                   </td>
 
                   <td className="celda-url-recurso">
-                    {recurso.URL ? (
+                    {Number(recurso.id_categoria) === 4 ? (
                       <div className="url-info">
                         <button
-                          onClick={() => copiarURL(recurso.URL)}
+                          onClick={() => copiarTexto(recurso.URL, "URL copiada al portapapeles")}
                           className="boton-copiar-url"
                           title="Copiar URL"
                         >
                           📋
                         </button>
+
                         <span
                           className="texto-url"
                           title={recurso.URL}
-                          onClick={() => window.open(recurso.URL, "_blank")}
+                          onClick={() => window.open(recurso.URL, "_blank", "noopener,noreferrer")}
                           style={{ cursor: "pointer", color: "#1976d2" }}
                         >
-                          {recurso.URL.length > 30
-                            ? recurso.URL.substring(0, 30) + "..."
+                          {(recurso.URL || "").length > 30
+                            ? `${recurso.URL.substring(0, 30)}...`
                             : recurso.URL}
                         </span>
                       </div>
                     ) : (
-                      <span className="sin-url">Sin URL</span>
+                      <div className="url-info">
+                        <button
+                          onClick={() => handleAbrirArchivo(recurso.id_recurso)}
+                          className="boton-copiar-url"
+                          title="Abrir archivo"
+                        >
+                          👁
+                        </button>
+
+                        <span
+                          className="texto-url"
+                          title="Abrir archivo desde el backend"
+                          onClick={() => handleAbrirArchivo(recurso.id_recurso)}
+                          style={{ cursor: "pointer", color: "#1976d2" }}
+                        >
+                          {recurso.titulo || "Abrir archivo"}
+                        </span>
+                      </div>
                     )}
                   </td>
 
                   <td className="celda-tipo-recurso">
                     <div className="tipo-info">
                       <span className="icono-tipo">{iconoArchivo}</span>
-                      <span className="nombre-tipo">
-                        {tipoArchivo === "link"
-                          ? "Enlace Web"
-                          : tipoArchivo === "imagen"
-                          ? "Imagen"
-                          : tipoArchivo === "video"
-                          ? "Video"
-                          : tipoArchivo === "pdf"
-                          ? "PDF"
-                          : tipoArchivo === "word"
-                          ? "Documento"
-                          : tipoArchivo === "excel"
-                          ? "Hoja de cálculo"
-                          : tipoArchivo === "powerpoint"
-                          ? "Presentación"
-                          : tipoArchivo === "audio"
-                          ? "Audio"
-                          : "Archivo"}
-                      </span>
+                      <span className="nombre-tipo">{getNombreTipoArchivo(tipoArchivo)}</span>
                     </div>
                   </td>
 
@@ -701,7 +776,7 @@ const Recursos = () => {
 
                   <td className="celda-usuario-recurso">
                     <div className="usuario-info">
-                      {recurso.id_usuario === idUsuarioActual ? (
+                      {Number(recurso.id_usuario) === Number(idUsuarioActual) ? (
                         <span className="usuario-actual">
                           {getNombreUsuario(recurso.id_usuario)} <em>(Tú)</em>
                         </span>
@@ -738,6 +813,30 @@ const Recursos = () => {
                       >
                         👁
                       </button>
+
+                      {Number(recurso.id_categoria) !== 4 && (
+                        <button
+                          className="boton-ver-detalle boton-accion-tabla"
+                          onClick={() => handleDescargarArchivo(recurso.id_recurso)}
+                          title="Descargar archivo"
+                          disabled={cargandoArchivo}
+                        >
+                          ⬇
+                        </button>
+                      )}
+
+                      {Number(recurso.id_categoria) === 4 && (
+                        <button
+                          className="boton-ver-detalle boton-accion-tabla"
+                          onClick={() =>
+                            window.open(recurso.URL, "_blank", "noopener,noreferrer")
+                          }
+                          title="Abrir enlace"
+                        >
+                          🔗
+                        </button>
+                      )}
+
                       <button
                         className="boton-editar-recurso boton-accion-tabla"
                         onClick={() => handleEditarRecurso(recurso)}
@@ -745,6 +844,7 @@ const Recursos = () => {
                       >
                         Editar
                       </button>
+
                       <button
                         className="boton-eliminar-recurso boton-accion-tabla"
                         onClick={() => handleEliminarRecurso(recurso)}
@@ -786,7 +886,7 @@ const Recursos = () => {
                     </div>
 
                     <div className="campo-formulario-recursos">
-                      <label>URL actual:</label>
+                      <label>Archivo / URL actual:</label>
                       {recursoActual.URL ? (
                         <div className="url-actual-info">
                           <input
@@ -795,23 +895,36 @@ const Recursos = () => {
                             disabled
                             className="input-formulario-recursos disabled"
                           />
+
                           <button
                             type="button"
                             className="boton-copiar-modal"
-                            onClick={() => copiarURL(recursoActual.URL)}
+                            onClick={() => copiarTexto(recursoActual.URL, "URL copiada al portapapeles")}
                             title="Copiar URL"
                           >
                             📋
                           </button>
-                          <a
-                            href={recursoActual.URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="enlace-archivo-modal"
-                            title="Abrir recurso"
-                          >
-                            🔗
-                          </a>
+
+                          {Number(recursoActual.id_categoria) === 4 ? (
+                            <a
+                              href={recursoActual.URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="enlace-archivo-modal"
+                              title="Abrir enlace"
+                            >
+                              🔗
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              className="enlace-archivo-modal"
+                              title="Abrir archivo"
+                              onClick={() => handleAbrirArchivo(recursoActual.id_recurso)}
+                            >
+                              👁
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <span className="sin-url-modal">Sin URL configurada</span>
@@ -920,9 +1033,9 @@ const Recursos = () => {
                               onChange={handleArchivoSeleccionado}
                               className="input-archivo-recursos"
                               accept={
-                                recursoActual.id_categoria === 1
+                                Number(recursoActual.id_categoria) === 1
                                   ? ".jpg,.jpeg,.png,.gif,.webp"
-                                  : recursoActual.id_categoria === 3
+                                  : Number(recursoActual.id_categoria) === 3
                                   ? ".mp4,.avi,.mov,.mkv,.webm"
                                   : ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
                               }
@@ -932,10 +1045,10 @@ const Recursos = () => {
                               <span className="icono-subida">📁</span>
                               <span>Haz clic para seleccionar un archivo</span>
                               <small className="texto-ayuda-archivo">
-                                {recursoActual.id_categoria === 1
+                                {Number(recursoActual.id_categoria) === 1
                                   ? "Formatos permitidos: JPG, PNG, GIF, WEBP"
-                                  : recursoActual.id_categoria === 3
-                                  ? "Formatos permitidos: MP4, AVI, MOV, MKV"
+                                  : Number(recursoActual.id_categoria) === 3
+                                  ? "Formatos permitidos: MP4, AVI, MOV, MKV, WEBM"
                                   : "Formatos permitidos: PDF, Word, Excel, PowerPoint, TXT, ZIP"}
                               </small>
                             </label>
@@ -943,13 +1056,14 @@ const Recursos = () => {
                         ) : (
                           <div className="archivo-seleccionado">
                             <span className="nombre-archivo">
-                              {recursoActual.id_categoria === 1
+                              {Number(recursoActual.id_categoria) === 1
                                 ? "🖼️"
-                                : recursoActual.id_categoria === 3
+                                : Number(recursoActual.id_categoria) === 3
                                 ? "🎬"
                                 : "📄"}{" "}
                               {nombreArchivo}
                             </span>
+
                             <button
                               type="button"
                               className="boton-quitar-archivo"
@@ -974,9 +1088,10 @@ const Recursos = () => {
                       className="input-formulario-recursos disabled"
                       style={{ backgroundColor: "#f0f8ff", color: "#2c3e50" }}
                     />
+
                     <input type="hidden" name="id_usuario" value={recursoActual.id_usuario} />
 
-                    {modoEdicion && recursoActual.id_usuario !== idUsuarioActual && (
+                    {modoEdicion && Number(recursoActual.id_usuario) !== Number(idUsuarioActual) && (
                       <span className="info-usuario-original">
                         ⓘ Este recurso fue subido originalmente por otro usuario
                       </span>
@@ -1003,9 +1118,9 @@ const Recursos = () => {
                       ) : (
                         <>
                           <span className="icono-alerta">
-                            {recursoActual.id_categoria === 1
+                            {Number(recursoActual.id_categoria) === 1
                               ? "🖼️"
-                              : recursoActual.id_categoria === 3
+                              : Number(recursoActual.id_categoria) === 3
                               ? "🎬"
                               : "📄"}
                           </span>
@@ -1027,13 +1142,14 @@ const Recursos = () => {
                 >
                   Cancelar
                 </button>
+
                 <button
                   type="submit"
                   className="boton-guardar-recursos"
                   disabled={
                     cargando ||
                     (!modoEdicion && !esCategoriaLinks() && !archivoFormulario) ||
-                    (!modoEdicion && esCategoriaLinks() && !urlManual)
+                    (!modoEdicion && esCategoriaLinks() && !urlManual.trim())
                   }
                 >
                   {cargando ? "Procesando..." : modoEdicion ? "Actualizar" : "Subir recurso"}
@@ -1064,12 +1180,15 @@ const Recursos = () => {
                 <div className="modal-cuerpo-recursos cuerpo-detalle">
                   <div className="cabecera-detalle">
                     <h3 className="titulo-detalle">{recursoDetalle.titulo}</h3>
+
                     <div className="badges-detalle">
-                      <span className={`badge-estado ${recursoDetalle.activo === 1 ? "activo" : "inactivo"}`}>
-                        {recursoDetalle.activo === 1 ? "Activo ✓" : "Inactivo ✗"}
+                      <span className={`badge-estado ${Number(recursoDetalle.activo) === 1 ? "activo" : "inactivo"}`}>
+                        {Number(recursoDetalle.activo) === 1 ? "Activo ✓" : "Inactivo ✗"}
                       </span>
+
                       <span className="badge-id">ID: {recursoDetalle.id_recurso}</span>
-                      {recursoDetalle.contador_reportes > 0 && (
+
+                      {Number(recursoDetalle.contador_reportes) > 0 && (
                         <span className="badge-reportes-detalle">
                           ⚠️ {recursoDetalle.contador_reportes} reporte(s)
                         </span>
@@ -1080,35 +1199,88 @@ const Recursos = () => {
                   <div className="grid-detalle">
                     <div className="info-principal">
                       <h4>Información principal</h4>
+
                       <div className="campo-detalle">
                         <label>Tema:</label>
                         <p className="valor-detalle">{recursoDetalle.tema}</p>
                       </div>
+
                       <div className="campo-detalle">
-                        <label>URL:</label>
+                        <label>Archivo / URL:</label>
+
                         <div className="url-detalle">
-                          <span className="valor-url" title={recursoDetalle.URL}>
-                            {recursoDetalle.URL?.substring(0, 60)}...
+                          <span
+                            className="valor-url"
+                            title={recursoDetalle.URL || "Archivo gestionado por backend"}
+                          >
+                            {Number(recursoDetalle.id_categoria) === 4
+                              ? recursoDetalle.URL
+                                ? recursoDetalle.URL.length > 60
+                                  ? `${recursoDetalle.URL.substring(0, 60)}...`
+                                  : recursoDetalle.URL
+                                : "Sin URL"
+                              : recursoArchivoMeta?.nombre_descarga || recursoDetalle.titulo}
                           </span>
+
                           <div className="botones-url">
-                            <button
-                              className="boton-copiar-detalle"
-                              onClick={() => copiarURL(recursoDetalle.URL)}
-                              title="Copiar URL"
-                            >
-                              📋 Copiar
-                            </button>
-                            <a
-                              href={recursoDetalle.URL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="boton-abrir-detalle"
-                            >
-                              🔗 Abrir
-                            </a>
+                            {Number(recursoDetalle.id_categoria) === 4 ? (
+                              <>
+                                <button
+                                  className="boton-copiar-detalle"
+                                  onClick={() =>
+                                    copiarTexto(recursoDetalle.URL, "URL copiada al portapapeles")
+                                  }
+                                  title="Copiar URL"
+                                >
+                                  📋 Copiar
+                                </button>
+
+                                <a
+                                  href={recursoDetalle.URL}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="boton-abrir-detalle"
+                                >
+                                  🔗 Abrir
+                                </a>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="boton-copiar-detalle"
+                                  onClick={() =>
+                                    copiarTexto(
+                                      recursoArchivoMeta?.nombre_descarga || recursoDetalle.titulo,
+                                      "Nombre del archivo copiado"
+                                    )
+                                  }
+                                  title="Copiar nombre"
+                                >
+                                  📋 Copiar
+                                </button>
+
+                                <button
+                                  className="boton-abrir-detalle"
+                                  onClick={() => handleAbrirArchivo(recursoDetalle.id_recurso)}
+                                  type="button"
+                                >
+                                  👁 Ver
+                                </button>
+
+                                <button
+                                  className="boton-abrir-detalle"
+                                  onClick={() => handleDescargarArchivo(recursoDetalle.id_recurso)}
+                                  type="button"
+                                  disabled={cargandoArchivo}
+                                >
+                                  ⬇ Descargar
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
+
                       {recursoDetalle.PUBLIC_ID && (
                         <div className="campo-detalle">
                           <label>Public ID:</label>
@@ -1119,36 +1291,63 @@ const Recursos = () => {
 
                     <div className="info-clasificacion">
                       <h4>Clasificación</h4>
+
                       <div className="campo-detalle">
                         <label>Asignatura:</label>
                         <p className="valor-detalle">{recursoDetalle.asignatura}</p>
                       </div>
+
                       <div className="campo-detalle">
                         <label>Categoría:</label>
                         <p className="valor-detalle">{recursoDetalle.categoria}</p>
                       </div>
+
                       <div className="campo-detalle">
                         <label>Tipo de archivo:</label>
                         <p className="valor-detalle">
                           <span className="icono-tipo-detalle">
-                            {getIconoArchivo(getTipoArchivo(recursoDetalle.URL))}
-                          </span>
-                          {getTipoArchivo(recursoDetalle.URL)}
+                            {getIconoArchivo(
+                              Number(recursoDetalle.id_categoria) === 4
+                                ? "link"
+                                : getTipoArchivo({
+                                    ...recursoDetalle,
+                                    extension: recursoArchivoMeta?.extension
+                                  })
+                            )}
+                          </span>{" "}
+                          {Number(recursoDetalle.id_categoria) === 4
+                            ? "Enlace web"
+                            : recursoArchivoMeta?.extension
+                            ? `${getNombreTipoArchivo(getTipoArchivo({
+                                ...recursoDetalle,
+                                extension: recursoArchivoMeta.extension
+                              }))} (.${recursoArchivoMeta.extension})`
+                            : getNombreTipoArchivo(getTipoArchivo(recursoDetalle))}
                         </p>
                       </div>
+
+                      {recursoArchivoMeta?.mime_type && Number(recursoDetalle.id_categoria) !== 4 && (
+                        <div className="campo-detalle">
+                          <label>MIME type:</label>
+                          <p className="valor-detalle">{recursoArchivoMeta.mime_type}</p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="info-usuario">
                       <h4>Información del usuario</h4>
+
                       <div className="campo-detalle">
                         <label>Subido por:</label>
                         <p className="valor-detalle">{recursoDetalle.usuario}</p>
                       </div>
+
                       <div className="campo-detalle">
                         <label>ID Usuario:</label>
                         <p className="valor-detalle">{recursoDetalle.id_usuario}</p>
                       </div>
-                      {recursoDetalle.id_usuario === idUsuarioActual && (
+
+                      {Number(recursoDetalle.id_usuario) === Number(idUsuarioActual) && (
                         <div className="campo-detalle">
                           <span className="usuario-actual-detalle">
                             ✓ Este recurso fue subido por ti
@@ -1167,6 +1366,7 @@ const Recursos = () => {
                             <span className="label-estadistica">Likes</span>
                           </div>
                         </div>
+
                         <div className="estadistica">
                           <span className="icono-estadistica">👎</span>
                           <div>
@@ -1174,6 +1374,7 @@ const Recursos = () => {
                             <span className="label-estadistica">Dislikes</span>
                           </div>
                         </div>
+
                         <div className="estadistica">
                           <span className="icono-estadistica">💬</span>
                           <div>
@@ -1199,11 +1400,13 @@ const Recursos = () => {
                                 {formatearFecha(reporte.fecha_reporte)}
                               </span>
                             </div>
+
                             <div className="info-adicional-reporte">
                               <span className="id-reporte">
                                 <strong>ID Reporte:</strong> {reporte.id_reporte}
                               </span>
-                              {reporte.id_usuario !== null && (
+
+                              {reporte.id_usuario !== null && reporte.id_usuario !== undefined && (
                                 <span className="id-usuario-reportero">
                                   <strong>ID Usuario Reportero:</strong> {reporte.id_usuario}
                                 </span>
@@ -1253,6 +1456,7 @@ const Recursos = () => {
                   >
                     Editar recurso
                   </button>
+
                   <button
                     type="button"
                     className="boton-cerrar-detalle"
@@ -1288,18 +1492,23 @@ const Recursos = () => {
                 <p><strong>Subido por:</strong> {getNombreUsuario(recursoAEliminar?.id_usuario)}</p>
                 <p><strong>Asignatura:</strong> {getNombreAsignatura(recursoAEliminar?.id_asignatura)}</p>
                 <p><strong>Categoría:</strong> {getNombreCategoria(recursoAEliminar?.id_categoria)}</p>
-                <p><strong>Tipo:</strong> {getTipoArchivo(recursoAEliminar?.URL)}</p>
+                <p><strong>Tipo:</strong> {getNombreTipoArchivo(getTipoArchivo(recursoAEliminar))}</p>
               </div>
 
-              {recursoAEliminar?.URL && (
+              {recursoAEliminar?.URL && Number(recursoAEliminar.id_categoria) === 4 && (
                 <div className="url-eliminar">
                   <p>
                     <strong>URL:</strong>{" "}
-                    <span className="texto-url">{recursoAEliminar.URL.substring(0, 50)}...</span>
+                    <span className="texto-url">
+                      {recursoAEliminar.URL.length > 50
+                        ? `${recursoAEliminar.URL.substring(0, 50)}...`
+                        : recursoAEliminar.URL}
+                    </span>
                   </p>
+
                   <button
                     className="boton-copiar-pequeno"
-                    onClick={() => copiarURL(recursoAEliminar.URL)}
+                    onClick={() => copiarTexto(recursoAEliminar.URL, "URL copiada al portapapeles")}
                   >
                     📋 Copiar URL
                   </button>
@@ -1307,13 +1516,10 @@ const Recursos = () => {
               )}
 
               <p className="advertencia-eliminar">
-                ⚠️ Esta acción
-                {recursoAEliminar?.URL?.includes("cloudinary")
-                  ? " eliminará permanentemente el recurso y su archivo asociado en Cloudinary."
-                  : " eliminará permanentemente el recurso."}
+                ⚠️ Esta acción eliminará permanentemente el recurso.
               </p>
 
-              {recursoAEliminar?.contador_reportes > 0 && (
+              {Number(recursoAEliminar?.contador_reportes) > 0 && (
                 <div className="alerta-reportes">
                   ⚠️ Este recurso tiene {recursoAEliminar.contador_reportes} reporte(s)
                 </div>
@@ -1331,6 +1537,7 @@ const Recursos = () => {
               >
                 Cancelar
               </button>
+
               <button
                 className="boton-eliminar-confirmar"
                 onClick={confirmarEliminarRecurso}
@@ -1345,7 +1552,7 @@ const Recursos = () => {
 
       <div className="paginador-recursos paginador-recursos-pro">
         <div className="info-paginacion-recursos">
-          Mostrando {indicePrimerElemento + 1} -{" "}
+          Mostrando {recursosFiltrados.length === 0 ? 0 : indicePrimerElemento + 1} -{" "}
           {Math.min(indiceUltimoElemento, recursosFiltrados.length)} de{" "}
           {recursosFiltrados.length} recursos
         </div>
@@ -1362,6 +1569,7 @@ const Recursos = () => {
           <div className="numeros-pagina-recursos">
             {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
               let numeroPagina;
+
               if (totalPaginas <= 5) {
                 numeroPagina = i + 1;
               } else if (paginaActual <= 3) {
