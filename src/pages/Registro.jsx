@@ -573,7 +573,7 @@ export default function Registro() {
                 <div className="mt-1">
                   {!fieldValid.correoFormato ? (
                     <p className="text-xs text-red-600">
-                      Formato de correo inválido. Usa @uts.edu.co, @correo.uts.edu.co o @proton.me
+                      Formato de correo inválido. Usa @uts.edu.co, @correo.uts.edu.co 
                     </p>
                   ) : correoExistente ? (
                     <p className="text-xs text-red-600">Este correo ya está registrado</p>
