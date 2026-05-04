@@ -1,166 +1,207 @@
+// URL base del backend desplegado en Render.
+// Si el dominio del backend cambia, solo se modifica esta constante.
 const API_URL = "https://proyectoweb-2-ir8x.onrender.com";
 
-// ======================
-// REPORTES
-// ======================
+// =====================================================
+// CONFIGURACIÓN GENERAL
+// =====================================================
 
-// Obtener todos los reportes
+/**
+ * Obtiene el token JWT almacenado en localStorage.
+ * Se usa para consumir rutas protegidas del backend.
+ */
+const getToken = () => localStorage.getItem("token");
+
+/**
+ * Genera los encabezados necesarios para consumir rutas protegidas.
+ * Incluye el tipo de contenido JSON y el token JWT del usuario autenticado.
+ */
+const authHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${getToken()}`,
+});
+
+/**
+ * Maneja respuestas del backend que pueden venir como JSON o texto.
+ * Retorna una estructura controlada cuando ocurre un error.
+ */
+const manejarRespuesta = async (res) => {
+  let data = null;
+
+  try {
+    data = await res.json();
+  } catch {
+    data = await res.text().catch(() => null);
+  }
+
+  if (!res.ok) {
+    return {
+      error: true,
+      mensaje:
+        data?.mensaje ||
+        data?.error ||
+        data ||
+        `Error HTTP ${res.status}`,
+      status: res.status,
+    };
+  }
+
+  return data;
+};
+
+// =====================================================
+// SERVICIOS DE REPORTES
+// =====================================================
+
+/**
+ * Obtiene todos los reportes registrados en el sistema.
+ * Generalmente se usa desde el panel administrativo.
+ */
 export const getReportes = async () => {
   try {
-    const token = localStorage.getItem("token");
     const res = await fetch(`${API_URL}/api/reportes`, {
       method: "GET",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+
+      // Ruta protegida: requiere token JWT válido
+      headers: authHeaders(),
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error en getReportes:", errorText);
-      throw new Error(`Error ${res.status}: ${errorText}`);
-    }
-    return await res.json();
+    return await manejarRespuesta(res);
   } catch (error) {
     console.error("Error en getReportes:", error.message);
-    return { error: true, mensaje: error.message };
+
+    return {
+      error: true,
+      mensaje: error.message,
+    };
   }
 };
 
-// Obtener reportes por recurso
+/**
+ * Obtiene los reportes asociados a un recurso específico.
+ */
 export const getReportesPorRecurso = async (id_recurso) => {
   try {
-    const token = localStorage.getItem("token");
     const res = await fetch(`${API_URL}/api/reportes/recurso/${id_recurso}`, {
       method: "GET",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+      headers: authHeaders(),
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error en getReportesPorRecurso:", errorText);
-      throw new Error(`Error ${res.status}: ${errorText}`);
-    }
-    return await res.json();
+    return await manejarRespuesta(res);
   } catch (error) {
     console.error("Error en getReportesPorRecurso:", error.message);
-    return { error: true, mensaje: error.message };
+
+    return {
+      error: true,
+      mensaje: error.message,
+    };
   }
 };
 
-// Crear reporte (POST) - CORREGIDO: ahora acepta parámetros separados
+/**
+ * Crea un nuevo reporte sobre un recurso.
+ * Recibe el ID del recurso y el motivo del reporte.
+ */
 export const postReporte = async (id_recurso, motivo) => {
   try {
-    const token = localStorage.getItem("token");
-    
-    // Verificar que el token existe
+    const token = getToken();
+
+    // Valida que exista un token antes de enviar el reporte
     if (!token) {
-      return { error: true, mensaje: "No hay token de autenticación" };
+      return {
+        error: true,
+        mensaje: "No hay token de autenticación",
+      };
     }
 
     const res = await fetch(`${API_URL}/api/reportes`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ 
-        id_recurso, 
+
+      // Ruta protegida: requiere autenticación para registrar reportes
+      headers: authHeaders(),
+
+      // Envía los datos principales del reporte al backend
+      body: JSON.stringify({
+        id_recurso,
         motivo,
-        fecha_reporte: new Date().toISOString()
+        fecha_reporte: new Date().toISOString(),
       }),
     });
 
-    const data = await res.json();
-    
-    if (!res.ok) {
-      console.error("Error en postReporte:", data);
-      return { error: true, mensaje: data.mensaje || `Error ${res.status}` };
-    }
-    
-    return data;
+    return await manejarRespuesta(res);
   } catch (error) {
     console.error("Error en postReporte:", error.message);
-    return { error: true, mensaje: "Error de conexión" };
+
+    return {
+      error: true,
+      mensaje: "Error de conexión",
+    };
   }
 };
 
-// Eliminar reporte (DELETE)
+/**
+ * Elimina un reporte mediante su identificador.
+ */
 export const deleteReporte = async (id_reporte) => {
   try {
-    const token = localStorage.getItem("token");
     const res = await fetch(`${API_URL}/api/reportes/${id_reporte}`, {
       method: "DELETE",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+
+      // Ruta protegida: requiere token válido para eliminar reportes
+      headers: authHeaders(),
     });
 
-    const data = await res.json();
-    
-    if (!res.ok) {
-      console.error("Error en deleteReporte:", data);
-      return { error: true, mensaje: data.mensaje || `Error ${res.status}` };
-    }
-    
-    return data;
+    return await manejarRespuesta(res);
   } catch (error) {
     console.error("Error en deleteReporte:", error.message);
-    return { error: true, mensaje: "Error de conexión" };
+
+    return {
+      error: true,
+      mensaje: "Error de conexión",
+    };
   }
 };
 
-// Obtener usuario por ID
+/**
+ * Obtiene la información de un usuario mediante su ID.
+ * Se usa como apoyo para mostrar datos del usuario que realizó el reporte.
+ */
 export const getUsuarioPorId = async (id_usuario) => {
   try {
-    const token = localStorage.getItem("token");
     const res = await fetch(`${API_URL}/api/usuarios/${id_usuario}`, {
       method: "GET",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+      headers: authHeaders(),
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error en getUsuarioPorId:", errorText);
-      throw new Error(`Error ${res.status}: ${errorText}`);
-    }
-    return await res.json();
+    return await manejarRespuesta(res);
   } catch (error) {
     console.error("Error en getUsuarioPorId:", error.message);
-    return { error: true, mensaje: error.message };
+
+    return {
+      error: true,
+      mensaje: error.message,
+    };
   }
 };
-// Obtener reporte completo (reporte + recurso + usuario)
+
+/**
+ * Obtiene el detalle completo de un reporte.
+ * Generalmente incluye información del reporte, recurso asociado y usuario.
+ */
 export const getReporteCompleto = async (id_reporte) => {
   try {
-    const token = localStorage.getItem("token");
-
     const res = await fetch(`${API_URL}/api/reportes/completo/${id_reporte}`, {
       method: "GET",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+      headers: authHeaders(),
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error en getReporteCompleto:", errorText);
-      throw new Error(`Error ${res.status}: ${errorText}`);
-    }
-
-    return await res.json();
-
+    return await manejarRespuesta(res);
   } catch (error) {
     console.error("Error en getReporteCompleto:", error.message);
-    return { error: true, mensaje: error.message };
+
+    return {
+      error: true,
+      mensaje: error.message,
+    };
   }
 };

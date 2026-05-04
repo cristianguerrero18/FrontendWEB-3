@@ -1,85 +1,94 @@
-// src/api/Admin/PQRS.js - VERSIÓN COMPLETA CON DEBUG
+// URL base del backend desplegado en Render.
+// Si el dominio del backend cambia, solo se modifica esta constante.
 const API_URL = "https://proyectoweb-2-ir8x.onrender.com";
+
+// =====================================================
+// CONFIGURACIÓN GENERAL
+// =====================================================
+
+/**
+ * Genera los encabezados necesarios para consumir rutas protegidas.
+ * Incluye el tipo de contenido JSON y el token JWT almacenado en localStorage.
+ */
 const authHeaders = () => ({
-  
   "Content-Type": "application/json",
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
-// Crear PQRS - VERSIÓN MEJORADA CON DEPURACIÓN
+// =====================================================
+// SERVICIOS DE PQRS
+// =====================================================
+
+/**
+ * Crea una nueva PQRS en el sistema.
+ * Recibe el usuario, la descripción y el tipo de PQRS.
+ */
 export const createPQRS = async ({ id_usuario, descripcion, id_tipo_pqrs }) => {
   try {
-    console.log("🚀 === ENVIANDO DATOS PARA CREAR PQR ===");
-    console.log("id_usuario:", id_usuario);
-    console.log("descripcion:", descripcion);
-    console.log("id_tipo_pqrs:", id_tipo_pqrs);
-    
     const payload = {
       id_usuario: Number(id_usuario),
-      descripcion: descripcion,
-      id_tipo_pqrs: Number(id_tipo_pqrs) || 1
+      descripcion: descripcion?.trim(),
+      id_tipo_pqrs: Number(id_tipo_pqrs) || 1,
     };
-    
-    console.log("📦 Payload JSON:", JSON.stringify(payload));
-    
+
     const res = await fetch(`${API_URL}/api/pqrs`, {
       method: "POST",
+
+      // Ruta protegida: requiere token JWT válido
       headers: authHeaders(),
+
+      // Envía los datos de la PQRS en formato JSON
       body: JSON.stringify(payload),
     });
 
-    console.log("📡 Estado de respuesta:", res.status, res.statusText);
-    
     const data = await res.json();
-    console.log("📨 Respuesta del servidor:", data);
 
     if (!res.ok) {
-      console.error("❌ Error en la respuesta:", data);
-      throw new Error(data.mensaje || data.error || `Error ${res.status}: ${res.statusText}`);
+      throw new Error(
+        data.mensaje || data.error || `Error ${res.status}: ${res.statusText}`
+      );
     }
-    
-    console.log("✅ PQR creado exitosamente");
+
     return data;
-    
   } catch (error) {
-    console.error("🔥 Error en createPQRS:", error.message);
-    console.error("Stack trace:", error.stack);
-    return { 
-      error: true, 
+    console.error("Error en createPQRS:", error.message);
+
+    return {
+      error: true,
       mensaje: error.message || "Error al crear el PQR",
-      detalles: error.toString()
     };
   }
 };
 
-// Obtener PQRS por usuario - VERSIÓN MEJORADA
+/**
+ * Obtiene las PQRS asociadas a un usuario específico.
+ */
 export const getPQRSPorUsuario = async (id_usuario) => {
   try {
-    console.log("📡 Solicitando PQRS para usuario:", id_usuario);
-    
     const res = await fetch(`${API_URL}/api/pqrs/usuario/${id_usuario}`, {
       method: "GET",
       headers: authHeaders(),
     });
 
-    console.log("📡 Estado de respuesta:", res.status, res.statusText);
-    
     if (!res.ok) {
-      console.error("❌ Error en getPQRSPorUsuario:", res.status);
-      return { error: true, mensaje: `Error ${res.status}: ${res.statusText}` };
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
     }
-    
-    const data = await res.json();
-    console.log("📨 PQRS obtenidos:", Array.isArray(data) ? data.length : 0, "registros");
-    return data;
-    
+
+    return res.json();
   } catch (error) {
-    console.error("🔥 Error en getPQRSPorUsuario:", error.message);
-    return { error: true, mensaje: error.message || "Error al obtener PQRS" };
+    console.error("Error en getPQRSPorUsuario:", error.message);
+
+    return {
+      error: true,
+      mensaje: error.message || "Error al obtener PQRS",
+    };
   }
 };
 
-// Obtener todos los PQRS
+/**
+ * Obtiene todas las PQRS registradas.
+ * Generalmente se usa desde el panel administrativo.
+ */
 export const getPQRS = async () => {
   try {
     const res = await fetch(`${API_URL}/api/pqrs`, {
@@ -88,14 +97,18 @@ export const getPQRS = async () => {
     });
 
     if (!res.ok) throw new Error(res.status);
+
     return res.json();
   } catch (error) {
     console.error("Error en getPQRS:", error.message);
+
     return [];
   }
 };
 
-// Obtener PQR por ID
+/**
+ * Consulta una PQRS específica mediante su ID.
+ */
 export const getPQRSPorId = async (id_pqr) => {
   try {
     const res = await fetch(`${API_URL}/api/pqrs/${id_pqr}`, {
@@ -104,28 +117,41 @@ export const getPQRSPorId = async (id_pqr) => {
     });
 
     if (!res.ok) throw new Error(res.status);
+
     return res.json();
   } catch (error) {
     console.error("Error en getPQRSPorId:", error.message);
+
     return null;
   }
 };
 
-// Eliminar PQR (DELETE)
+/**
+ * Elimina una PQRS mediante su identificador.
+ */
 export const deletePQRS = async (id_pqr) => {
   try {
     const res = await fetch(`${API_URL}/api/pqrs/${id_pqr}`, {
       method: "DELETE",
+
+      // Ruta protegida: requiere autenticación para eliminar registros
       headers: authHeaders(),
     });
 
     return res.json();
   } catch (error) {
     console.error("Error en deletePQRS:", error.message);
-    return { mensaje: "Error al eliminar PQR" };
+
+    return {
+      mensaje: "Error al eliminar PQR",
+    };
   }
 };
 
+/**
+ * Obtiene la información de un usuario mediante su ID.
+ * Se utiliza como apoyo para mostrar datos del solicitante de la PQRS.
+ */
 export const getUsuarioPorId = async (id_usuario) => {
   try {
     const res = await fetch(`${API_URL}/api/usuarios/${id_usuario}`, {
@@ -134,38 +160,47 @@ export const getUsuarioPorId = async (id_usuario) => {
     });
 
     if (!res.ok) throw new Error(res.status);
+
     return res.json();
   } catch (error) {
     console.error("Error en getUsuarioPorId:", error.message);
+
     return null;
   }
 };
 
-// Responder PQR (PUT) - CORREGIDO
+/**
+ * Registra la respuesta administrativa a una PQRS.
+ * Recibe el ID de la PQRS, la respuesta y el ID del administrador.
+ */
 export const responderPQRS = async ({ id_pqr, respuesta, id_admin }) => {
   try {
-    console.log("Enviando respuesta a PQR:", { id_pqr, respuesta, id_admin });
-    
     const res = await fetch(`${API_URL}/api/pqrs/responder`, {
       method: "PUT",
+
+      // Ruta protegida: solo usuarios autorizados deben responder PQRS
       headers: authHeaders(),
+
       body: JSON.stringify({
         id_pqr: Number(id_pqr),
-        respuesta: respuesta,
-        id_admin: Number(id_admin) || 1
+        respuesta: respuesta?.trim(),
+        id_admin: Number(id_admin) || 1,
       }),
     });
 
     const data = await res.json();
-    console.log("Respuesta del servidor:", data);
-    
+
     if (!res.ok) {
       throw new Error(data.mensaje || `Error ${res.status}`);
     }
-    
+
     return data;
   } catch (error) {
     console.error("Error en responderPQRS:", error.message);
-    return { error: true, mensaje: error.message || "Error al responder el PQR" };
+
+    return {
+      error: true,
+      mensaje: error.message || "Error al responder el PQR",
+    };
   }
 };
