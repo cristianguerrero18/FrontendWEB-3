@@ -53,7 +53,7 @@ export default function Registro() {
   const [cargandoCarreras, setCargandoCarreras] = useState(false)
   const [tipoSeleccionado, setTipoSeleccionado] = useState("")
 
-  const dominiosValidos = ["uts.edu.co", "correo.uts.edu.co]
+  const dominiosValidos = ["uts.edu.co", "correo.uts.edu.co"]
 
   useEffect(() => {
     document.title = "UTS - Registro | Plataforma Educativa"
