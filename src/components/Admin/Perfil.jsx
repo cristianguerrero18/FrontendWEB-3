@@ -29,6 +29,7 @@ const Perfil = ({
 }) => {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [editando, setEditando] = useState(false);
+
   const [formData, setFormData] = useState({
     nombres_usuario: "",
     apellidos_usuario: "",
@@ -46,6 +47,7 @@ const Perfil = ({
       6: "Doctorado",
       7: "Diplomado",
     };
+
     return tipos[idTipoCarrera] || "No especificado";
   };
 
@@ -55,6 +57,7 @@ const Perfil = ({
       2: "Estudiante",
       3: "Docente",
     };
+
     return roles[idRol] || "Usuario";
   };
 
@@ -84,7 +87,11 @@ const Perfil = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleGuardar = () => {
@@ -100,6 +107,7 @@ const Perfil = ({
         id_tipo_carrera: perfil.id_tipo_carrera,
         id_rol: perfil.id_rol,
       });
+
       setEditando(false);
     }
   };
@@ -111,6 +119,7 @@ const Perfil = ({
       correo: perfil.correo,
       contrasena: perfil.contrasena,
     });
+
     setEditando(false);
   };
 
@@ -145,7 +154,9 @@ const Perfil = ({
       {mensaje && (
         <div
           className={`mensaje-perfil ${
-            mensaje.includes("Error") || mensaje.includes("error") ? "error" : "exito"
+            mensaje.includes("Error") || mensaje.includes("error")
+              ? "error"
+              : "exito"
           }`}
         >
           <AlertCircle size={18} />
@@ -160,6 +171,7 @@ const Perfil = ({
               <div className="icono-modal">
                 <AlertTriangle size={24} />
               </div>
+
               <div>
                 <h3>Confirmar eliminación</h3>
                 <p className="perfil-modal-subtitle">
@@ -170,7 +182,9 @@ const Perfil = ({
 
             <div className="modal-body">
               <p>¿Deseas continuar con la eliminación de este perfil?</p>
-              <p className="texto-advertencia">Esta acción no se puede deshacer.</p>
+              <p className="texto-advertencia">
+                Esta acción no se puede deshacer.
+              </p>
 
               <div className="usuario-eliminar">
                 <strong>
@@ -209,60 +223,60 @@ const Perfil = ({
         </div>
       )}
 
-<div className="cabecera-perfil perfil-header-pro perfil-header-minimal">
-  <div className="titulo-perfil-con-boton perfil-header-minimal-row">
-    <div className="perfil-header-texto perfil-header-solo-badge">
-      <div className="perfil-badge-superior">
-        <BadgeCheck size={14} />
-        <span>Información personal activa</span>
-      </div>
-    </div>
+      <div className="cabecera-perfil perfil-header-pro perfil-header-minimal">
+        <div className="titulo-perfil-con-boton perfil-header-minimal-row">
+          <div className="perfil-header-texto perfil-header-solo-badge">
+            <div className="perfil-badge-superior">
+              <BadgeCheck size={14} />
+              <span>Información personal activa</span>
+            </div>
+          </div>
 
-    <div className="botones-cabecera-perfil perfil-botones-superiores">
-      {!editando ? (
-        <>
-          <button
-            className="boton-eliminar-perfil"
-            onClick={handleEliminarClick}
-            disabled={cargando}
-          >
-            <Trash2 size={16} />
-            <span>Eliminar</span>
-          </button>
+          <div className="botones-cabecera-perfil perfil-botones-superiores">
+            {!editando ? (
+              <>
+                <button
+                  className="boton-eliminar-perfil"
+                  onClick={handleEliminarClick}
+                  disabled={cargando}
+                >
+                  <Trash2 size={16} />
+                  <span>Eliminar</span>
+                </button>
 
-          <button
-            className="boton-editar-perfil"
-            onClick={() => setEditando(true)}
-            disabled={cargando}
-          >
-            <Edit2 size={16} />
-            <span>Editar</span>
-          </button>
-        </>
-      ) : (
-        <div className="botones-accion-perfil perfil-botones-superiores">
-          <button
-            className="boton-cancelar-perfil"
-            onClick={handleCancelar}
-            disabled={cargando}
-          >
-            <X size={16} />
-            <span>Cancelar</span>
-          </button>
+                <button
+                  className="boton-editar-perfil"
+                  onClick={() => setEditando(true)}
+                  disabled={cargando}
+                >
+                  <Edit2 size={16} />
+                  <span>Editar</span>
+                </button>
+              </>
+            ) : (
+              <div className="botones-accion-perfil perfil-botones-superiores">
+                <button
+                  className="boton-cancelar-perfil"
+                  onClick={handleCancelar}
+                  disabled={cargando}
+                >
+                  <X size={16} />
+                  <span>Cancelar</span>
+                </button>
 
-          <button
-            className="boton-guardar-perfil"
-            onClick={handleGuardar}
-            disabled={cargando}
-          >
-            <Save size={16} />
-            <span>Guardar</span>
-          </button>
+                <button
+                  className="boton-guardar-perfil"
+                  onClick={handleGuardar}
+                  disabled={cargando}
+                >
+                  <Save size={16} />
+                  <span>Guardar</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
-  </div>
-</div>
+      </div>
 
       <div className="contenido-perfil-principal">
         <div className="panel-informacion-perfil">
@@ -276,8 +290,12 @@ const Perfil = ({
                 <h2>
                   {perfil.nombres_usuario} {perfil.apellidos_usuario}
                 </h2>
+
                 <div className="perfil-meta-linea">
-                  <div className="badge-id-perfil">ID: {perfil.id_usuario}</div>
+                  <div className="badge-id-perfil">
+                    ID: {perfil.id_usuario}
+                  </div>
+
                   <div
                     className="badge-rol-perfil"
                     style={{
@@ -310,6 +328,7 @@ const Perfil = ({
                       placeholder="Nombres"
                       disabled={cargando}
                     />
+
                     <input
                       type="text"
                       name="apellidos_usuario"
@@ -366,6 +385,7 @@ const Perfil = ({
                         placeholder="Nueva contraseña"
                         disabled={cargando}
                       />
+
                       <button
                         type="button"
                         className="boton-mostrar-contrasena-perfil"
@@ -373,7 +393,11 @@ const Perfil = ({
                         title={mostrarPassword ? "Ocultar" : "Mostrar"}
                         disabled={cargando}
                       >
-                        {mostrarPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {mostrarPassword ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
                       </button>
                     </div>
                   ) : (
@@ -381,6 +405,7 @@ const Perfil = ({
                       <span className="contrasena-oculta">
                         {mostrarPassword ? perfil.contrasena : "••••••••"}
                       </span>
+
                       <button
                         type="button"
                         className="boton-mostrar-contrasena-perfil"
@@ -388,7 +413,11 @@ const Perfil = ({
                         title={mostrarPassword ? "Ocultar" : "Mostrar"}
                         disabled={cargando}
                       >
-                        {mostrarPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {mostrarPassword ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
                       </button>
                     </div>
                   )}
@@ -396,7 +425,8 @@ const Perfil = ({
 
                 {editando && (
                   <div className="ayuda-contrasena-perfil">
-                    Deja este campo sin cambios si no deseas actualizar la contraseña.
+                    Deja este campo sin cambios si no deseas actualizar la
+                    contraseña.
                   </div>
                 )}
               </div>
@@ -406,15 +436,21 @@ const Perfil = ({
 
         <div className="panel-sistema-perfil">
           <div className="tarjeta-perfil perfil-card-pro">
-            <h3 className="titulo-tarjeta-perfil">Información del sistema</h3>
+            <h3 className="titulo-tarjeta-perfil">
+              Información del sistema
+            </h3>
 
             <div className="campos-sistema-perfil">
               <div className="campo-sistema-perfil">
                 <div className="icono-campo-sistema">
                   <Shield size={18} />
                 </div>
+
                 <div className="contenido-campo-sistema">
-                  <div className="etiqueta-campo-sistema">Rol del sistema</div>
+                  <div className="etiqueta-campo-sistema">
+                    Rol del sistema
+                  </div>
+
                   <div
                     className="badge-rol-perfil"
                     style={{
@@ -432,8 +468,12 @@ const Perfil = ({
                 <div className="icono-campo-sistema">
                   <GraduationCap size={18} />
                 </div>
+
                 <div className="contenido-campo-sistema">
-                  <div className="etiqueta-campo-sistema">Carrera asignada</div>
+                  <div className="etiqueta-campo-sistema">
+                    Carrera asignada
+                  </div>
+
                   <div className="valor-campo-sistema">
                     {perfil.nombre_carrera || "No asignada"}
                   </div>
@@ -444,32 +484,27 @@ const Perfil = ({
                 <div className="icono-campo-sistema">
                   <Calendar size={18} />
                 </div>
+
                 <div className="contenido-campo-sistema">
-                  <div className="etiqueta-campo-sistema">Tipo de carrera</div>
+                  <div className="etiqueta-campo-sistema">
+                    Tipo de carrera
+                  </div>
+
                   <div className="valor-campo-sistema">
                     {obtenerTipoCarreraTexto(perfil.id_tipo_carrera)}
                   </div>
                 </div>
               </div>
-
-              {perfil.id_carrera && (
-                <div className="campo-sistema-perfil">
-                  <div className="icono-campo-sistema">
-                    <span className="icono-id">#</span>
-                  </div>
-                  <div className="contenido-campo-sistema">
-                    <div className="etiqueta-campo-sistema">ID carrera</div>
-                    <div className="valor-campo-sistema">{perfil.id_carrera}</div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
           {editando && (
             <div className="nota-edicion-perfil">
               <AlertCircle size={18} />
-              <p>Los cambios se aplicarán inmediatamente después de guardar la información.</p>
+              <p>
+                Los cambios se aplicarán inmediatamente después de guardar la
+                información.
+              </p>
             </div>
           )}
         </div>
